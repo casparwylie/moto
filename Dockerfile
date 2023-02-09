@@ -1,0 +1,24 @@
+FROM --platform=linux/amd64 python:3.11-slim-buster
+
+
+WORKDIR /main
+RUN apt-get update \
+  && apt-get install gcc -y \
+  && apt-get install make -y \
+  && apt-get install vim -y \
+  && apt-get install curl -y \
+  && apt-get clean
+
+
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="/root/.local/bin:$PATH"
+
+COPY poetry.lock pyproject.toml ./
+RUN poetry config virtualenvs.create false
+RUN poetry install
+
+COPY ./frontend frontend
+COPY ./src .
+
+EXPOSE 8000
+CMD ["python", "server.py"]

@@ -85,5 +85,5 @@ async def search(make: str, model: str) -> list[Racer]:
 app.mount('/', StaticFiles(directory='frontend', html = True), name='index')
 
 if __name__ == '__main__':
-  uvicorn.run(app, host='0.0.0.0', port=8000)
+  uvicorn.run("server:app", host='0.0.0.0', reload=True, port=8000)
 

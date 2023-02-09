@@ -43,7 +43,8 @@
       outline-width: 0px;
       border: 1px;
       font-size: 20px;
-      width: 50%;
+      width: calc(50% - 2px);
+      margin: 1px;
     }
 
     #racer-inputs-container {
@@ -75,9 +76,19 @@
     #starter-form {
       display: flex;
       width: 60%;
-
     }
 
+    #race-go-option {
+      background-color: #39ae86;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0px 0px 5px grey;
+      font-size: 30px;
+    }
+
+    #starter-triggers {
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -88,7 +99,7 @@
         <div id="racer-inputs-container"></div>
         <div id="starter-triggers">
           <button id="add-more-option">+ Add More</button>
-          <button id="race-start-option"><b>Start</b></button>
+          <button id="race-start-option"><b>Check</b></button>
           <button id="race-go-option"><b>Race!</b></button>
         </div>
       </div>
