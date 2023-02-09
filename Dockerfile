@@ -7,6 +7,8 @@ RUN apt-get update \
   && apt-get install make -y \
   && apt-get install vim -y \
   && apt-get install curl -y \
+  && apt-get install default-libmysqlclient-dev -y \
+  && apt-get install python-dev -y \
   && apt-get clean
 
 

@@ -10,7 +10,15 @@ services:
     volumes:
       - ./src:/main
       - ./frontend:/main/frontend
-  db:
+    environment:
+      DB_NAME: 'moto'
+      DB_USER: 'user'
+      DB_PASS: 'password'
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
     image: mysql:5.7
     platform: linux/amd64
     restart: always
@@ -21,5 +29,7 @@ services:
       MYSQL_ROOT_PASSWORD: 'password'
     ports:
       - 3306:3306
-    expose:
-      - 3306
+    healthcheck:
+        test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+        timeout: 5s
+        retries: 10

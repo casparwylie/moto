@@ -2,14 +2,16 @@
 const API_URL = '/api';
 let inputsContainer = document.getElementById('racer-inputs-container');
 let racerContainer = document.getElementById('racer-container');
-let raceStartOpt = document.getElementById('race-start-option');
+let raceGoOpt = document.getElementById('race-go-option');
 let addMoreOpt = document.getElementById('add-more-option');
 let recommendationsContainer = document.getElementById('recommendation-container');
+let replayOption = document.getElementById('replay-option');
 
-raceStartOpt.addEventListener('click', getBikes);
+raceGoOpt.addEventListener('click', getBikes);
 addMoreOpt.addEventListener('click', addInput);
 
 async function getBikes() {
+  racerContainer.replaceChildren();
   for (item of inputsContainer.children) {
     let make = item.children[0].value;
     let model = item.children[1].value;
@@ -21,6 +23,27 @@ async function getBikes() {
       reportFailedBike(make, model);
     }
   }
+  initiateGo();
+}
+
+function initiateGo() {
+
+  document.getElementById('lights-container').style.display = 'block';
+  setTimeout(function(){
+    document.getElementById('light-1').style.backgroundColor = 'red';
+  }, 1000);
+  setTimeout(function(){
+    document.getElementById('light-2').style.backgroundColor = 'orange';
+  }, 2000);
+  setTimeout(function(){
+    document.getElementById('light-1').style.backgroundColor = 'green';
+    document.getElementById('light-2').style.backgroundColor = 'green';
+    document.getElementById('light-3').style.backgroundColor = 'green';
+  }, 3000);
+  setTimeout(function(){
+    document.getElementById('lights-container').style.display = 'none';
+    go();
+  }, 4000);
 }
 
 function getBikesTest() {
@@ -60,7 +83,7 @@ function addInput() {
   let modelIn = document.createElement('input');
   modelIn.placeholder = "Model...";
   modelIn.addEventListener(
-    'keydown', () => {getRecommendations(makeIn, modelIn)}
+    'keyup', async function() {await getRecommendations(makeIn, modelIn)}
   );
   container.appendChild(modelIn);
   inputsContainer.appendChild(container);
@@ -69,6 +92,8 @@ function addInput() {
 async function getRecommendations(makeIn, modelIn) {
   let make = makeIn.value;
   let model = modelIn.value;
+  console.log(model);
+  recommendationsContainer.replaceChildren();
   if (make && model && model.length > 1) {
     let result = await fetch(`${API_URL}/search?make=${make}&model=${model}`);
     let racerResults = await result.json();
@@ -78,10 +103,9 @@ async function getRecommendations(makeIn, modelIn) {
 }
 
 function addRecommendation(modelIn, racerResults) {
-  recommendationsContainer.replaceChildren();
   for (racer of racerResults) {
     let row = document.createElement('div');
-    row.innerHTML = racer.model;
+    row.innerHTML = `${racer.model} ${racer.year}`;
     row.className = 'recommendation-row';
     row.addEventListener('click', function(model) {
       return () => {
@@ -110,9 +134,13 @@ function go() {
         m = ((a) * as[racer.id]) + 1 + (ptw * 7);
         racer.style.marginLeft = parseInt(window.getComputedStyle(racer).marginLeft) + m + 'px';
         as[racer.id] += 0.01;
-        console.log(parseInt(racer.style.marginLeft));
         if (parseInt(racer.style.marginLeft) > 1000) {
           clearInterval(ints[racer.id]);
+          delete ints[racer.id];
+        }
+        console.log(ints);
+        if (Object.values(ints).length == 0) {
+          raceGoOpt.innerHTML = "Race Again!";
         }
       }
     }(racer, a, ptw), 40);

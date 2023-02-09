@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import requests
 import uvicorn
 from pydantic import BaseModel
+import database
 
 
 app = FastAPI()
@@ -30,59 +31,54 @@ class Racer(BaseModel):
       return value[0:value.lower().find(metric.lower())].strip()
 
   @classmethod
-  def from_api_data(cls, data: dict) -> 'Racer':
-    print(data)
-    weight = None
-    weight_type = None
-    if weight := data.get('total_weight'):
-      weight_type = 'total'
-    elif weight := data.get('wet_weight'):
-      weight_type = 'wet'
-    elif weight := data.get('dry_weight'):
-      weight_type = 'dry'
-    weight = cls.find_number_by_metric(weight, 'kg')
-    make = data.get('make').strip()
-    model = data.get('model').strip()
+  def from_db_data(cls, data, make_name) -> 'Racer':
     return cls(
-      full_name=f'{make} {model}',
-      make=make,
-      model=model,
-      year=data.get('year').strip(),
-      power=cls.find_number_by_metric(data.get('power'), 'hp'),
-      torque=cls.find_number_by_metric(data.get('torque'), 'nm'),
-      weight=weight,
-      weight_type=weight_type,
+      full_name=f'{make_name} {data.name}',
+      make=make_name,
+      model=data.name,
+      year=data.year,
+      power=data.power,
+      torque=data.torque,
+      weight=data.weight,
+      weight_type=data.weight_type,
     )
+
+
 
 @app.get('/api/racer')
 async def racer(make: str, model: str) -> Racer:
 
     if make and model:
-      response = requests.get(
-        M_API_URL.format(make=make, model=model),
-        headers={'X-Api-Key': M_API_KEY},
-      )
-      if data := response.json():
-        return Racer.from_api_data(data[0])
+      with database.engine.connect() as conn:
+        make = conn.execute(
+          database.build_get_make_by_name_query(make)
+        ).one_or_none()
+        racers = list(conn.execute(
+          database.build_get_racer_by_make_model_query(make.id, model).limit(1)
+        ))
+      if racers:
+        return Racer.from_db_data(racers[0], make.name)
 
 
 @app.get('/api/search')
 async def search(make: str, model: str) -> list[Racer]:
+    results = []
     if make and model:
-      response = requests.get(
-        M_API_URL.format(make=make, model=model),
-        headers={'X-Api-Key': M_API_KEY},
-      )
-      if data := response.json():
-        r = [
-          Racer.from_api_data(result) for result in data
-        ]
-        print(len(r))
-        return r
-    return []
+      with database.engine.connect() as conn:
+        make = conn.execute(
+          database.build_get_make_by_name_query(make)
+        ).one_or_none()
+        results = list(conn.execute(
+          database.build_search_racer_query(make.id, model).limit(20)
+        ))
+        print(len(results))
+    return [
+      Racer.from_db_data(result, make.name) for result in results
+    ]
 
 
 app.mount('/', StaticFiles(directory='frontend', html = True), name='index')
+
 
 if __name__ == '__main__':
   uvicorn.run("server:app", host='0.0.0.0', reload=True, port=8000)
