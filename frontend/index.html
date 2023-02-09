@@ -1,0 +1,103 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browser</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap');
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    button, input {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .racer {
+     height: 50px;
+     width: 50px;
+     border-radius: 5px;
+     margin-top: 10px;
+     background-image: url('https://cdn-icons-png.flaticon.com/512/1168/1168041.png');
+     background-size: 100%;
+     background-repeat: no-repeat;
+    }
+    .racer-label {
+      position: absolute;
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    #control-panel {
+      margin: 0 auto;
+      width: 100vw;
+      height: 20vh;
+      background: lightblue;
+      padding: 20px
+    }
+
+    #racer-inputs-container input {
+      border-radius: 5px;
+      outline-width: 0px;
+      border: 1px;
+      font-size: 20px;
+      width: 50%;
+    }
+
+    #racer-inputs-container {
+      width: 100%;
+    }
+
+    button {
+      border-radius: 5px;
+      outline-width: 0px;
+      border: 1px;
+      font-size: 20px;
+      margin: 1px;
+      cursor: pointer;
+    }
+
+    #recommendation-container {
+      height: 100%;
+      width: 20%;
+    }
+
+    #starter-inputs {
+      width: 40%;
+    }
+
+    .recommendation-row {
+      cursor: pointer;
+    }
+
+    #starter-form {
+      display: flex;
+      width: 60%;
+
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="control-panel">
+    <div id="starter-form">
+      <div id="starter-inputs">
+        <div id="racer-inputs-container"></div>
+        <div id="starter-triggers">
+          <button id="add-more-option">+ Add More</button>
+          <button id="race-start-option"><b>Start</b></button>
+          <button id="race-go-option"><b>Race!</b></button>
+        </div>
+      </div>
+      <div id="recommendation-container"></div>
+    </div>
+  </div>
+  <div id="racer-container">
+  </div>
+  <script src="static/core.js"></script>
+</body>
+
+</html>
