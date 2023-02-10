@@ -1,6 +1,7 @@
 import os
 import requests
 from sqlalchemy import text, create_engine
+import enum
 
 
 DB_URL = 'mysql://{user}:{password}@{host}:{port}/{database}'
@@ -10,8 +11,8 @@ M_API_URL = 'https://api.api-ninjas.com/v1/motorcycles?&make={make}&offset={offs
 M_API_PAGE_LENGTH = 30
 
 insert_racer_query = """
-INSERT INTO racer_models (name, make, year, power, torque, weight, weight_type)
-VALUES ('{name}', {make}, {year}, {power}, {torque}, {weight}, '{weight_type}')
+INSERT INTO racer_models (name, make, style, year, power, torque, weight, weight_type)
+VALUES ('{name}', {make}, '{style}', {year}, {power}, {torque}, {weight}, '{weight_type}')
 """
 
 select_makes_query = """
@@ -19,7 +20,7 @@ SELECT * FROM racer_makes
 """
 
 delete_racers_query = """
-TRUNCATE TABLE racer_models
+TRUNCATE TABLE racer_models;
 """
 
 def _create_engine():
@@ -43,6 +44,40 @@ def find_number_by_metric(value: str, metric: str) -> int:
 def get_makes_from_db(conn):
   return list(conn.execute(text(select_makes_query)))
 
+
+class RacerStyles(str, enum.Enum):
+  STREET = 'street'
+  CROSS = 'cross'
+  CLASSIC = 'classic'
+  TOUR = 'tour',
+  CRUISER = 'cruiser'
+  SPORT = 'sport'
+  ADVENTURE = 'adventure'
+  RETRO = 'retro'
+
+unknown_styles = set()
+
+STYLE_MAP = {
+  ('naked',): RacerStyles.STREET,
+  ('cross', 'moto', 'motard', 'trial'): RacerStyles.CROSS,
+  ('classic',): RacerStyles.CLASSIC,
+  ('tour',): RacerStyles.TOUR,
+  ('cruiser', 'chopper'): RacerStyles.CRUISER,
+  ('sport',): RacerStyles.SPORT,
+  ('enduro', 'offroad'): RacerStyles.ADVENTURE,
+  ('custom', 'allround', 'unspecified'): RacerStyles.RETRO,
+}
+
+def get_style_from_api_type(given_type):
+  global unknown_styles
+  for terms, style in STYLE_MAP.items():
+    for term in terms:
+      if term.lower() in given_type.lower():
+        return style.value
+  unknown_styles.add(given_type)
+  return RacerStyles.RETRO.value
+
+
 def prepare_model(data, make_id):
   weight = None
   weight_type = None
@@ -58,6 +93,7 @@ def prepare_model(data, make_id):
   return dict(
     name=model,
     make=make_id,
+    style=get_style_from_api_type(data.get('type').strip()),
     year=data.get('year').strip(),
     power=find_number_by_metric(data.get('power'), 'hp'),
     torque=find_number_by_metric(data.get('torque'), 'nm'),
@@ -74,7 +110,7 @@ def run_sync(makes, conn):
       print('Total scanned: ', len(models_data))
       valid_models = [model for model in models if all(model.values())]
       print('Total valid/saving: ', len(models_data))
-      sync_models(models, conn)
+      sync_models(valid_models, conn)
     else:
       print('Failed to find model! Skipping...')
 
@@ -88,7 +124,6 @@ def get_models_by_make_api(make_name):
     result_length = M_API_PAGE_LENGTH
     offset = 0
     while result_length:
-      print(f'Scanned {offset}')
       response = requests.get(
         M_API_URL.format(make=make_name, offset=offset),
         headers={'X-Api-Key': M_API_KEY},
@@ -97,6 +132,7 @@ def get_models_by_make_api(make_name):
         all_data += data
       result_length = len(data)
       offset += M_API_PAGE_LENGTH
+      print(f'Scanned {offset}')
     return all_data
 
 def clear_all(conn):
@@ -104,12 +140,14 @@ def clear_all(conn):
 
 def main():
   with _create_engine().connect() as conn:
-    clear_all(conn)
+    #clear_all(conn)
     makes = get_makes_from_db(conn)
+    makes = [make for make in makes if make.name in ('Keeway', 'Enfield')]
     makes_names = ', '.join(make.name for make in makes)
     print('Curent makes: ' + makes_names)
     run_sync(makes, conn)
     print('Done!')
+    print(f'Unknown types: {unknown_styles}')
     conn.commit()
 
 if __name__ == '__main__':

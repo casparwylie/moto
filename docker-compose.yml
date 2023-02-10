@@ -33,3 +33,5 @@ services:
         test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
         timeout: 5s
         retries: 10
+    volumes:
+      - ./_mysql:/var/lib/mysql

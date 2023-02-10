@@ -15,12 +15,14 @@ async function getBikes() {
   for (item of inputsContainer.children) {
     let make = item.children[0].value;
     let model = item.children[1].value;
-    let result = await fetch(`${API_URL}/racer?make=${make}&model=${model}`);
-    let racer_data = await result.json();
-    if (racer_data) {
-      addRacer(racer_data);
-    } else {
-      reportFailedBike(make, model);
+    if (make.trim() && model.trim()) {
+      let result = await fetch(`${API_URL}/racer?make=${make}&model=${model}`);
+      let racer_data = await result.json();
+      if (racer_data) {
+        addRacer(racer_data);
+      } else {
+        reportFailedBike(make, model);
+      }
     }
   }
   initiateGo();
@@ -46,13 +48,6 @@ function initiateGo() {
   }, 4000);
 }
 
-function getBikesTest() {
-  let testData = [["Indian FTR", "120", "120", "233"], ["Triumph Triple", "120", "79", "188"]]
-  for (item of testData) {
-    addRacer(item);
-  }
-}
-
 function reportFailedBike(make, model) {
     alert(`Failed to find ${make} ${model}`);
 }
@@ -60,6 +55,7 @@ function reportFailedBike(make, model) {
 function addRacer(data) {
   let racer = document.createElement('div');
   racer.className = 'racer';
+  racer.style = `background-image: url('/images/${data.style}_type.png')`;
   racer.setAttribute('power', data.power);
   racer.setAttribute('torque', data.torque);
   racer.setAttribute('weight', data.weight);
@@ -92,12 +88,16 @@ function addInput() {
 async function getRecommendations(makeIn, modelIn) {
   let make = makeIn.value;
   let model = modelIn.value;
-  console.log(model);
   recommendationsContainer.replaceChildren();
   if (make && model && model.length > 1) {
     let result = await fetch(`${API_URL}/search?make=${make}&model=${model}`);
     let racerResults = await result.json();
     addRecommendation(modelIn, racerResults);
+  }
+  if (recommendationsContainer.innerHTML) {
+    recommendationsContainer.style.display = 'block';
+  } else {
+    recommendationsContainer.style.display = 'none';
   }
 
 }
@@ -111,6 +111,7 @@ function addRecommendation(modelIn, racerResults) {
       return () => {
         modelIn.value = model;
         recommendationsContainer.replaceChildren();
+        recommendationsContainer.style.display = 'none';
       };
     }(racer.model));
     recommendationsContainer.appendChild(row);

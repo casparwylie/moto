@@ -19,6 +19,7 @@ class Racer(BaseModel):
   full_name: str | None
   make: str | None
   model: str | None
+  style: str | None
   year: str | None
   power: str | None
   torque: str | None
@@ -36,6 +37,7 @@ class Racer(BaseModel):
       full_name=f'{make_name} {data.name}',
       make=make_name,
       model=data.name,
+      style=data.style,
       year=data.year,
       power=data.power,
       torque=data.torque,
@@ -46,7 +48,7 @@ class Racer(BaseModel):
 
 
 @app.get('/api/racer')
-async def racer(make: str, model: str) -> Racer:
+async def racer(make: str, model: str) -> Racer | dict:
 
     if make and model:
       with database.engine.connect() as conn:
@@ -58,6 +60,7 @@ async def racer(make: str, model: str) -> Racer:
         ))
       if racers:
         return Racer.from_db_data(racers[0], make.name)
+    return {}
 
 
 @app.get('/api/search')
@@ -65,9 +68,12 @@ async def search(make: str, model: str) -> list[Racer]:
     results = []
     if make and model:
       with database.engine.connect() as conn:
-        make = conn.execute(
-          database.build_get_make_by_name_query(make)
-        ).one_or_none()
+        makes = list(conn.execute(
+          database.build_get_make_by_name_query(make).limit(1)
+        ))
+        if not makes:
+          return []
+        make = makes[0]
         results = list(conn.execute(
           database.build_search_racer_query(make.id, model).limit(20)
         ))
