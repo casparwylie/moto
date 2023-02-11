@@ -20,13 +20,14 @@
      height: 60px;
      width: 90px;
      border-radius: 5px;
-     margin-top: 30px;
-     border-bottom: 1px dotted grey;
-     background-image: url('/image/retro_type.png');
+     margin-bottom: 30px;
      background-size: 100%;
      background-repeat: no-repeat;
      position: relative;
      z-index: -1;
+    }
+    .racer-outline {
+      border-bottom: 1px dotted #65192e;
     }
     .racer-label {
       position: absolute;
@@ -40,12 +41,13 @@
       height: 80vh;
       z-index: -1;
       position: relative;
+      background: #7da8b7;
     }
 
     #control-panel {
       margin: 0 auto;
       width: 100vw;
-      height: 20vh;
+      height: 30vh;
       background: #da4820;
       padding: 20px;
       padding-right: 0px;
@@ -74,28 +76,28 @@
     }
 
     #recommendation-container {
-      width: 50%;
-      background: #da2055;
+      width: calc(50% - 2px);
+      background: #CA335C;
       border-radius: 10px;
+      float: right;
       padding: 20px;
+      color: white;
+      margin-top: -50px;
       display: none;
       z-index: 1000;
     }
 
-    #starter-inputs {
-      width: 50%;
-      background: #da4820;
-      border-radius: 20px;
-      padding: 20px;
-    }
-
     .recommendation-row {
       cursor: pointer;
-      border-bottom: 1px dotted #39ae86;
+      border-bottom: 1px dotted #027860;
+      text-align: center;
     }
 
     #starter-form {
-      width: 60%;
+      background: #da4820;
+      padding: 20px;
+      margin: 0 auto;
+      width: 40%;
     }
 
     #race-go-option {
@@ -111,26 +113,48 @@
     }
 
     #lights-container {
-      height: 40vh;
+      height: 28vw;
       width: 10vw;
       margin: 100 45vw;
       position: absolute;
       background: #353a3c;
       padding: 20px;
+      display: none;
       border-radius: 30px;
       box-shadow: 0px 0px 20px grey;
-      display: none;
     }
 
     .light {
-      height: 34%;
-      margin-top: 3px;
+      height: 28%;
+      margin-top: 11%;
       width: 80%;
       border-radius: 100%;
       margin-left: 10%;
       position: relative;
     }
 
+    #heading {
+      margin: 0 auto;
+      width: 100%;
+      text-align: center;
+      font-size: 30px;
+      color: white;
+    }
+
+    #results-container {
+      float: right;
+      width: 20%;
+      color: white;
+    }
+
+    .result-row {
+      padding: 5px;
+    }
+
+    #credit {
+      color: #983216;
+      font-size: 15px;
+    }
   </style>
 </head>
 
@@ -141,13 +165,13 @@
     <div class="light" id="light-3"></div>
   </div>
   <div id="control-panel">
+    <div id="heading">2wheel.bet<div id="credit"> By Caspar Wylie</div></div>
+    <div id="results-container"></div>
     <div id="starter-form">
-      <div id="starter-inputs">
-        <div id="racer-inputs-container"></div>
-        <div id="starter-triggers">
-          <button id="add-more-option">+ Add More</button>
-          <button id="race-go-option"><b>Race!</b></button>
-        </div>
+      <div id="racer-inputs-container"></div>
+      <div id="starter-triggers">
+        <button id="add-more-option">+ Add More</button>
+        <button id="race-go-option"><b>Race!</b></button>
       </div>
       <div id="recommendation-container"></div>
     </div>
