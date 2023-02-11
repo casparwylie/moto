@@ -71,6 +71,9 @@ function addRacer(data) {
   let racerOutline = document.createElement('div');
   racerOutline.className = 'racer-outline';
   let racer = document.createElement('div');
+  if (data.weight_type == 'dry') {
+    data.weight = (parseInt(data.weight) + 20).toString();
+  }
   racer.className = 'racer';
   racer.style = `background-image: url('/images/${data.style}_type.svg')`;
   racer.setAttribute('power', data.power);
