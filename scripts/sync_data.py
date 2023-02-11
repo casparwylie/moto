@@ -9,7 +9,6 @@ _MAKES_TRUTH = (
   'Indian',
   'Yamaha',
   'Suzuki',
-  'Royal Enfield',
   'Triumph',
   'Kawasaki',
   'KTM',
@@ -24,6 +23,7 @@ _MAKES_TRUTH = (
   'Norton',
   'Victory',
   'Keeway',
+  'CCM',
 )
 
 DB_URL = 'mysql://{user}:{password}@{host}:{port}/{database}'

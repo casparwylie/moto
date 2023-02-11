@@ -14,20 +14,24 @@ addMoreOpt.addEventListener('click', addInput);
 async function getBikes() {
   racerContainer.replaceChildren();
   resultsContainer.replaceChildren();
+  var atleastOne = false;
   for (item of inputsContainer.children) {
-    let make = item.children[0].value;
-    let model = item.children[1].value;
+    let make = item.children[0].value.trim();
+    let model = item.children[1].value.trim();
     if (make.trim() && model.trim()) {
       let result = await fetch(`${API_URL}/racer?make=${make}&model=${model}`);
       let racer_data = await result.json();
       if (racer_data) {
         addRacer(racer_data);
+        atleastOne = true;
       } else {
         reportFailedBike(make, model);
       }
     }
   }
-  initiateGo();
+  if (atleastOne) {
+    initiateGo();
+  }
 }
 
 function initiateGo() {
@@ -142,7 +146,7 @@ function go() {
 
     let ptw = parseInt(power) / parseInt(weight);
     let a = parseInt(torque) / parseInt(weight);
-    as[racer.id] = torque / 15;
+    as[racer.id] = torque / 25;
     ints[racer.id] = setInterval(function(racer, a, ptw){
       return () => {
         m = ((a) * as[racer.id]) + 1 + (ptw * 7);
