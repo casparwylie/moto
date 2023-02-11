@@ -58,7 +58,7 @@ def _create_engine():
   db_user = '2wheeluser'
   db_password = '2wheelpass'
   host = '108.61.173.62'
-  port = '3306'
+  port = '3307'
   database = 'moto'
 
   url = DB_URL.format(
