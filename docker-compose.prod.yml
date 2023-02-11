@@ -3,8 +3,6 @@ version: "3.9"
 services:
   web:
     container_name: web
-    build:
-      context: .
     image: ${IMAGE_NAME}
     ports:
       - "0.0.0.0:8000:8000"
