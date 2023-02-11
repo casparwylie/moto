@@ -50,5 +50,5 @@ jobs:
           script: |
                   echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
                   IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml pull web
-                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d --no-recreate mysql
                   IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up web -d
+                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d --no-recreate mysql
