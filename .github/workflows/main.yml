@@ -24,6 +24,7 @@ jobs:
             echo "DB_NAME=${{ secrets.DB_NAME}}" >> .env
             echo "DB_USER=${{ secrets.DB_USER}}" >> .env
             echo "DB_PASS=${{ secrets.DB_PASS}}" >> .env
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASS}}" >> .env
             IMAGE_NAME="${IMAGE_NAME}" docker-compose -f docker-compose.prod.yml build web
       -
         name: Push
@@ -48,5 +49,5 @@ jobs:
           envs: IMAGE_NAME
           script: |
                   echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-                  IMAGE_NAME="${IMAGE_NAME}" MYSQL_ROOT_PASS="${secrets.MYSQL_ROOT_PASS}" docker compose -f docker-compose.prod.yml pull
-                  IMAGE_NAME="${IMAGE_NAME}" MYSQL_ROOT_PASS="${secrets.MYSQL_ROOT_PASS}" docker compose -f docker-compose.prod.yml up -d
+                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml pull
+                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d

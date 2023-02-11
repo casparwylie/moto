@@ -18,8 +18,8 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASS}
+    env_file:
+      - .env
     ports:
       - 3306:3306
     healthcheck:
