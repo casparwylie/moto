@@ -5,8 +5,25 @@ from sqlalchemy import text, create_engine
 import enum
 
 _MAKES_TRUTH = (
-  'Keeway',
+  'Honda',
+  'Indian',
+  'Yamaha',
+  'Suzuki',
+  'Royal Enfield',
+  'Triumph',
+  'Kawasaki',
   'KTM',
+  'Aprilia',
+  'BMW',
+  'Ducati',
+  'Harley-Davidson',
+  'Enfield',
+  'Benelli',
+  'MV Agusta',
+  'Moto Guzzi',
+  'Norton',
+  'Victory',
+  'Keeway',
 )
 
 DB_URL = 'mysql://{user}:{password}@{host}:{port}/{database}'
@@ -38,9 +55,9 @@ INSERT INTO racer_makes (name) VALUES ('{name}')
 
 def _create_engine():
 
-  db_user = 'user'
-  db_password = 'password'
-  host = '0.0.0.0'
+  db_user = '2wheeluser'
+  db_password = '2wheelpass'
+  host = '108.61.173.62'
   port = '3306'
   database = 'moto'
 
