@@ -8,9 +8,17 @@ let recommendationsContainer = document.getElementById('recommendation-container
 let replayOption = document.getElementById('replay-option');
 let resultsContainer = document.getElementById('results-container');
 let starterForm = document.getElementById('starter-form');
+let resetOption = document.getElementById('reset-option');
 
 raceGoOpt.addEventListener('click', getBikes);
 addMoreOpt.addEventListener('click', addInput);
+resetOption.addEventListener('click', resetInputs);
+
+function resetInputs() {
+  inputsContainer.replaceChildren();
+  addInput();
+  addInput();
+}
 
 async function getBikes() {
   racerContainer.replaceChildren();
