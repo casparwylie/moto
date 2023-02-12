@@ -7,6 +7,7 @@ let addMoreOpt = document.getElementById('add-more-option');
 let recommendationsContainer = document.getElementById('recommendation-container');
 let replayOption = document.getElementById('replay-option');
 let resultsContainer = document.getElementById('results-container');
+let starterForm = document.getElementById('starter-form');
 
 raceGoOpt.addEventListener('click', getBikes);
 addMoreOpt.addEventListener('click', addInput);
@@ -30,6 +31,7 @@ async function getBikes() {
     }
   }
   if (atleastOne) {
+    starterForm.style.opacity = '0.2';
     initiateGo();
   }
 }
@@ -162,6 +164,7 @@ function go() {
         }
         if (Object.values(ints).length == 0) {
           raceGoOpt.innerHTML = 'Race Again!';
+          starterForm.style.opacity = '1';
         }
       }
     }(racer, a, ptw), 40);
