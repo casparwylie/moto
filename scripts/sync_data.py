@@ -53,19 +53,40 @@ add_make_query = """
 INSERT INTO racer_makes (name) VALUES ('{name}')
 """
 
-def _create_engine():
 
-  db_user = '2wheeluser'
-  db_password = '2wheelpass'
+class LocalDb:
+  db_user = 'user'
+  db_password = 'password'
+  host = 'localhost'
+  port = '3307'
+  database = 'moto'
+
+class ProdDb:
+  db_user =  os.environ.get('MOTO_DB_USER_PROD')
+  db_password = os.environ.get('MOTO_DB_PASS_PROD')
   host = '108.61.173.62'
   port = '3307'
   database = 'moto'
 
+def _create_engine(env):
+
   url = DB_URL.format(
-    user=db_user, password=db_password, host=host, port=port, database=database
+    user=env.db_user,
+    password=env.db_password,
+    host=env.host,
+    port=env.port,
+    database=env.database,
   )
   return create_engine(url)
 
+def get_env():
+  match sys.argv[-2]:
+    case 'production':
+      return ProdDb
+    case _:
+      return LocalDb
+
+engine = _create_engine(get_env())
 
 def find_number_by_metric(value: str, metric: str) -> int:
   if value:
@@ -183,7 +204,7 @@ def add_make(name, conn):
 
 def factory_run():
   """Deletes all models and rescans them"""
-  with _create_engine().connect() as conn:
+  with engine.connect() as conn:
     clear_all(conn)
     makes = get_makes_from_db(conn)
     run_sync(makes, conn)
@@ -194,7 +215,7 @@ def factory_run():
 
 def update_run():
   """Scans newly added makes"""
-  with _create_engine().connect() as conn:
+  with engine.connect() as conn:
     makes = get_makes_from_db(conn)
     scanned = [make.make for make in get_scanned_makes_from_db(conn)]
     to_sync = [make for make in makes if make.id not in scanned]
@@ -209,7 +230,7 @@ def update_run():
 
 
 def sync_makes_run():
-  with _create_engine().connect() as conn:
+  with engine.connect() as conn:
     make_names = [make.name for make in get_makes_from_db(conn)]
     to_add = [make for make in _MAKES_TRUTH if make not in make_names]
     if to_add:
