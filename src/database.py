@@ -70,6 +70,7 @@ def build_get_racer_by_make_model_query(make: int, model: str):
     racer_models_table.columns
   ).where(racer_models_table.c.name == model, racer_models_table.c.make == make)
 
+
 def build_get_make_by_name_query(make_name: str):
   return select(racer_makes_table.columns).where(
     racer_makes_table.c.name.contains(make_name)
