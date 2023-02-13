@@ -75,7 +75,3 @@ def build_get_make_by_name_query(make_name: str):
     racer_makes_table.c.name.contains(make_name)
   )
 
-### CREATIONS ###
-
-with engine.connect() as conn:
-  metadata.create_all(conn)
