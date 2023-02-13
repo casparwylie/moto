@@ -4,7 +4,7 @@ name: prod
 on:
   push:
     branches:
-      - test
+      - main
 
 env:
   IMAGE_NAME: "ghcr.io/${{ github.repository }}/${{ github.sha }}:latest"
