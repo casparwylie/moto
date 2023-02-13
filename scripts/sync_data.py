@@ -57,7 +57,7 @@ INSERT INTO racer_makes (name) VALUES ('{name}')
 class LocalDb:
   db_user = 'user'
   db_password = 'password'
-  host = 'localhost'
+  host = '127.0.0.1'
   port = '3307'
   database = 'moto'
 
@@ -69,7 +69,6 @@ class ProdDb:
   database = 'moto'
 
 def _create_engine(env):
-
   url = DB_URL.format(
     user=env.db_user,
     password=env.db_password,
