@@ -1,0 +1,1 @@
+const racerPage = new RacingPage();
