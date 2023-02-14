@@ -1,29 +1,28 @@
-const API_URL = '/api';
-let inputsContainer = document.getElementById('racer-inputs-container');
-let racerContainer = document.getElementById('racer-container');
-let raceGoOpt = document.getElementById('race-go-option');
-let addMoreOpt = document.getElementById('add-more-option');
-let recommendationsContainer = document.getElementById('recommendation-container');
-let replayOption = document.getElementById('replay-option');
-let resetOption = document.getElementById('reset-option');
-let resultsContainer = document.getElementById('results-container');
-let starterForm = document.getElementById('starter-form');
-let lightsContainer = document.getElementById('lights-container');
+const API_URL = '/api/racer';
+
+const inputsContainer = document.getElementById('racer-inputs-container');
+const racerContainer = document.getElementById('racer-container');
+const raceGoOpt = document.getElementById('race-go-option');
+const addMoreOpt = document.getElementById('add-more-option');
+const recommendationsContainer = document.getElementById('recommendation-container');
+const replayOption = document.getElementById('replay-option');
+const resetOption = document.getElementById('reset-option');
+const resultsContainer = document.getElementById('results-container');
+const starterForm = document.getElementById('starter-form');
+const lightsContainer = document.getElementById('lights-container');
 
 
 class Racer {
-  constructor(fullName, power, torque, weight, weightType, style, race) {
-
+  constructor(fullName, power, torque, weight, weightType, style, year, race) {
     this.power = parseInt(power);
     this.torque = parseInt(torque);
     this.weight = parseInt(weight);
     this.weightType = weightType;
     this.fullName = fullName;
     this.style = style;
-
-    this.resolveWeight();
-
+    this.year = year;
     this.race = race;
+
     this.finished = false;
     this.ptw = this.power / this.weight;
     this.acc = this.torque / this.weight;
@@ -31,10 +30,20 @@ class Racer {
     this.racerElement = document.createElement('div');
     this.racerElement.className = 'racer';
     this.racerElement.id = this.fullName;
+
     this.setImage();
-    this.racerElement.setAttribute('power', this.power);
-    this.racerElement.setAttribute('torque', this.torque);
-    this.racerElement.setAttribute('weight', this.weight);
+    this.resolveWeight();
+    this.logData();
+  }
+
+  logData() {
+    console.log(`${this.fullName}:`);
+    console.log(`   power: ${this.power}`);
+    console.log(`   torque: ${this.torque}`);
+    console.log(`   weight: ${this.weight}`);
+    console.log(`   weight_type: ${this.weightType}`);
+    console.log(`   style: ${this.style}`);
+    console.log(`   year: ${this.year}`);
   }
 
   setImage() {
@@ -42,7 +51,7 @@ class Racer {
   }
 
   static async fromApi(make, model, race) {
-    let result = await fetch(`${API_URL}/racer?make=${make}&model=${model}`);
+    let result = await fetch(`${API_URL}?make=${make}&model=${model}`);
     let racerData = await result.json();
     if (racerData) {
       return new Racer(
@@ -52,6 +61,7 @@ class Racer {
         racerData.weight,
         racerData.weight_type,
         racerData.style,
+        racerData.year,
         race,
       );
     }

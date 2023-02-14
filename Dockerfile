@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 python:3.11-slim-buster
 
+WORKDIR /moto
 
-WORKDIR /main
 RUN apt-get update \
   && apt-get install gcc -y \
   && apt-get install make -y \
@@ -19,8 +19,8 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.create false
 RUN poetry install
 
-COPY ./frontend frontend
-COPY ./src .
+COPY ./frontend ./frontend
+COPY ./src ./src
 
 EXPOSE 8000
-CMD ["python", "server.py"]
+CMD ["python", "./src/main.py"]
