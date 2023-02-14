@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 
 class Racer(BaseModel):
+  model_id: int
   full_name: str | None
   make: str | None
   model: str | None
@@ -17,6 +18,7 @@ class Racer(BaseModel):
   @classmethod
   def from_db_data(cls, data: Row, make_name: str) -> 'Racer':
     return cls(
+      model_id=data.id,
       full_name=f'{make_name} {data.name}',
       make=make_name,
       model=data.name,
@@ -27,3 +29,8 @@ class Racer(BaseModel):
       weight=data.weight,
       weight_type=data.weight_type,
     )
+
+
+class SaveRequest(BaseModel):
+  model_ids: list[int]
+

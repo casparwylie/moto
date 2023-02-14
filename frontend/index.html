@@ -1,7 +1,5 @@
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2Wheel Bet</title>
   <style>
@@ -157,6 +155,15 @@
       color: #983216;
       font-size: 15px;
     }
+
+    #race-share-option {
+      background-color: #2282b5;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0px 0px 5px grey;
+      font-size: 30px;
+      display: none;
+    }
   </style>
 </head>
 
@@ -175,13 +182,13 @@
         <button id="add-more-option">+ Add</button>
         <button id="reset-option">Reset</button>
         <button id="race-go-option"><b>Race!</b></button>
+        <button id="race-share-option"><b>Share</b></button>
       </div>
       <div id="recommendation-container"></div>
     </div>
   </div>
   <div id="racer-container"></div>
-  <script src="static/race.js"></script>
-  <script src="static/main.js"></script>
+  <script src="/static/race.js"></script>
+  <script src="/static/main.js"></script>
 </body>
-
 </html>

@@ -1,1 +1,2 @@
-const racerPage = new RacingPage();
+const racingPage = new RacingPage();
+racingPage.checkSharedRace();

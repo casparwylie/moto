@@ -1,8 +1,9 @@
-const API_URL = '/api/racer';
+const API_URL = '/api/racing';
 
 const inputsContainer = document.getElementById('racer-inputs-container');
 const racerContainer = document.getElementById('racer-container');
 const raceGoOpt = document.getElementById('race-go-option');
+const raceShareOpt = document.getElementById('race-share-option');
 const addMoreOpt = document.getElementById('add-more-option');
 const recommendationsContainer = document.getElementById('recommendation-container');
 const replayOption = document.getElementById('replay-option');
@@ -13,7 +14,18 @@ const lightsContainer = document.getElementById('lights-container');
 
 
 class Racer {
-  constructor(fullName, power, torque, weight, weightType, style, year, race) {
+  constructor(
+    modelId,
+    fullName,
+    power,
+    torque,
+    weight,
+    weightType,
+    style,
+    year,
+    race,
+  ) {
+    this.modelId = modelId;
     this.power = parseInt(power);
     this.torque = parseInt(torque);
     this.weight = parseInt(weight);
@@ -23,21 +35,19 @@ class Racer {
     this.year = year;
     this.race = race;
 
+    this.raceId = null;
     this.finished = false;
     this.ptw = this.power / this.weight;
     this.acc = this.torque / this.weight;
 
-    this.racerElement = document.createElement('div');
-    this.racerElement.className = 'racer';
-    this.racerElement.id = this.fullName;
 
-    this.setImage();
     this.resolveWeight();
     this.logData();
   }
 
   logData() {
     console.log(`${this.fullName}:`);
+    console.log(`   ID: ${this.modelId}`);
     console.log(`   power: ${this.power}`);
     console.log(`   torque: ${this.torque}`);
     console.log(`   weight: ${this.weight}`);
@@ -47,27 +57,36 @@ class Racer {
   }
 
   setImage() {
-    this.racerElement.style = `background-image: url('/images/${this.style}_type.svg')`;
+    this.racerElement.style = `background-image: url('/static/images/${this.style}_type.svg')`;
   }
 
   static async fromApi(make, model, race) {
     let result = await fetch(`${API_URL}?make=${make}&model=${model}`);
     let racerData = await result.json();
     if (racerData) {
-      return new Racer(
-        racerData.full_name,
-        racerData.power,
-        racerData.torque,
-        racerData.weight,
-        racerData.weight_type,
-        racerData.style,
-        racerData.year,
-        race,
-      );
+      return Racer.fromData(racerData, race);
     }
   }
 
+  static fromData(data, race) {
+    return new Racer(
+      data.model_id,
+      data.full_name,
+      data.power,
+      data.torque,
+      data.weight,
+      data.weight_type,
+      data.style,
+      data.year,
+      race,
+    );
+  }
+
   render() {
+    this.racerElement = document.createElement('div');
+    this.racerElement.className = 'racer';
+    this.racerElement.id = this.fullName;
+    this.setImage();
     let label = document.createElement('div');
     label.className = 'racer-label';
     label.innerHTML = this.fullName;
@@ -131,6 +150,7 @@ class Race {
 
   constructor() {
     this.racers = [];
+    this.unseenRace = true;
   }
 
   reset() {
@@ -138,7 +158,7 @@ class Race {
     resultsContainer.replaceChildren();
   }
 
-  async getRacers() {
+  async setRacersFromForm() {
     for (let item of inputsContainer.children) {
       let make = item.children[0].value.trim();
       let model = item.children[1].value.trim();
@@ -151,8 +171,20 @@ class Race {
     }
   }
 
-  async race() {
+  async setRacersFromRaceId(raceId) {
+    this.unseenRace = false;
+    let result = await fetch(`${API_URL}/race?race_id=${raceId}`);
+    let racerData = await result.json();
+    for (let racer of racerData) {
+      this.racers.push(Racer.fromData(racer, this));
+    }
+  }
+
+  async race(save=true) {
     if (this.racers.length > 0) {
+      if (save) {
+        await this.save();
+      }
       starterForm.style.opacity = '0.2';
       this.reset();
       for (let racer of this.racers) {
@@ -165,6 +197,26 @@ class Race {
         }
       }, 4000);
     }
+  }
+
+  async save() {
+      var modelIds = [];
+      for (let racer of this.racers) {
+        modelIds.push(racer.modelId);
+      }
+      let response = await fetch(`${API_URL}/save`,
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({'model_ids': modelIds}),
+        }
+      );
+      let data = await response.json();
+      this.raceId = data.race_id;
+  }
+
+  share() {
+    alert(this.raceId);
   }
 
   checkFinished() {
@@ -208,6 +260,9 @@ class Race {
 
   finish() {
     raceGoOpt.innerHTML = 'Race Again!';
+    if (this.unseenRace) {
+      raceShareOpt.style.display = 'block';
+    }
     starterForm.style.opacity = '1';
   }
 }
@@ -221,6 +276,7 @@ class RacerRecommender {
   }
 
   async get() {
+    raceShareOpt.style.display = 'none';
     let make = this.makeIn.value.trim();
     let model = this.modelIn.value.trim();
     if (make && model && model.length > 1) {
@@ -259,12 +315,20 @@ class RacingPage {
   constructor() {
     this.addEventListeners();
     this.renderInputs();
+    this.race = null;
   }
 
   addEventListeners() {
-    raceGoOpt.addEventListener('click', this.runRace);
-    addMoreOpt.addEventListener('click', this.addInput);
+    raceGoOpt.addEventListener('click', () => this.runRace());
+    addMoreOpt.addEventListener('click', () => this.addInput());
+    raceShareOpt.addEventListener('click', () => this.share());
     resetOption.addEventListener('click', () => this.resetInputs());
+  }
+
+  share() {
+    if (this.race && this.race.raceId && this.race.racers.length > 0) {
+      this.race.share();
+    }
   }
 
   addInput() {
@@ -291,13 +355,53 @@ class RacingPage {
   }
 
   resetInputs() {
+    raceShareOpt.style.display = 'none';
     inputsContainer.replaceChildren();
     this.renderInputs();
   }
 
-  async runRace() {
-    let race = new Race();
-    await race.getRacers();
-    race.race();
+  async raceChanged() {
+    let dummyRace = new Race();
+    await dummyRace.setRacersFromForm();
+    if (dummyRace.racers.length == 0) {
+      return false;
+    }
+    if (dummyRace.racers.length != this.race.racers.length) {
+      return true;
+    }
+    for (let i in dummyRace.racers) {
+      if (dummyRace.racers[i].modelId != this.race.racers[i].modelId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async runRace(raceId = null) {
+    if (!this.race || await this.raceChanged()) {
+      await this.runNewRace(raceId);
+    } else {
+      await this.race.race(false);
+    }
+  }
+
+  async runNewRace(raceId = null) {
+    this.race = new Race();
+    if (raceId) {
+      await this.race.setRacersFromRaceId(raceId);
+      await this.race.race(false);
+    } else {
+      await this.race.setRacersFromForm();
+      await this.race.race(true);
+    }
+  }
+
+  async checkSharedRace() {
+    let sharedUrlMatch = window.location.pathname.match("/r/\([0-9]+)/?$");
+    if (sharedUrlMatch) {
+      let raceId = parseInt(sharedUrlMatch[1]);
+      await this.runRace(raceId);
+    }
   }
 }
+
