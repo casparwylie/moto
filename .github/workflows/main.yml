@@ -49,6 +49,7 @@ jobs:
           envs: IMAGE_NAME
           script: |
                   echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+                  docker image prune --force
                   IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml pull web
                   IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d --no-recreate mysql
                   IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d --no-deps web
