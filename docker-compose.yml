@@ -8,8 +8,8 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./src:/main
-      - ./frontend:/main/frontend
+      - ./frontend:/moto/frontend
+      - ./src:/moto/src
     environment:
       DB_NAME: 'moto'
       DB_USER: 'user'
