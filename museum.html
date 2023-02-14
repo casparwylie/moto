@@ -1,0 +1,68 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browser</title>
+  <style>
+body {
+  margin: 20px;
+
+}
+
+.racer {
+ height: 50px;
+ width: 50px;
+ background: red;
+ border-radius: 5px;
+ margin-top: 10px;
+}
+
+
+  </style>
+</head>
+
+<body>
+  <div class="racer" id="r-9" torque="86" power="90" weight="244">GS</div>
+  <div class="racer" id="r-1" torque="120" power="120" weight="233">FTR</div>
+  <div class="racer" id="r-8" torque="93" power="117" weight="189">MT09</div>
+  <div class="racer" id="r-2" torque="125" power="208" weight="196">Ducati SF</div>
+  <div class="racer" id="r-3" torque="60" power="100" weight="200">R9T</div>
+  <div class="racer" id="r-4" torque="60" power="200" weight="200">StreetT</div>
+  <div class="racer" id="r-5" torque="32" power="25" weight="160">RE</div>
+  <div class="racer" id="r-6" torque="220" power="165" weight="290">Rocket 3</div>
+  <div class="racer" id="r-7" torque="165" power="220" weight="216">H2</div>
+  <script>
+  let racers = document.getElementsByClassName('racer');
+
+  var as = {};
+  var ints = {};
+  for (racer of racers) {
+      var power = parseInt(racer.getAttribute('power'));
+      let weight = racer.getAttribute('weight');
+      var torque = parseInt(racer.getAttribute('torque'));
+
+      let ptw = parseInt(weight) / parseInt(power);
+      let a = parseInt(torque) / parseInt(weight);
+      as[racer.id] = torque / 20;
+      ints[racer.id] = setInterval(function(racer, a, ptw){
+        return () => {
+          //console.log(racer.id + ": "+(parseInt(a * as[racer.id])));
+          m = ((a) * as[racer.id]) + (ptw / 5);
+          racer.style.marginLeft = parseInt(window.getComputedStyle(racer).marginLeft) + m + 'px';
+          as[racer.id] += 0.01;
+          console.log(parseInt(racer.style.marginLeft));
+          if (parseInt(racer.style.marginLeft) > 1000) {
+            clearInterval(ints[racer.id]);
+          }
+        }
+      }(racer, a, ptw), 20);
+  }
+
+
+
+
+  </script>
+</body>
+
+</html>
