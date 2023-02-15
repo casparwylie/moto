@@ -157,12 +157,14 @@
     }
 
     #race-share-option {
-      background-color: #2282b5;
-      color: white;
-      font-weight: bold;
-      box-shadow: 0px 0px 5px grey;
-      font-size: 30px;
+      background-color: #ffa500;
       display: none;
+    }
+
+    .shared-link {
+      font-size: 20px;
+      color: #39ae86;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -182,12 +184,13 @@
         <button id="add-more-option">+ Add</button>
         <button id="reset-option">Reset</button>
         <button id="race-go-option"><b>Race!</b></button>
-        <button id="race-share-option"><b>Share</b></button>
+        <button id="race-share-option"><b>Share Race</b></button>
       </div>
       <div id="recommendation-container"></div>
     </div>
   </div>
   <div id="racer-container"></div>
+  <script src="/static/utils.js"></script>
   <script src="/static/race.js"></script>
   <script src="/static/main.js"></script>
 </body>

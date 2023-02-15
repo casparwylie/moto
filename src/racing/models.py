@@ -16,11 +16,11 @@ class Racer(BaseModel):
 
 
   @classmethod
-  def from_db_data(cls, data: Row, make_name: str) -> 'Racer':
+  def from_db_data(cls, data: Row) -> 'Racer':
     return cls(
       model_id=data.id,
-      full_name=f'{make_name} {data.name}',
-      make=make_name,
+      full_name=f'{data.make_name} {data.name}',
+      make=data.make_name,
       model=data.name,
       style=data.style,
       year=data.year,

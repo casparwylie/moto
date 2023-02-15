@@ -9,6 +9,7 @@ from sqlalchemy import (
   String,
   select,
   insert,
+  literal_column,
 )
 
 ### TABLES ###
@@ -56,12 +57,15 @@ race_racers_table = Table(
 
 ### QUERIES ###
 
-def build_search_racer_query(make: int, model: str):
+def build_search_racer_query(make: str, model: str):
   return select(
-    racer_models_table.columns
-  ).where(
+    racer_models_table.columns,
+    racer_makes_table.c.name.label('make_name'),
+  ).having(
     racer_models_table.c.name.contains(model),
-    racer_models_table.c.make == make
+    literal_column('make_name').contains(make),
+  ).join(
+    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
   )
 
 
@@ -71,20 +75,21 @@ def build_get_race_query(race_id: int):
     racer_makes_table.c.name.label('make_name'),
   ).where(race_racers_table.c.race_id == race_id
   ).join(
-    race_racers_table, race_racers_table.c.model_id == racer_models_table.c.id).join(
+    race_racers_table, race_racers_table.c.model_id == racer_models_table.c.id
+  ).join(
     racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make,
   )
 
 
-def build_get_racer_by_make_model_query(make: int, model: str):
+def build_get_racer_by_make_model_query(make: str, model: str):
   return select(
-    racer_models_table.columns
-  ).where(racer_models_table.c.name == model, racer_models_table.c.make == make)
-
-
-def build_get_make_by_name_query(make_name: str):
-  return select(racer_makes_table.columns).where(
-    racer_makes_table.c.name.contains(make_name)
+    racer_models_table.columns,
+    racer_makes_table.c.name.label('make_name'),
+  ).having(
+    racer_models_table.c.name == model,
+    literal_column('make_name') == make,
+  ).join(
+    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
   )
 
 

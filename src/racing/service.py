@@ -2,7 +2,6 @@ from sqlalchemy import Row
 
 from database import engine as db
 from racing.queries import (
-  build_get_make_by_name_query,
   build_get_race_query,
   build_get_racer_by_make_model_query,
   build_insert_race_query,
@@ -14,19 +13,12 @@ from racing.queries import (
 _MAX_SEARCH_RESULT = 20
 _MAX_RACERS_PER_RACE = 10
 
-def get_racer(make: str, model: str) -> tuple[str, Row] | tuple[None, None]:
+def get_racer(make: str, model: str) -> Row | None:
   if make and model:
     with db.connect() as conn:
-      make = conn.execute(
-        build_get_make_by_name_query(make)
-      ).one_or_none()
-      if make:
-        racers = list(conn.execute(
-          build_get_racer_by_make_model_query(make.id, model).limit(1)
-        ))
-        if racers:
-          return make.name, racers[0]
-  return None, None
+        return conn.execute(
+          build_get_racer_by_make_model_query(make, model)
+        ).first()
 
 
 def get_race(race_id: int) -> list[Row]:
@@ -38,18 +30,13 @@ def get_race(race_id: int) -> list[Row]:
 
 def search_racers(
   make: str, model: str
-) -> tuple[str, list[Row]] | tuple[None, list]:
+) -> list[Row]:
   if make and model:
     with db.connect() as conn:
-      make = conn.execute(
-        build_get_make_by_name_query(make)
-      ).one_or_none()
-      if make:
-        results = list(conn.execute(
-          build_search_racer_query(make.id, model).limit(_MAX_SEARCH_RESULT)
-        ))
-        return make.name, results
-  return None, []
+      return conn.execute(
+        build_search_racer_query(make, model).limit(_MAX_SEARCH_RESULT)
+      )
+  return ()
 
 
 def save_race(model_ids: list[int]) -> int | None:
