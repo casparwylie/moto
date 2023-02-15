@@ -6,6 +6,15 @@ function _show(element) {
   element.style.display = 'block';
 }
 
+function _el(type, info) {
+  let element = document.createElement(type);
+  Object.entries(info).forEach((entry) => {
+    let [key, value] = entry;
+    element[key] = value;
+  });
+  return element;
+}
+
 async function _post(url, data) {
   let response = await fetch(url,
     {
