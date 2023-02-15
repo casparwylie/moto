@@ -289,7 +289,7 @@ class RacerRecommender {
     _hide(raceShareOpt);
     let make = this.makeIn.value.trim();
     let model = this.modelIn.value.trim();
-    if (make && model && model.length > 1) {
+    if (make) {
       let results = await _get(`${API_URL}/search?make=${make}&model=${model}`);
       if (results.length > 0) {
         _show(recommendationsContainer);
@@ -354,6 +354,7 @@ class RacingPage {
 
     let recommender = new RacerRecommender(makeIn, modelIn);
     modelIn.addEventListener('keyup', () => recommender.get())
+    modelIn.addEventListener('focus', () => recommender.get())
 
     if (make && model) {
       makeIn.value = make;

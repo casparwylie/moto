@@ -31,7 +31,7 @@ def get_race(race_id: int) -> list[Row]:
 def search_racers(
   make: str, model: str
 ) -> list[Row]:
-  if make and model:
+  if make:
     with db.connect() as conn:
       return conn.execute(
         build_search_racer_query(make, model).limit(_MAX_SEARCH_RESULT)
