@@ -5,12 +5,16 @@ from sqlalchemy import (
   ForeignKey,
   Index,
   Integer,
+  DateTime,
   String,
   select,
+  insert,
+  literal_column,
 )
 
 ### TABLES ###
 metadata = MetaData()
+
 
 racer_makes_table = Table(
     'racer_makes',
@@ -18,6 +22,7 @@ racer_makes_table = Table(
     Column('id', Integer, primary_key=True),
     Column('name', String(50), index=True),
 )
+
 
 racer_models_table = Table(
     'racer_models',
@@ -33,25 +38,67 @@ racer_models_table = Table(
     Column('weight_type', String(10)),
 )
 
+
+race_history_table = Table(
+  'race_history',
+  metadata,
+  Column('id', Integer, primary_key=True),
+  Column('created_at', DateTime),
+)
+
+
+race_racers_table = Table(
+  'race_racers',
+  metadata,
+  Column('race_id', Integer, ForeignKey(race_history_table.c.id)),
+  Column('model_id', Integer, ForeignKey(racer_models_table.c.id)),
+)
+
+
 ### QUERIES ###
 
-def build_search_racer_query(make: int, model: str):
+def build_search_racer_query(make: str, model: str):
   return select(
-    racer_models_table.columns
-  ).where(
+    racer_models_table.columns,
+    racer_makes_table.c.name.label('make_name'),
+  ).having(
     racer_models_table.c.name.contains(model),
-    racer_models_table.c.make == make
+    literal_column('make_name').contains(make),
+  ).join(
+    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
   )
 
 
-def build_get_racer_by_make_model_query(make: int, model: str):
+def build_get_race_query(race_id: int):
   return select(
-    racer_models_table.columns
-  ).where(racer_models_table.c.name == model, racer_models_table.c.make == make)
-
-
-def build_get_make_by_name_query(make_name: str):
-  return select(racer_makes_table.columns).where(
-    racer_makes_table.c.name.contains(make_name)
+    racer_models_table,
+    racer_makes_table.c.name.label('make_name'),
+  ).where(race_racers_table.c.race_id == race_id
+  ).join(
+    race_racers_table, race_racers_table.c.model_id == racer_models_table.c.id
+  ).join(
+    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make,
   )
 
+
+def build_get_racer_by_make_model_query(make: str, model: str):
+  return select(
+    racer_models_table.columns,
+    racer_makes_table.c.name.label('make_name'),
+  ).having(
+    racer_models_table.c.name == model,
+    literal_column('make_name') == make,
+  ).join(
+    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
+  )
+
+
+def build_insert_race_query():
+  return insert(race_history_table)
+
+
+def build_insert_race_racers_query(race_id: int, model_ids: list[int]):
+  return insert(race_racers_table).values([
+    dict(race_id=race_id, model_id=model_id)
+    for model_id in model_ids
+  ])
