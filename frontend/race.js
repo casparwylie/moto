@@ -11,6 +11,7 @@ const resetOption = document.getElementById('reset-option');
 const resultsContainer = document.getElementById('results-container');
 const starterForm = document.getElementById('starter-form');
 const lightsContainer = document.getElementById('lights-container');
+const controlPanel = document.getElementById('control-panel');
 
 
 class Racer {
@@ -333,6 +334,11 @@ class RacingPage {
     addMoreOpt.addEventListener('click', () => this.addInput());
     raceShareOpt.addEventListener('click', () => this.share());
     resetOption.addEventListener('click', () => this.resetInputs());
+    controlPanel.addEventListener('click', (evt) => {
+      if (evt.target == controlPanel) {
+        _hide(recommendationsContainer);
+      }
+    });
   }
 
   share() {
