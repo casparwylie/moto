@@ -15,37 +15,47 @@
     }
 
     .racer {
-     height: 60px;
-     width: 90px;
-     border-radius: 5px;
-     margin-bottom: 30px;
-     background-size: 100%;
-     background-repeat: no-repeat;
-     position: relative;
-     z-index: -1;
+       height: 15%;
+       width: 10%;
+       background-size: 100%;
+       background-repeat: no-repeat;
+       z-index: -1;
+    }
+
+    .small-racer {
+      height: 10%;
+      width: 5%;
+      margin-bottom: 1vh;
     }
     .racer-outline {
       border-bottom: 1px dotted #65192e;
     }
+
     .racer-label {
       position: absolute;
-      margin-top: 60px;
-      font-size: 15px;
-      width: 220px;
+      font-size: 2vh;
+      margin-top: 7%;
+      float: bottom;
+      width: 20%;
+    }
+
+    .small-racer-label {
+      font-size: 2vh;
+      margin-top: 4%;
     }
 
     #racer-container {
-      width: 100vw;
-      height: 70vh;
+      width: 100%;
+      height: 100%;
       z-index: -1;
       background: #7da8b7;
-      position: relative;
+      position: absolute;
     }
 
     #control-panel {
       margin: 0 auto;
       width: 100vw;
-      height: 30vh;
+      height: 40vh;
       background: #da4820;
       padding-right: 0px;
     }
@@ -94,7 +104,7 @@
     #starter-form {
       background: #da4820;
       padding: 20px;
-      margin: 45 auto;
+      margin: 0 auto;
       width: 40%;
       max-height: 200%;
     }
@@ -114,7 +124,7 @@
     #lights-container {
       height: 28vw;
       width: 10vw;
-      margin: 35vh 45vw;
+      margin: 15vh 45vw;
       position: absolute;
       background: #353a3c;
       padding: 20px;
@@ -134,7 +144,7 @@
 
     #heading {
       margin: 0 auto;
-      height: 0px;
+      height: 70px;
       width: 100%;
       text-align: center;
       font-size: 30px;
@@ -145,6 +155,8 @@
       float: right;
       width: 20%;
       color: white;
+      background: black;
+      opacity: 0.7;
     }
 
     .result-row {
@@ -166,10 +178,156 @@
       color: #39ae86;
       text-decoration: underline;
     }
+
+    #menu {
+      margin: 0 auto;
+      width: 40%;
+      display: flex;
+      border-bottom: 1px double black;
+      border-top: 1px double black;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .menu-item {
+      padding: 5px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .menu-item:hover {
+      color: white;
+    }
+
+    .window {
+      width: 50%;
+      margin-top: 5%;
+      height: 70vh;
+      overflow-y: scroll;
+      margin-left: calc(25% - 20px);
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 30px darkgrey;
+      background-color: #008b8b;
+      display: none;
+      position: absolute;
+    }
+
+    #introduction-container {
+      margin-top: 3%;
+      font-size: 15px;
+    }
+
+    .close {
+      float: right;
+      cursor: pointer;
+      color: white;
+    }
+
+    @media only screen and (max-width: 900px) {
+      #menu {
+        width: 60%;
+        font-size: 15px;
+      }
+
+      #racer-inputs-container input, #race-go-option, button, input {
+        font-size: 15px;
+      }
+
+      #recommendation-container {
+        padding: 5px;
+        font-size: 12px;
+      }
+      .window {
+        width: 80%;
+        margin-left: calc(10% - 20px);
+      }
+    }
+    .window-header-image {
+       background-size: 100%;
+       background-repeat: no-repeat;
+       height: 18%;
+       width: 20%;
+       margin: 0 auto;
+    }
+
+    .window-header-image-1 {
+       background-image: url('/static/images/classic_type.svg');
+    }
+
+    .window-header-image-2 {
+       background-image: url('/static/images/adventure_type.svg');
+    }
+
+    .window-header-image-3 {
+       background-image: url('/static/images/sport_type.svg');
+    }
+
+    #popular-pairs-container {
+    }
+
+    .popular-pair-row {
+      padding: 5px;
+      border-bottom: 1px solid grey;
+      height: 5%;
+      display: flex;
+      justify-content: center;
+      cursor: pointer;
+
+    }
+
+    .popular-pair-row-item {
+      margin-left: 10px;
+    }
+
+    .vs-text {
+      font-weight: bold;
+      color: #004545;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
   </style>
 </head>
 
 <body>
+  <div class="window" id="introduction-window">
+    <div window="introduction-window" class="close">x</div>
+    <div class="window-header-image window-header-image-1"></div>
+    <h2>Introduction</h2>
+    Welcome to 2wheel Bet - an experiment that hopes to bring fellow bikers together for healthy debate and ultimately some fun. The experiment simulates a virtual drag race between any real-life motorcycle based on real performance data. I created this because I wanted to reason with the mysterious nature of motorcycle performance, and see how my own bike would fare against others. It's not perfect, but I like to think that any imperfection in the algorithm is just like real-life imperfections such as the rider, weather conditions, and so on.
+
+    <h2>How it works</h2>
+    The algorithm takes into account power, weight, and torque from a dataset that isn't always perfect. It even tries to simulate gear changes - so you can expect surprises throughout a race. On the whole, it seems to produce realistic enough results, and I rarely disagree with the outcome. Real life speed, distance and time is not directly comparable to what you'll see on the screen, though it should be proportional (it may seem exaggerated).
+
+    Data imperfections are difficult to tune. For example, the data may mismatch bikes with dry and wet weight, meaning a dry weighted bike might get an advantage. I've tried to tune it, and compensate for imperfections like that.
+
+    <h2>Insight Tabs</h2>
+
+    <p><b>Head2heads:</b> This is a list of the most popular motorcycle pairs people searched. E.g if a Fireblade and R1 are at number 1, it means they have appeared within the most races together.</p>
+
+    <p><b>Recent races:</b> This is a list of the most recent races people have searched.</p>
+
+
+    <h2>Development</h2>
+    I am trying to improve and add features all the time, though it's hard work as the only developer. If you have any ideas, or would like to get involved, please contact me at casparwylie@gmail.com.
+
+    <h2>Obvious disclaimer</h2>
+    (1) If you want to disprove the results in real life, do it on a track. (2) This experiment is not meant to encourage public road racing.
+    (3) The results are not perfect, hence I will be adding voting and commenting features to allow for debate.
+
+  </div>
+  <div class="window" id="popular-pairs-window">
+    <div window="popular-pairs-window" class="close">x</div>
+    <div class="window-header-image window-header-image-2"></div>
+    <h2>Most Popular Raced Pairs</h2>
+    <div id="popular-pairs-container"></div>
+  </div>
+  <div class="window" id="recent-races-window">
+    <div window="recent-races-window" class="close">x</div>
+    <div class="window-header-image window-header-image-3"></div>
+    <h2>Recent Races</h2>
+    <div id="recent-races-container"></div>
+  </div>
   <div id="lights-container">
     <div class="light" id="light-1"></div>
     <div class="light" id="light-2"></div>
@@ -177,7 +335,11 @@
   </div>
   <div id="control-panel">
     <div id="heading">2wheel.bet<div id="credit"> By Caspar Wylie</div></div>
-    <div id="results-container"></div>
+    <div id="menu">
+      <div class="menu-item" window="introduction-window">Introduction</div>
+      <div class="menu-item" window="popular-pairs-window">Head2heads</div>
+      <div class="menu-item" window="recent-races-window">Recent Races</div>
+    </div>
     <div id="starter-form">
       <div id="racer-inputs-container"></div>
       <div id="starter-triggers">
@@ -189,9 +351,12 @@
       <div id="recommendation-container"></div>
     </div>
   </div>
+  <div id="results-container"></div>
   <div id="racer-container"></div>
   <script src="/static/utils.js"></script>
   <script src="/static/race.js"></script>
+  <script src="/static/insights.js"></script>
+  <script src="/static/windows.js"></script>
   <script src="/static/main.js"></script>
 </body>
 </html>

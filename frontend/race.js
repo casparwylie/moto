@@ -1,4 +1,4 @@
-const API_URL = '/api/racing';
+const RACING_API_URL = '/api/racing';
 
 const inputsContainer = document.getElementById('racer-inputs-container');
 const racerContainer = document.getElementById('racer-container');
@@ -50,6 +50,15 @@ class Racer {
     this.logData();
   }
 
+  shrink() {
+    this.racerElement.classList.add('small-racer');
+    this.label.classList.add('small-racer-label');
+  }
+
+  expand() {
+    this.racerElement.classList.remove('small-racer');
+  }
+
   logData() {
     console.log(`${this.fullName}:`);
     console.log(`   ID: ${this.modelId}`);
@@ -63,14 +72,14 @@ class Racer {
   }
 
   setImage() {
-    this.racerElement.style = `background-image: url('/static/images/${this.style}_type.svg')`;
+    this.racerElement.style = (
+      `background-image: url('/static/images/${this.style}_type.svg')`
+    );
   }
 
   static async fromApi(make, model, race) {
-    let data = await _get(`${API_URL}?make=${make}&model=${model}`);
-    if (data) {
-      return Racer.fromData(data, race);
-    }
+    let data = await _get(`${RACING_API_URL}?make=${make}&model=${model}`);
+    if (data) return Racer.fromData(data, race);
   }
 
   static fromData(data, race) {
@@ -90,20 +99,19 @@ class Racer {
   }
 
   render() {
-    this.racerElement = document.createElement('div');
-    this.racerElement.className = 'racer';
-    this.racerElement.id = this.fullName;
+    this.racerElement = _el(
+      'div', {className: 'racer', id: this.fullName}
+    );
+    this.label = _el(
+      'div', {className: 'racer-label', innerHTML: this.fullName}
+    )
+    this.racerOutline = _el(
+      'div', {className: 'racer-outline'}
+    );
     this.setImage();
-    let label = document.createElement('div');
-    label.className = 'racer-label';
-    label.innerHTML = this.fullName;
-
-    let racerOutline = document.createElement('div');
-    racerOutline.className = 'racer-outline';
-
-    this.racerElement.appendChild(label);
-    racerOutline.appendChild(this.racerElement);
-    racerContainer.appendChild(racerOutline);
+    this.racerElement.appendChild(this.label);
+    this.racerOutline.appendChild(this.racerElement);
+    racerContainer.appendChild(this.racerOutline);
   }
 
   resolveWeight() {
@@ -133,8 +141,7 @@ class Racer {
   finish() {
     this.finished = true;
     this.race.checkFinished();
-    let row = document.createElement('div');
-    row.className = 'result-row';
+
     let position = resultsContainer.children.length + 1;
     var posDisplay;
     switch (position) {
@@ -150,7 +157,12 @@ class Racer {
       default:
         posDisplay = position.toString() + 'th';
     }
-    row.innerHTML = `${posDisplay} - ${this.fullName}`;
+    let row = _el(
+      'div', {
+        className: 'result-row',
+        innerHTML:  `${posDisplay} - ${this.fullName}`
+      }
+    );
     resultsContainer.appendChild(row);
   }
 }
@@ -174,47 +186,35 @@ class Race {
       let model = item.children[1].value.trim();
       if (make && model) {
         let racer = await Racer.fromApi(make, model, this);
-        if (racer) {
-          this.racers.push(racer);
-        }
+        if (racer) this.racers.push(racer);
       }
-    }
+    };
   }
 
   async setRacersFromRaceId(raceId) {
-    let results = await _get(`${API_URL}/race?race_id=${raceId}`);
-    for (let racer of results) {
-      this.racers.push(Racer.fromData(racer, this));
-    }
+    let results = await _get(`${RACING_API_URL}/race?race_id=${raceId}`);
+    results.forEach((racer) => this.racers.push(
+      Racer.fromData(racer, this)
+    ));
     this.raceId = raceId;
   }
 
   async race(save) {
-    if (this.racers.length > 0) {
-      if (save) {
-        this.unseenRace = true;
-        await this.save();
-      }
-      starterForm.style.opacity = '0.2';
-      this.reset();
-      for (let racer of this.racers) {
-        racer.render();
-      }
-      this.startLights();
-      setTimeout(() => {
-        for (let racer of this.racers) {
-          racer.move();
-        }
-      }, 4000);
+    if (this.racers.length == 0) return;
+    if (save) {
+      this.unseenRace = true;
+      await this.save();
     }
+    _hide(controlPanel);
+    this.reset();
+    this.startLights();
+    this.racers.forEach((racer) => racer.render());
+    setTimeout(() => this.racers.forEach((racer) => racer.move()), 4000);
   }
 
   async save() {
-      var modelIds = [];
-      for (let racer of this.racers) {
-        modelIds.push(racer.modelId);
-      }
-      let data = await _post(`${API_URL}/save`, {'model_ids': modelIds});
+      let modelIds = this.racers.map((racer) => racer.modelId);
+      let data = await _post(`${RACING_API_URL}/save`, {'model_ids': modelIds});
       this.raceId = data.race_id;
   }
 
@@ -233,36 +233,23 @@ class Race {
   }
 
   checkFinished() {
-      var finished = 0;
-      for (let racer of this.racers) {
-        if (racer.finished) {
-          finished ++;
-        }
-      }
-      if (finished == this.racers.length) {
-        this.finish();
-      }
+      let finished = this.racers.every((racer) => racer.finished);
+      if (finished) this.finish();
   }
 
   startLights() {
+    let green = '#39ae86';
+    let red = '#a31919';
+    let orange = '#da4820';
     let lights = [
       document.getElementById('light-1'),
       document.getElementById('light-2'),
       document.getElementById('light-3'),
     ]
-    for (let light of lights) {
-      light.style.backgroundColor = 'transparent';
-    }
-    let green = '#39ae86';
-    let red = '#a31919';
-    let orange = '#da4820';
+    lights.forEach((light) => light.style.backgroundColor = 'transparent');
     _show(lightsContainer);
-    setTimeout(function(){
-      lights[0].style.backgroundColor = red;
-    }, 1000);
-    setTimeout(function(){
-      lights[1].style.backgroundColor = orange;
-    }, 2000);
+    setTimeout(() => lights[0].style.backgroundColor = red, 1000);
+    setTimeout(() => lights[1].style.backgroundColor = orange, 2000);
     setTimeout(() => {
       lights[0].style.backgroundColor = green;
       lights[1].style.backgroundColor = green;
@@ -273,8 +260,9 @@ class Race {
 
   finish() {
     raceGoOpt.innerHTML = 'Race Again!';
+    _show(controlPanel);
     this.showShare();
-    starterForm.style.opacity = '1';
+    this.racers.forEach((racer) => racer.shrink());
   }
 }
 
@@ -291,7 +279,9 @@ class RacerRecommender {
     let make = this.makeIn.value.trim();
     let model = this.modelIn.value.trim();
     if (make) {
-      let results = await _get(`${API_URL}/search?make=${make}&model=${model}`);
+      let results = await _get(
+        `${RACING_API_URL}/search?make=${make}&model=${model}`
+      );
       if (results.length > 0) {
         _show(recommendationsContainer);
         this.addRecommendations(results);
@@ -303,13 +293,16 @@ class RacerRecommender {
 
   addRecommendations(racerResults) {
     recommendationsContainer.replaceChildren();
-    for (let racer of racerResults) {
-      let row = document.createElement('div');
-      row.innerHTML = `${racer.model} ${racer.year}`;
-      row.className = 'recommendation-row';
+    racerResults.forEach((racer) => {
+      let row = _el(
+        'div', {
+          className: 'recommendation-row',
+          innerHTML: `${racer.model} ${racer.year}`
+        }
+      );
       row.addEventListener('click', () => this.selectRecommendation(racer.model));
       recommendationsContainer.appendChild(row);
-    }
+    });
   }
 
   selectRecommendation(model) {
@@ -335,9 +328,7 @@ class RacingPage {
     raceShareOpt.addEventListener('click', () => this.share());
     resetOption.addEventListener('click', () => this.resetInputs());
     controlPanel.addEventListener('click', (evt) => {
-      if (evt.target == controlPanel) {
-        _hide(recommendationsContainer);
-      }
+      if (evt.target == controlPanel) _hide(recommendationsContainer);
     });
   }
 
@@ -348,15 +339,9 @@ class RacingPage {
   }
 
   addInput(make=null, model=null) {
-    let container = document.createElement('div');
-    container.className = 'racer-input-row';
-
-    let makeIn = document.createElement('input');
-    makeIn.placeholder = "Make...";
-    container.appendChild(makeIn);
-
-    let modelIn = document.createElement('input');
-    modelIn.placeholder = "Model...";
+    let container = _el('div', {className: 'racer-input-row'});
+    let makeIn = _el('input', {placeholder: 'Make...'});
+    let modelIn = _el('input', {placeholder: 'Model...'});
 
     let recommender = new RacerRecommender(makeIn, modelIn);
     modelIn.addEventListener('keyup', () => recommender.get())
@@ -367,6 +352,7 @@ class RacingPage {
       modelIn.value = model;
     }
 
+    container.appendChild(makeIn);
     container.appendChild(modelIn);
     inputsContainer.appendChild(container);
   }
@@ -384,9 +370,7 @@ class RacingPage {
 
   setInputsFromRace() {
     this.resetInputs(false);
-    for (let racer of this.race.racers) {
-      this.addInput(racer.makeName, racer.name);
-    }
+    this.race.racers.forEach((racer) => this.addInput(racer.makeName, racer.name));
   }
 
   getInputState() {

@@ -30,7 +30,56 @@ class Racer(BaseModel):
       weight_type=data.weight_type,
     )
 
+  @classmethod
+  def from_db_data_raw(cls, data: dict) -> 'Racer':
+    return cls(
+      model_id=data['id'],
+      full_name=f'{data["make_name"]} {data["name"]}',
+      make=data['make_name'],
+      model=data['name'],
+      style=data['style'],
+      year=data['year'],
+      power=data['power'],
+      torque=data['torque'],
+      weight=data['weight'],
+      weight_type=data['weight_type'],
+    )
+
 
 class SaveRequest(BaseModel):
   model_ids: list[int]
+
+
+class PopularPair(BaseModel):
+  racer_1: Racer
+  racer_2: Racer
+  occurence: int
+
+
+class PopularPairsResponse(BaseModel):
+  races: list[list[Racer]]
+
+  @classmethod
+  def from_service(cls, data: tuple[dict, dict, int]) -> 'PopularPairsResponse':
+    return cls(
+      races=[
+        [
+          Racer.from_db_data_raw(pair[0]),
+          Racer.from_db_data_raw(pair[1])
+        ]
+        for pair in data
+      ]
+    )
+
+
+class RecentRacesResponse(BaseModel):
+  races: list[list[Racer]]
+
+  @classmethod
+  def from_service(cls, data: list[list[Row]]) -> 'RecentRacesResponse':
+    return cls(races=[
+      [Racer.from_db_data(racer_data) for racer_data in race]
+      for race in data
+    ])
+
 
