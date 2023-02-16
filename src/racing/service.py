@@ -3,12 +3,14 @@ from typing import Generator
 from database import engine as db
 from racing.queries import (
   build_get_race_query,
+  build_get_race_racers_query,
   build_get_racer_by_make_model_query,
   build_insert_race_query,
   build_insert_race_racers_query,
   build_search_racer_query,
   build_popular_pairs_query,
   build_most_recent_races_query,
+  build_check_race_by_racers_query,
 )
 
 
@@ -25,22 +27,22 @@ def get_racer(make: str, model: str) -> Row | None:
         ).first()
 
 
-def get_race(race_id: int) -> list[Row]:
+def get_race(race_id: int) -> tuple[Row, list[Row]]:
     with db.connect() as conn:
-      return list(
-        conn.execute(build_get_race_query(race_id).limit(_MAX_RACERS_PER_RACE))
-      )
+      race = conn.execute(build_get_race_query(race_id)).one_or_none()
+      racers = conn.execute(build_get_race_racers_query(race_id))
+      return race, racers
 
 
 def search_racers(
   make: str, model: str
-) -> list[Row]:
+) -> Generator[Row, None, None] | list:
   if make:
     with db.connect() as conn:
       return conn.execute(
         build_search_racer_query(make, model).limit(_MAX_SEARCH_RESULT)
       )
-  return ()
+  return []
 
 
 def save_race(model_ids: list[int]) -> int | None:
@@ -57,15 +59,14 @@ def get_popular_pairs() -> Generator[tuple[dict, dict, int], None, None]:
   with db.connect() as conn:
     results = conn.execute(build_popular_pairs_query())
     for result in results:
-      data = result._asdict()
-      racer_1 = {}
-      racer_2 = {}
-      for key, value in data.items():
-        if key.endswith('_1'):
-          racer_1[key.replace('_1', '')] = value
-        elif key.endswith('_2'):
-          racer_2[key.replace('_2', '')] = value
-      yield (racer_1, racer_2, data['occurence'])
+      model_ids = [result.id_1, result.id_2]
+      check = conn.execute(
+        build_check_race_by_racers_query(model_ids)
+      ).first()
+      if check:
+        yield get_race(check.race_id)
+      else:
+        yield get_race(save_race(model_ids))
 
 
 def get_recent_races() -> Generator[list[Row], None, None]:

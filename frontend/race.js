@@ -192,11 +192,11 @@ class Race {
   }
 
   async setRacersFromRaceId(raceId) {
-    let results = await _get(`${RACING_API_URL}/race?race_id=${raceId}`);
-    results.forEach((racer) => this.racers.push(
+    let result = await _get(`${RACING_API_URL}/race?race_id=${raceId}`);
+    result.racers.forEach((racer) => this.racers.push(
       Racer.fromData(racer, this)
     ));
-    this.raceId = raceId;
+    this.raceId = result.race_id;
   }
 
   async race(save) {
@@ -390,7 +390,7 @@ class RacingPage {
       save = true;
       this.race = new Race();
       await this.race.setRacersFromForm();
-    } else if (raceId && !this.race) {
+    } else if (raceId) {
       // first visit shared - don't save, but load
       this.race = new Race();
       await this.race.setRacersFromRaceId(raceId);
