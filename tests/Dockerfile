@@ -24,4 +24,4 @@ COPY ./src ./src
 COPY ./tests ./tests
 COPY ./database/flyway/migrations ./migrations
 
-CMD ["pytest"]
+CMD ["pytest", "-vvv"]
