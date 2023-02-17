@@ -297,16 +297,16 @@ class RacerRecommender {
       let row = _el(
         'div', {
           className: 'recommendation-row',
-          innerHTML: `${racer.model} ${racer.year}`
+          innerHTML: `${racer.name} ${racer.year}`
         }
       );
-      row.addEventListener('click', () => this.selectRecommendation(racer.model));
+      row.addEventListener('click', () => this.selectRecommendation(racer.name));
       recommendationsContainer.appendChild(row);
     });
   }
 
-  selectRecommendation(model) {
-    this.modelIn.value = model;
+  selectRecommendation(name) {
+    this.modelIn.value = name;
     recommendationsContainer.replaceChildren();
     _hide(recommendationsContainer);
   }

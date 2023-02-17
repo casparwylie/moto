@@ -62,7 +62,6 @@ def get_popular_pairs() -> Generator[tuple[Row, list[Row]], None, None]:
       build_popular_pairs_query(_MAX_POPULAR_PAIRS)
     )
     for result in results:
-      print(result)
       model_ids = [result.id_1, result.id_2]
       check = conn.execute(
         build_check_race_by_racers_query(model_ids)
