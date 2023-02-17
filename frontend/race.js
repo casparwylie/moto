@@ -138,10 +138,25 @@ class Racer {
     }, 40);
   }
 
+  getStatsString() {
+    var weightType = 'wet';
+    if (this.weightType == 'dry') weightType = 'adjusted to wet';
+    return `
+      <b>Power:</b> ${this.power} hp;<br>
+      <b>Torque:</b> ${this.torque} Nm;<br>
+      <b>Weight (${weightType}):</b> ${this.weight} kg;
+    `
+  }
+
   finish() {
     this._finished = true;
     this.race.checkFinished();
 
+    let statsString = this.getStatsString();
+    let statsContainer = _el(
+      'div', {innerHTML: statsString, className: 'stats-container'}
+    );
+    this.racerElement.appendChild(statsContainer);
     let position = resultsContainer.children.length + 1;
     var posDisplay;
     switch (position) {
