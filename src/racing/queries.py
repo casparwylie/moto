@@ -109,9 +109,9 @@ def build_insert_race_racers_query(race_id: int, model_ids: list[int]):
   ])
 
 
-def build_popular_pairs_query():
+def build_popular_pairs_query(limit):
   return text(
-    """
+    f"""
     SELECT
       p1.id AS id_1,
       p2.id AS id_2,
@@ -126,14 +126,15 @@ def build_popular_pairs_query():
       ON t1.race_id = t2.race_id
       AND t1.model_id < t2.model_id
       GROUP BY
-          t1.model_id,
-          t2.model_id
-      ORDER BY occurence DESC LIMIT 10
+          t1_id,
+          t2_id
     ) AS pairs
     JOIN racer_models p1
       ON p1.id = pairs.t1_id
     JOIN racer_models p2
       ON p2.id = pairs.t2_id
+    WHERE occurence > 1
+    ORDER BY occurence DESC LIMIT {limit}
     """
   )
 

@@ -5,9 +5,9 @@ from pydantic import BaseModel
 
 class Racer(BaseModel):
   model_id: int
+  name: str | None
   full_name: str | None
-  make: str | None
-  model: str | None
+  make_name: str | None
   style: str | None
   year: str | None
   power: str | None
@@ -21,29 +21,14 @@ class Racer(BaseModel):
     return cls(
       model_id=data.id,
       full_name=f'{data.make_name} {data.name}',
-      make=data.make_name,
-      model=data.name,
+      make_name=data.make_name,
+      name=data.name,
       style=data.style,
       year=data.year,
       power=data.power,
       torque=data.torque,
       weight=data.weight,
       weight_type=data.weight_type,
-    )
-
-  @classmethod
-  def from_db_data_raw(cls, data: dict) -> 'Racer':
-    return cls(
-      model_id=data['id'],
-      full_name=f'{data["make_name"]} {data["name"]}',
-      make=data['make_name'],
-      model=data['name'],
-      style=data['style'],
-      year=data['year'],
-      power=data['power'],
-      torque=data['torque'],
-      weight=data['weight'],
-      weight_type=data['weight_type'],
     )
 
 

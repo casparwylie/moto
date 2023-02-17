@@ -17,27 +17,27 @@ const controlPanel = document.getElementById('control-panel');
 class Racer {
   constructor(
     modelId,
-    model,
-    makeName,
+    name,
     fullName,
+    makeName,
+    style,
+    year,
     power,
     torque,
     weight,
     weightType,
-    style,
-    year,
     race,
   ) {
     this.modelId = modelId;
-    this.name = model;
-    this.makeName = makeName;
+    this.name = name;
     this.fullName = fullName;
+    this.makeName = makeName;
+    this.style = style;
+    this.year = year;
     this.power = parseInt(power);
     this.torque = parseInt(torque);
     this.weight = parseInt(weight);
     this.weightType = weightType;
-    this.style = style;
-    this.year = year;
     this.race = race;
 
     this.raceId = null;
@@ -85,15 +85,15 @@ class Racer {
   static fromData(data, race) {
     return new Racer(
       data.model_id,
-      data.model,
-      data.make,
+      data.name,
       data.full_name,
+      data.make_name,
+      data.style,
+      data.year,
       data.power,
       data.torque,
       data.weight,
       data.weight_type,
-      data.style,
-      data.year,
       race,
     );
   }

@@ -1,12 +1,12 @@
 from fastapi import FastAPI, APIRouter
 
-from racing.models import (
+from src.racing.models import (
   Racer,
   Race,
   RaceListing,
   SaveRequest,
 )
-from racing.service import (
+from src.racing.service import (
   get_racer,
   get_race,
   search_racers,
@@ -26,7 +26,8 @@ async def racer(make: str, model: str) -> Racer | None:
 
 @router.get('/race')
 async def race(race_id: int) -> Race:
-  return Race.from_service(*get_race(race_id))
+  if race := get_race(race_id):
+    return Race.from_service(*race)
 
 
 @router.get('/search')
@@ -38,9 +39,9 @@ async def search(make: str, model: str) -> list[Racer]:
 
 
 @router.post('/save')
-async def save(request: SaveRequest) -> dict:
-  race_id = save_race(request.model_ids)
-  return {'race_id': race_id}
+async def save(request: SaveRequest) -> Race | None:
+  if race := save_race(request.model_ids):
+    return Race.from_service(*race)
 
 
 @router.get('/insight/popular-pairs')
