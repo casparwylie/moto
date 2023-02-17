@@ -12,7 +12,7 @@ const resultsContainer = document.getElementById('results-container');
 const starterForm = document.getElementById('starter-form');
 const lightsContainer = document.getElementById('lights-container');
 const controlPanel = document.getElementById('control-panel');
-
+const fbShareOpt = document.getElementById('fb-share-opt');
 
 class Racer {
   constructor(
@@ -41,7 +41,6 @@ class Racer {
     this.race = race;
 
     this.raceId = null;
-    this.finished = false;
     this.ptw = this.power / this.weight;
     this.acc = this.torque / this.weight;
 
@@ -121,6 +120,7 @@ class Racer {
   }
 
   move() {
+    this._finished = false;
     this._progress = this.torque / 25;
     this._interval = setInterval(() => {
       let momentum = ((this.acc) * this._progress) + 1 + (this.ptw * 7);
@@ -139,7 +139,7 @@ class Racer {
   }
 
   finish() {
-    this.finished = true;
+    this._finished = true;
     this.race.checkFinished();
 
     let position = resultsContainer.children.length + 1;
@@ -218,8 +218,12 @@ class Race {
       this.raceId = data.race_id;
   }
 
+  getShareLink() {
+    return `${window.location.host}/r/${this.raceId}`;
+  }
+
   share() {
-    let shareLink = `${window.location.host}/r/${this.raceId}`;
+    let shareLink = this.getShareLink();
     navigator.clipboard.writeText(shareLink);
     raceShareOpt.innerHTML = shareLink + ' copied &#10003;';
     raceShareOpt.classList.add('shared-link');
@@ -227,13 +231,22 @@ class Race {
   }
 
   showShare() {
-    raceShareOpt.innerHTML = 'Share Race';
+    raceShareOpt.innerHTML = '&#x2704; Share Race URL';
     raceShareOpt.classList.remove('shared-link');
+    fbShareOpt.setAttribute(
+      'onclick',
+      `window.open('https://www.facebook.com/sharer/sharer.php?u='+
+      encodeURIComponent('${this.getShareLink()}'),
+      'facebook-share-dialog',
+      'width=626,height=436');
+      return false;`
+    );
     _show(raceShareOpt);
+    _show(fbShareOpt);
   }
 
   checkFinished() {
-      let finished = this.racers.every((racer) => racer.finished);
+      let finished = this.racers.every((racer) => racer._finished);
       if (finished) this.finish();
   }
 
@@ -276,6 +289,7 @@ class RacerRecommender {
 
   async get() {
     _hide(raceShareOpt);
+    _hide(fbShareOpt);
     let make = this.makeIn.value.trim();
     let model = this.modelIn.value.trim();
     if (make) {
@@ -364,6 +378,8 @@ class RacingPage {
 
   resetInputs(add=true) {
     _hide(raceShareOpt);
+    _hide(fbShareOpt);
+
     inputsContainer.replaceChildren();
     if (add) this.renderInputs();
   }

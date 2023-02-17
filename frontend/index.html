@@ -77,7 +77,7 @@
       border-radius: 5px;
       outline-width: 0px;
       border: 1px;
-      font-size: 20px;
+      font-size: 15px;
       margin: 1px;
       cursor: pointer;
     }
@@ -114,11 +114,17 @@
       color: white;
       font-weight: bold;
       box-shadow: 0px 0px 5px grey;
-      font-size: 30px;
+      font-size: 20px;
+      width: 25%;
+      flex: 0 0 100%;
     }
 
     #starter-triggers {
       margin-top: 10px;
+      display: flex;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+      justify-content: left;
     }
 
     #lights-container {
@@ -153,7 +159,7 @@
     }
 
     #results-container {
-      float: right;
+      position: absolute;
       width: 20%;
       color: white;
       background: black;
@@ -175,7 +181,6 @@
     }
 
     .shared-link {
-      font-size: 20px;
       color: #39ae86;
       text-decoration: underline;
     }
@@ -212,6 +217,7 @@
       background-color: #008b8b;
       display: none;
       position: absolute;
+      z-index: 10000;
     }
 
     #introduction-container {
@@ -232,7 +238,8 @@
       }
 
       #racer-inputs-container input, #race-go-option, button, input {
-        font-size: 15px;
+        font-size: 10px;
+        font-size: 12px;
       }
 
       #recommendation-container {
@@ -287,9 +294,21 @@
       padding-left: 20px;
       padding-right: 20px;
     }
+
+    #fb-share-opt {
+     background: #3399ff;
+     width: 100px;
+     display: none;
+    }
+
+    #fb-f {
+      font-weight: bold;
+      font-size: 17px;
+      padding-right: 6px;
+      color: white;
+    }
   </style>
 </head>
-
 <body>
   <div class="window" id="introduction-window">
     <div window="introduction-window" class="close">x</div>
@@ -349,8 +368,11 @@
       <div id="starter-triggers">
         <button id="add-more-option">+ Add</button>
         <button id="reset-option">Reset</button>
-        <button id="race-go-option"><b>Race!</b></button>
         <button id="race-share-option"><b>Share Race</b></button>
+        <button id="fb-share-opt"><span id="fb-f">f</span> Share</button>
+        <button id="race-go-option"><b>Race!</b></button>
+
+
       </div>
       <div id="recommendation-container"></div>
     </div>
