@@ -21,7 +21,8 @@ services:
   tests:
     container_name: tests
     build:
-      context: tests
+      context: .
+      dockerfile: tests/Dockerfile
     environment:
       DB_NAME: 'moto_test'
       DB_USER: 'root'
