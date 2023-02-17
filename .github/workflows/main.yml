@@ -29,6 +29,7 @@ jobs:
       -
         name: Build
         run: |
+            touch .env
             IMAGE_NAME="${IMAGE_NAME}" docker-compose -f docker-compose.prod.yml build web
       -
         name: Push
