@@ -21,6 +21,7 @@ RUN poetry install
 
 COPY ./frontend ./frontend
 COPY ./src ./src
+COPY ./tests ./tests
+COPY ./database/flyway/migrations ./migrations
 
-EXPOSE 8000
-CMD ["python", "./src/main.py"]
+CMD ["pytest"]

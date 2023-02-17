@@ -1,12 +1,12 @@
 from fastapi import FastAPI, APIRouter
 
-from racing.models import (
+from src.racing.models import (
   Racer,
-  PopularPairsResponse,
-  RecentRacesResponse,
+  Race,
+  RaceListing,
   SaveRequest,
 )
-from racing.service import (
+from src.racing.service import (
   get_racer,
   get_race,
   search_racers,
@@ -25,11 +25,9 @@ async def racer(make: str, model: str) -> Racer | None:
 
 
 @router.get('/race')
-async def race(race_id: int) -> list[Racer]:
-  return [
-    Racer.from_db_data(racer)
-    for racer in get_race(race_id)
-  ]
+async def race(race_id: int) -> Race:
+  if race := get_race(race_id):
+    return Race.from_service(*race)
 
 
 @router.get('/search')
@@ -41,16 +39,16 @@ async def search(make: str, model: str) -> list[Racer]:
 
 
 @router.post('/save')
-async def save(request: SaveRequest) -> dict:
-  race_id = save_race(request.model_ids)
-  return {'race_id': race_id}
+async def save(request: SaveRequest) -> Race | None:
+  if race := save_race(request.model_ids):
+    return Race.from_service(*race)
 
 
 @router.get('/insight/popular-pairs')
-async def insight_popular_pairs() -> PopularPairsResponse:
-  return PopularPairsResponse.from_service(get_popular_pairs())
+async def insight_popular_pairs() -> RaceListing:
+  return RaceListing.from_service(get_popular_pairs())
 
 
 @router.get('/insight/recent-races')
-async def insight_recent_races() -> RecentRacesResponse:
-  return RecentRacesResponse.from_service(get_recent_races())
+async def insight_recent_races() -> RaceListing:
+  return RaceListing.from_service(get_recent_races())

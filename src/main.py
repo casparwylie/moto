@@ -8,7 +8,7 @@ import dataclasses
 import requests
 import uvicorn
 
-from racing.routes import router as racing_api_router
+from src.racing.routes import router as racing_api_router
 
 _FE_DIR = os.path.join(os.getcwd(), 'frontend')
 
@@ -25,5 +25,5 @@ async def index(path):
 
 
 if __name__ == '__main__':
-  uvicorn.run("main:app", host='0.0.0.0', reload=True, port=8000)
+  uvicorn.run('src.main:app', host='0.0.0.0', reload=True, port=8000)
 

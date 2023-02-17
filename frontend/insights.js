@@ -13,25 +13,23 @@ class RaceListing {
 
   async populate() {
     let results = await _get(this.api_url);
-    results.races.forEach((racers) => this.addRow(racers));
+    results.races.forEach((race) => this.addRow(race));
   }
 
-  addRow(racers) {
+  addRow(race) {
     let row = _el('div', {className: 'popular-pair-row'});
-    row.addEventListener('click', () => this.setRace(racers));
+    row.addEventListener('click', () => this.newRace(race.race_id));
 
     let vsItem = _el('span', {innerHTML: 'VS', className: 'vs-text'});
-    row.innerHTML = racers.map((racer) => racer.full_name).join(
-      vsItem.outerHTML);
+    row.innerHTML = race.racers.map(
+      (racer) => racer.full_name
+    ).join(vsItem.outerHTML);
 
     this.container.appendChild(row);
   }
 
-  setRace(racers) {
-    racingPage.resetInputs(false);
-    racers.forEach(
-      (racer) => racingPage.addInput(racer.make, racer.model)
-    );
+  newRace(raceId) {
+    racingPage.runRace(raceId);
     if (this.window_) _hide(this.window_);
   }
 }
