@@ -5,7 +5,6 @@ services:
     container_name: web
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.web
     ports:
       - 8000:8000
     volumes:
@@ -23,7 +22,7 @@ services:
     container_name: tests
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.tests
+      dockerfile: tests/Dockerfile
     environment:
       DB_NAME: 'moto_test'
       DB_USER: 'root'
