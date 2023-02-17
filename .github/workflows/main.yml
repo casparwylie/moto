@@ -19,6 +19,7 @@ jobs:
         name: Run tests
         run: |
             docker-compose run tests
+            rm -rf .mysql-dev
       -
         name: Build
         run: |
