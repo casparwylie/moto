@@ -18,7 +18,7 @@ jobs:
       -
         name: Run tests
         run: |
-            docker-compose -f docker-compose.yml run --build tests
+            docker-compose run tests
       -
         name: Build
         run: |
