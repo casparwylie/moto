@@ -16,7 +16,9 @@ jobs:
       -
         name: Checking out repo
         uses: actions/checkout@v2
-      - run: ls -la && echo "${{ secrets.PRODUCTION_KEY }}"
+      -
+        name: Run tests
+        run: docker-compose -f docker-compose.yml run --build tests
       -
         name: Build
         run: |
