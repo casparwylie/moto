@@ -28,4 +28,4 @@ services:
         timeout: 5s
         retries: 10
     volumes:
-      - ./_mysql:/var/lib/mysql
+      - ./.mysql-prod:/var/lib/mysql
