@@ -17,7 +17,8 @@ jobs:
         uses: actions/checkout@v2
       -
         name: Run tests
-        run: docker-compose -f docker-compose.yml run --build tests
+        run: |
+            docker-compose -f docker-compose.yml run --build tests
       -
         name: Build
         run: |
