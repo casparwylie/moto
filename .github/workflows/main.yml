@@ -18,11 +18,11 @@ jobs:
       -
         name: Run tests
         run: |
-            sudo chmod 755 -R .
             docker-compose run tests
       -
         name: Build
         run: |
+            sudo chmod 755 -R .
             touch .env
             echo "DB_NAME=${{ secrets.DB_NAME}}" >> .env
             echo "DB_USER=${{ secrets.DB_USER}}" >> .env
