@@ -155,7 +155,6 @@ async def test_search(db, make, model, expected):
   # When
   result = await route_search(make=make, model=model)
   assert result == expected
-  assert False
 
 
 @pytest.mark.asyncio
