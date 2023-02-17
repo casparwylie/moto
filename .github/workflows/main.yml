@@ -29,11 +29,6 @@ jobs:
       -
         name: Build
         run: |
-            touch .env
-            echo "DB_NAME=${{ secrets.DB_NAME}}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER}}" >> .env
-            echo "DB_PASS=${{ secrets.DB_PASS}}" >> .env
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASS}}" >> .env
             IMAGE_NAME="${IMAGE_NAME}" docker-compose -f docker-compose.prod.yml build web
       -
         name: Push
@@ -46,7 +41,17 @@ jobs:
     needs: build
     steps:
       -
-        name: Deploy compose
+        name: Checking out repo
+        uses: actions/checkout@v2
+      -
+        name: Set production environment variables
+        run: |
+            touch .env
+            echo "DB_NAME=${{ secrets.DB_NAME}}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER}}" >> .env
+            echo "DB_PASS=${{ secrets.DB_PASS}}" >> .env
+            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASS}}" >> .env
+        name: Deploy production compose
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.PRODUCTION_HOST }}
