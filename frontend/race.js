@@ -17,27 +17,27 @@ const controlPanel = document.getElementById('control-panel');
 class Racer {
   constructor(
     modelId,
-    model,
-    makeName,
+    name,
     fullName,
+    makeName,
+    style,
+    year,
     power,
     torque,
     weight,
     weightType,
-    style,
-    year,
     race,
   ) {
     this.modelId = modelId;
-    this.name = model;
-    this.makeName = makeName;
+    this.name = name;
     this.fullName = fullName;
+    this.makeName = makeName;
+    this.style = style;
+    this.year = year;
     this.power = parseInt(power);
     this.torque = parseInt(torque);
     this.weight = parseInt(weight);
     this.weightType = weightType;
-    this.style = style;
-    this.year = year;
     this.race = race;
 
     this.raceId = null;
@@ -85,15 +85,15 @@ class Racer {
   static fromData(data, race) {
     return new Racer(
       data.model_id,
-      data.model,
-      data.make,
+      data.name,
       data.full_name,
+      data.make_name,
+      data.style,
+      data.year,
       data.power,
       data.torque,
       data.weight,
       data.weight_type,
-      data.style,
-      data.year,
       race,
     );
   }
@@ -192,11 +192,11 @@ class Race {
   }
 
   async setRacersFromRaceId(raceId) {
-    let results = await _get(`${RACING_API_URL}/race?race_id=${raceId}`);
-    results.forEach((racer) => this.racers.push(
+    let result = await _get(`${RACING_API_URL}/race?race_id=${raceId}`);
+    result.racers.forEach((racer) => this.racers.push(
       Racer.fromData(racer, this)
     ));
-    this.raceId = raceId;
+    this.raceId = result.race_id;
   }
 
   async race(save) {
@@ -297,16 +297,16 @@ class RacerRecommender {
       let row = _el(
         'div', {
           className: 'recommendation-row',
-          innerHTML: `${racer.model} ${racer.year}`
+          innerHTML: `${racer.name} ${racer.year}`
         }
       );
-      row.addEventListener('click', () => this.selectRecommendation(racer.model));
+      row.addEventListener('click', () => this.selectRecommendation(racer.name));
       recommendationsContainer.appendChild(row);
     });
   }
 
-  selectRecommendation(model) {
-    this.modelIn.value = model;
+  selectRecommendation(name) {
+    this.modelIn.value = name;
     recommendationsContainer.replaceChildren();
     _hide(recommendationsContainer);
   }
@@ -390,7 +390,7 @@ class RacingPage {
       save = true;
       this.race = new Race();
       await this.race.setRacersFromForm();
-    } else if (raceId && !this.race) {
+    } else if (raceId) {
       // first visit shared - don't save, but load
       this.race = new Race();
       await this.race.setRacersFromRaceId(raceId);

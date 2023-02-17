@@ -1,20 +1,22 @@
 from sqlalchemy import Row
 from typing import Generator
-from database import engine as db
-from racing.queries import (
+from src.database import engine as db
+from src.racing.queries import (
   build_get_race_query,
+  build_get_race_racers_query,
   build_get_racer_by_make_model_query,
   build_insert_race_query,
   build_insert_race_racers_query,
   build_search_racer_query,
   build_popular_pairs_query,
   build_most_recent_races_query,
+  build_check_race_by_racers_query,
 )
 
 
 _MAX_SEARCH_RESULT = 20
-_MAX_RACERS_PER_RACE = 10
 _MAX_RECENT_RACES = 30
+_MAX_POPULAR_PAIRS = 10
 
 
 def get_racer(make: str, model: str) -> Row | None:
@@ -25,50 +27,52 @@ def get_racer(make: str, model: str) -> Row | None:
         ).first()
 
 
-def get_race(race_id: int) -> list[Row]:
+def get_race(race_id: int) -> tuple[Row, list[Row]]:
     with db.connect() as conn:
-      return list(
-        conn.execute(build_get_race_query(race_id).limit(_MAX_RACERS_PER_RACE))
-      )
+      race = conn.execute(build_get_race_query(race_id)).one_or_none()
+      racers = conn.execute(build_get_race_racers_query(race_id))
+      if race and racers:
+        return race, racers
 
 
 def search_racers(
   make: str, model: str
-) -> list[Row]:
+) -> Generator[Row, None, None] | list:
   if make:
-    with db.connect() as conn:
-      return conn.execute(
-        build_search_racer_query(make, model).limit(_MAX_SEARCH_RESULT)
-      )
-  return ()
+      with db.connect() as conn:
+        return conn.execute(
+          build_search_racer_query(make, model).limit(_MAX_SEARCH_RESULT)
+        )
+  return []
 
 
-def save_race(model_ids: list[int]) -> int | None:
+def save_race(model_ids: list[int]) -> tuple[Row, list[Row]] | None:
   if model_ids:
     with db.connect() as conn:
       race = conn.execute(build_insert_race_query())
       race_id = race.lastrowid
       conn.execute(build_insert_race_racers_query(race_id, model_ids))
       conn.commit()
-      return race_id
+      return get_race(race_id)
 
 
-def get_popular_pairs() -> Generator[tuple[dict, dict, int], None, None]:
+def get_popular_pairs() -> Generator[tuple[Row, list[Row]], None, None]:
   with db.connect() as conn:
-    results = conn.execute(build_popular_pairs_query())
+    results = conn.execute(
+      build_popular_pairs_query(_MAX_POPULAR_PAIRS)
+    )
     for result in results:
-      data = result._asdict()
-      racer_1 = {}
-      racer_2 = {}
-      for key, value in data.items():
-        if key.endswith('_1'):
-          racer_1[key.replace('_1', '')] = value
-        elif key.endswith('_2'):
-          racer_2[key.replace('_2', '')] = value
-      yield (racer_1, racer_2, data['occurence'])
+      model_ids = [result.id_1, result.id_2]
+      check = conn.execute(
+        build_check_race_by_racers_query(model_ids)
+      ).first()
+      if check:
+        yield get_race(check.race_id)
+      else:
+        yield save_race(model_ids)
 
 
-def get_recent_races() -> Generator[list[Row], None, None]:
+def get_recent_races() -> Generator[tuple[Row, list[Row]], None, None]:
   with db.connect() as conn:
     results = conn.execute(
       build_most_recent_races_query().limit(_MAX_RECENT_RACES)
