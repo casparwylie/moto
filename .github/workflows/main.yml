@@ -21,6 +21,7 @@ jobs:
             docker-compose run tests
   build:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       -
         name: Checking out repo
