@@ -214,7 +214,10 @@ class Race {
       this.unseenRace = true;
       await this.save();
     }
-    if(window.matchMedia('(max-width: 1200px)').matches) {
+    if(
+      this.racers.length > 4
+      || window.matchMedia('(max-width: 1200px)').matches
+    ) {
       _hide(controlPanel);
     }
     this.reset();
