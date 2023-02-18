@@ -23,7 +23,7 @@
       margin-bottom: 1vh;
     }
     .racer-outline {
-      border-bottom: 1px dotted #65192e;
+      border-bottom: 1px solid black;
     }
 
     .racer-label {
@@ -32,13 +32,14 @@
       width: 20%;
       font-size: 2vh;
       margin-top: 4%;
+      color: white;
     }
 
     #racer-container {
       width: 100%;
       height: 100%;
       z-index: -1;
-      background: #7da8b7;
+      background: #1a1919;
       position: absolute;
     }
 
@@ -46,7 +47,7 @@
       margin: 0 auto;
       width: 100vw;
       height: 40vh;
-      background: #da4820;
+      background: white;
       padding-right: 0px;
     }
 
@@ -57,6 +58,8 @@
       font-size: 20px;
       width: calc(50% - 2px);
       margin: 1px;
+      background: #1a1919;
+      color: white;
     }
 
     #racer-inputs-container {
@@ -72,41 +75,39 @@
       cursor: pointer;
     }
 
+    .form-opts {
+      background: #1a1919;
+      color: white;
+    }
+
     #recommendation-container {
       width: calc(50% - 2px);
-      background: #CA335C;
-      border-radius: 10px;
+      background: #002d59;
+      border-radius: 5px;
       float: right;
       padding: 20px;
       color: white;
-      margin-top: -50px;
+      margin-top: -60px;
       display: none;
       position: relative;
       z-index: 1000;
     }
 
+    .recommendation-row:hover {
+      color: #39ae86;
+    }
     .recommendation-row {
       cursor: pointer;
-      border-bottom: 1px dotted #027860;
+      border-bottom: 1px solid black;
       text-align: center;
     }
 
     #starter-form {
-      background: #da4820;
       padding: 20px;
       margin: 0 auto;
       width: 40%;
+      background: white;
       max-height: 200%;
-    }
-
-    #race-go-option {
-      background-color: #39ae86;
-      color: white;
-      font-weight: bold;
-      box-shadow: 0px 0px 5px grey;
-      font-size: 20px;
-      width: 25%;
-      flex: 0 0 100%;
     }
 
     #starter-triggers {
@@ -144,7 +145,7 @@
       width: 100%;
       text-align: center;
       font-size: 30px;
-      color: white;
+      color: black;
       padding-top: 10px;
     }
 
@@ -153,7 +154,7 @@
     }
 
     #credit {
-      color: #983216;
+      color: #d3c9c6;
       font-size: 15px;
     }
 
@@ -182,7 +183,7 @@
     }
 
     .menu-item:hover {
-      color: white;
+      color: #39ae86;
     }
 
     .window {
@@ -212,6 +213,13 @@
       color: white;
     }
 
+    .window-header-image {
+       background-size: 100%;
+       background-repeat: no-repeat;
+       height: 18%;
+       width: 20%;
+       margin: 0 auto;
+    }
     @media only screen and (max-width: 900px) {
       #menu {
         width: 60%;
@@ -231,13 +239,10 @@
         width: 80%;
         margin-left: calc(10% - 20px);
       }
-    }
-    .window-header-image {
-       background-size: 100%;
-       background-repeat: no-repeat;
-       height: 25%;
-       width: 20%;
-       margin: 0 auto;
+
+      .window-header-image {
+       height: 28%;
+      }
     }
 
     .window-header-image-1 {
@@ -311,6 +316,16 @@
       color: white;
       background: black;
     }
+
+    #race-go-option {
+      background-color: #39ae86;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      width: 25%;
+      flex: 0 0 100%;
+    }
+
   </style>
 </head>
 <body>
@@ -377,8 +392,8 @@
     <div id="starter-form">
       <div id="racer-inputs-container"></div>
       <div id="starter-triggers">
-        <button id="add-more-option">+ Add</button>
-        <button id="reset-option">Reset</button>
+        <button class="form-opts" id="add-more-option">+ Add</button>
+        <button class="form-opts" id="reset-option">Reset</button>
         <button id="race-go-option"><b>Race!</b></button>
       </div>
       <div id="recommendation-container"></div>
