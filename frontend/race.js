@@ -3,7 +3,7 @@ const RACING_API_URL = '/api/racing';
 const inputsContainer = document.getElementById('racer-inputs-container');
 const racerContainer = document.getElementById('racer-container');
 const raceGoOpt = document.getElementById('race-go-option');
-const raceShareOpt = document.getElementById('race-share-option');
+const raceShareOpt = document.getElementById('link-share-opt');
 const addMoreOpt = document.getElementById('add-more-option');
 const recommendationsContainer = document.getElementById('recommendation-container');
 const replayOption = document.getElementById('replay-option');
@@ -13,6 +13,8 @@ const starterForm = document.getElementById('starter-form');
 const lightsContainer = document.getElementById('lights-container');
 const controlPanel = document.getElementById('control-panel');
 const fbShareOpt = document.getElementById('fb-share-opt');
+const resultsWindow = document.getElementById('results-window');
+
 
 class Racer {
   constructor(
@@ -47,15 +49,6 @@ class Racer {
 
     this.resolveWeight();
     this.logData();
-  }
-
-  shrink() {
-    this.racerElement.classList.add('small-racer');
-    this.label.classList.add('small-racer-label');
-  }
-
-  expand() {
-    this.racerElement.classList.remove('small-racer');
   }
 
   logData() {
@@ -142,9 +135,9 @@ class Racer {
     var weightType = 'wet';
     if (this.weightType == 'dry') weightType = 'adjusted to wet';
     return `
-      <b>Power:</b> ${this.power} hp;<br>
-      <b>Torque:</b> ${this.torque} Nm;<br>
-      <b>Weight (${weightType}):</b> ${this.weight} kg;
+      <b>Power:</b> ${this.power} hp<br>
+      <b>Torque:</b> ${this.torque} Nm<br>
+      <b>Weight (${weightType}):</b> ${this.weight} kg
     `
   }
 
@@ -152,11 +145,6 @@ class Racer {
     this._finished = true;
     this.race.checkFinished();
 
-    let statsString = this.getStatsString();
-    let statsContainer = _el(
-      'div', {innerHTML: statsString, className: 'stats-container'}
-    );
-    this.racerElement.appendChild(statsContainer);
     let position = resultsContainer.children.length + 1;
     var posDisplay;
     switch (position) {
@@ -172,13 +160,19 @@ class Racer {
       default:
         posDisplay = position.toString() + 'th';
     }
-    let row = _el(
-      'div', {
-        className: 'result-row',
-        innerHTML:  `${posDisplay} - ${this.fullName}`
-      }
+    let resultContainer = _el('div', {className: 'result-container'});
+    let posText = _el('div', {innerHTML: posDisplay, className: 'pos-text'});
+    let racerNameText = _el('div', {
+      className: 'result-heading',
+      innerHTML: this.fullName,
+    });
+    let statsContainer = _el(
+      'div', {innerHTML: this.getStatsString(), className: 'stats-container'}
     );
-    resultsContainer.appendChild(row);
+    resultContainer.appendChild(posText);
+    resultContainer.appendChild(racerNameText);
+    resultContainer.appendChild(statsContainer);
+    resultsContainer.appendChild(resultContainer);
   }
 }
 
@@ -220,7 +214,9 @@ class Race {
       this.unseenRace = true;
       await this.save();
     }
-    _hide(controlPanel);
+    if(window.matchMedia('(max-width: 1200px)').matches) {
+      _hide(controlPanel);
+    }
     this.reset();
     this.startLights();
     this.racers.forEach((racer) => racer.render());
@@ -237,15 +233,15 @@ class Race {
     return `${window.location.host}/r/${this.raceId}`;
   }
 
-  share() {
+  shareLink() {
     let shareLink = this.getShareLink();
     navigator.clipboard.writeText(shareLink);
     raceShareOpt.innerHTML = shareLink + ' copied &#10003;';
     raceShareOpt.classList.add('shared-link');
-    setTimeout(this.showShare, 3000);
+    setTimeout(this.setShare, 3000);
   }
 
-  showShare() {
+  setShare() {
     raceShareOpt.innerHTML = '&#x2704; Share Race URL';
     raceShareOpt.classList.remove('shared-link');
     fbShareOpt.setAttribute(
@@ -256,8 +252,6 @@ class Race {
       'width=626,height=436');
       return false;`
     );
-    _show(raceShareOpt);
-    _show(fbShareOpt);
   }
 
   checkFinished() {
@@ -289,8 +283,8 @@ class Race {
   finish() {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
-    this.showShare();
-    this.racers.forEach((racer) => racer.shrink());
+    _show(resultsWindow);
+    this.setShare();
   }
 }
 
@@ -303,8 +297,6 @@ class RacerRecommender {
   }
 
   async get() {
-    _hide(raceShareOpt);
-    _hide(fbShareOpt);
     let make = this.makeIn.value.trim();
     let model = this.modelIn.value.trim();
     if (make) {
@@ -363,7 +355,7 @@ class RacingPage {
 
   share() {
     if (this.race && this.race.raceId && this.race.racers.length > 0) {
-      this.race.share();
+      this.race.shareLink();
     }
   }
 
@@ -392,9 +384,6 @@ class RacingPage {
   }
 
   resetInputs(add=true) {
-    _hide(raceShareOpt);
-    _hide(fbShareOpt);
-
     inputsContainer.replaceChildren();
     if (add) this.renderInputs();
   }

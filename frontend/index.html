@@ -15,14 +15,9 @@
     }
 
     .racer {
-       height: 15%;
-       width: 10%;
        background-size: 100%;
        background-repeat: no-repeat;
        z-index: -1;
-    }
-
-    .small-racer {
       height: 10%;
       width: 5%;
       margin-bottom: 1vh;
@@ -33,13 +28,8 @@
 
     .racer-label {
       position: absolute;
-      font-size: 2vh;
-      margin-top: 7%;
       float: bottom;
       width: 20%;
-    }
-
-    .small-racer-label {
       font-size: 2vh;
       margin-top: 4%;
     }
@@ -158,14 +148,6 @@
       padding-top: 10px;
     }
 
-    #results-container {
-      position: absolute;
-      width: 20%;
-      color: white;
-      background: black;
-      opacity: 0.7;
-    }
-
     .result-row {
       padding: 5px;
     }
@@ -175,9 +157,8 @@
       font-size: 15px;
     }
 
-    #race-share-option {
+    #link-share-opt {
       background-color: #ffa500;
-      display: none;
     }
 
     .shared-link {
@@ -254,7 +235,7 @@
     .window-header-image {
        background-size: 100%;
        background-repeat: no-repeat;
-       height: 18%;
+       height: 25%;
        width: 20%;
        margin: 0 auto;
     }
@@ -277,15 +258,12 @@
     .popular-pair-row {
       padding: 5px;
       border-bottom: 1px solid grey;
-      height: 5%;
-      display: flex;
-      justify-content: center;
       cursor: pointer;
-
+      text-align: center;
     }
 
-    .popular-pair-row-item {
-      margin-left: 10px;
+    .popular-pair-row:hover {
+      color: white;
     }
 
     .vs-text {
@@ -297,31 +275,52 @@
 
     #fb-share-opt {
      background: #3399ff;
-     width: 100px;
-     display: none;
+    }
+
+    .share-opt {
+      padding: 15px;
+      font-size: 20px;
     }
 
     #fb-f {
       font-weight: bold;
-      font-size: 17px;
       padding-right: 6px;
       color: white;
     }
 
-    .stats-container {
-      position: absolute;
-      margin-left: -20%;
-      background: black;
-      opacity: 0.7;
-      text-align: right;
+    .result-container {
+      padding: 20px;
+      font-size: 15px;
+      border-bottom: 1px dotted grey;
+    }
+
+    .results-container {
+
+    }
+
+    .result-heading {
+      color: #ffa500;
+    }
+
+    .pos-text {
+      font-size: 25px;
+      color: #ffa500;
+    }
+
+    #results-window {
       color: white;
-      padding: 10px;
-      border-radius: 5px;
-      z-index: 10000;
+      background: black;
     }
   </style>
 </head>
 <body>
+  <div class="window" id="results-window">
+    <div window="results-window" class="close">x</div>
+    <h2>Results</h2>
+    <button id="link-share-opt" class="share-opt"><b>Share Race</b></button>
+    <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
+    <div id="results-container"></div>
+  </div>
   <div class="window" id="introduction-window">
     <div window="introduction-window" class="close">x</div>
     <div class="window-header-image window-header-image-1"></div>
@@ -380,14 +379,11 @@
       <div id="starter-triggers">
         <button id="add-more-option">+ Add</button>
         <button id="reset-option">Reset</button>
-        <button id="race-share-option"><b>Share Race</b></button>
-        <button id="fb-share-opt"><span id="fb-f">f</span> Share</button>
         <button id="race-go-option"><b>Race!</b></button>
       </div>
       <div id="recommendation-container"></div>
     </div>
   </div>
-  <div id="results-container"></div>
   <div id="racer-container"></div>
   <script src="/static/utils.js"></script>
   <script src="/static/race.js"></script>
