@@ -65,7 +65,7 @@ class Racer {
 
   setImage() {
     this.racerElement.style = (
-      `background-image: url('/static/images/${this.style}_type.svg')`
+      `background-image: url('/static/images/${this.style}_type_white.svg')`
     );
   }
 
