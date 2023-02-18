@@ -51,15 +51,6 @@ class Racer {
     this.logData();
   }
 
-  shrink() {
-    //this.racerElement.classList.add('small-racer');
-    //this.label.classList.add('small-racer-label');
-  }
-
-  expand() {
-    this.racerElement.classList.remove('small-racer');
-  }
-
   logData() {
     console.log(`${this.fullName}:`);
     console.log(`   ID: ${this.modelId}`);
@@ -293,7 +284,6 @@ class Race {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
     _show(resultsWindow);
-    this.racers.forEach((racer) => racer.shrink());
     this.setShare();
   }
 }
