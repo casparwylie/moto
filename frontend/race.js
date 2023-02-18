@@ -42,12 +42,12 @@ class Racer {
     this.weightType = weightType;
     this.race = race;
 
+    this.resolveWeight();
     this.raceId = null;
     this.ptw = this.power / this.weight;
     this.acc = this.torque / this.weight;
 
 
-    this.resolveWeight();
     this.logData();
   }
 
