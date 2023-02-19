@@ -90,19 +90,21 @@ def racer_from_data(model_id):
 #############
 
 @pytest.mark.parametrize(
-  "make,model,expected",
+  "make,model,year,expected",
   (
-    ("MakeA", "Name 1", racer_from_data(1)),
-    ("MakeA", "Nam", None),
-    ("MakeB", "Name 1", None),
-    ("", "Name 1", None),
-    ("", "", None),
+    ("MakeA", "Name 1", "", racer_from_data(1)),
+    ("MakeA", "Name 1", "2022", racer_from_data(1)),
+    ("MakeA", "Name 1", "2023", None),
+    ("MakeA", "Nam", "",  None),
+    ("MakeB", "Name 1", "", None),
+    ("", "Name 1", "",  None),
+    ("", "", "", None),
   )
 )
 @pytest.mark.asyncio
-async def test_racer(db, make, model, expected):
+async def test_racer(db, make, model, year, expected):
   # When
-  result = await route_racer(make, model)
+  result = await route_racer(make=make, model=model, year=year)
 
   # Then
   assert result == expected
@@ -135,25 +137,27 @@ async def test_race_not_found(db):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-  "make,model,expected",
+  "make,model,year,expected",
   (
-    ("MakeA", "Name 1", [racer_from_data(1)]),
-    ("MakeA", "Nam", [
+    ("MakeA", "Name 1", "", [racer_from_data(1)]),
+    ("MakeA", "Nam", "",[
       racer_from_data(1), racer_from_data(2),
     ]),
-    ("MakeC", "", [
+    ("MakeC", "", "", [
       racer_from_data(4), racer_from_data(5), racer_from_data(6),
     ]),
-    ("Make", "Name 1", [racer_from_data(1)]),
-    ("MakeB", "Name 1", []),
-    ("", "Name 1", []),
-    ("", "", []),
+    ("Make", "Name 1", "2022", [racer_from_data(1)]),
+    ("MakeB", "Name 1", "", []),
+    ("", "Name 1", "", []),
+    ("", "", "", []),
   )
 )
-async def test_search(db, make, model, expected):
+async def test_search(db, make, model, year, expected):
 
   # When
-  result = await route_search(make=make, model=model)
+  result = await route_search(make=make, model=model, year=year)
+
+  # Then
   assert result == expected
 
 
