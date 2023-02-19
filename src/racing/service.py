@@ -19,11 +19,11 @@ _MAX_RECENT_RACES = 30
 _MAX_POPULAR_PAIRS = 10
 
 
-def get_racer(make: str, model: str) -> Row | None:
+def get_racer(make: str, model: str, year: str) -> Row | None:
   if make and model:
     with db.connect() as conn:
         return conn.execute(
-          build_get_racer_by_make_model_query(make, model)
+          build_get_racer_by_make_model_query(make, model, year)
         ).first()
 
 
@@ -36,12 +36,12 @@ def get_race(race_id: int) -> tuple[Row, list[Row]]:
 
 
 def search_racers(
-  make: str, model: str
+  make: str, model: str, year: str
 ) -> Generator[Row, None, None] | list:
   if make:
       with db.connect() as conn:
         return conn.execute(
-          build_search_racer_query(make, model).limit(_MAX_SEARCH_RESULT)
+          build_search_racer_query(make, model, year).limit(_MAX_SEARCH_RESULT)
         )
   return []
 

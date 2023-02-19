@@ -18,9 +18,10 @@ from src.racing.service import (
 
 router = APIRouter(prefix='/api/racing')
 
+
 @router.get('')
-async def racer(make: str, model: str) -> Racer | None:
-  if racer := get_racer(make, model):
+async def racer(make: str, model: str, year: str) -> Racer | None:
+  if racer := get_racer(make, model, year):
       return Racer.from_db_data(racer)
 
 
@@ -31,10 +32,10 @@ async def race(race_id: int) -> Race:
 
 
 @router.get('/search')
-async def search(make: str, model: str) -> list[Racer]:
+async def search(make: str, model: str, year: str) -> list[Racer]:
   return [
     Racer.from_db_data(result)
-    for result in search_racers(make, model)
+    for result in search_racers(make, model, year)
   ]
 
 
