@@ -59,12 +59,13 @@ race_racers_table = Table(
 
 ### QUERIES ###
 
-def build_search_racer_query(make: str, model: str):
+def build_search_racer_query(make: str, model: str, year: str):
   return select(
     racer_models_table.columns,
     racer_makes_table.c.name.label('make_name'),
   ).having(
     racer_models_table.c.name.contains(model),
+    racer_models_table.c.year.contains(year),
     literal_column('make_name').contains(make),
   ).join(
     racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
@@ -82,18 +83,22 @@ def build_get_race_racers_query(race_id: int):
     racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make,
   )
 
+
 def build_get_race_query(race_id):
   return select(race_history_table).where(race_history_table.c.id == race_id)
 
 
-def build_get_racer_by_make_model_query(make: str, model: str):
+def build_get_racer_by_make_model_query(make: str, model: str, year: str | None):
+  filters = [
+    racer_models_table.c.name == model,
+    literal_column('make_name') == make,
+  ]
+  if year:
+   filters.append(racer_models_table.c.year == year)
   return select(
     racer_models_table.columns,
     racer_makes_table.c.name.label('make_name'),
-  ).having(
-    racer_models_table.c.name == model,
-    literal_column('make_name') == make,
-  ).join(
+  ).having(*filters).join(
     racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
   )
 
