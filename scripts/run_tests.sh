@@ -1,1 +1,1 @@
-docker compose run tests
+docker compose run --build tests

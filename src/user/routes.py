@@ -25,13 +25,13 @@ from src.user.service import (
 router = APIRouter(prefix='/api/user')
 
 _SESSION_KEY_NAME = 'session_token'
-_SESSION_EXPIRE = 86400 * 7 * 2 # 2 weeks
+_SESSION_EXPIRE = 10#86400 * 7 * 2 # 2 weeks
 
 
 def get_token_from_cookie(cookie: Header):
   if cookie:
     parts = cookie.split('=')
-    return parts[1] if cookie and parts[0] == _SESSION_KEY_NAME else None
+    return parts[1] if parts[0] == _SESSION_KEY_NAME else None
 
 
 @router.get('')
