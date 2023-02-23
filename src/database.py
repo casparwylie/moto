@@ -15,7 +15,11 @@ def _create_engine():
   url = DB_URL.format(
     user=db_user, password=db_password, host=host, port=port, database=database
   )
-  return create_engine(url, connect_args={'auth_plugin': 'mysql_native_password'})
+  return create_engine(
+    url,
+    connect_args={'auth_plugin': 'mysql_native_password'},
+    pool_pre_ping=True,
+  )
 
 engine = _create_engine()
 
