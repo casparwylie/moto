@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2Wheel Bet</title>
+  <title>Which Bikes Win</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk&display=swap');
     body {
@@ -330,9 +330,85 @@
       flex: 0 0 100%;
     }
 
+    #login-window {
+      height: 30vh;
+    }
+
+    #signup-window {
+      height: 35vh;
+    }
+
+    .account-form button, .account-form input {
+      border-radius: 5px;
+      outline-width: 0px;
+      border: 1px;
+      font-size: 20px;
+      width: 100%;
+      margin: 1px;
+      background: #1a1919;
+      color: white;
+      margin-top: 5px;
+    }
+    .account-form button {
+      border-radius: 5px;
+      width: 40%;
+      float: left;
+    }
+
+    .account-form {
+      position: relative;
+      margin: 0 auto;
+      width: 60%;
+    }
+
+    .good {
+      background-color: #39ae86;
+    }
+
+    .normal {
+      background-color: #40e0d0;
+    }
+
+    .bad {
+      background-color: #ff4c4c;
+    }
+
+    .informer-row {
+      width: 100vw;
+      text-align: center;
+      color: white;
+      padding: 5px;
+      z-index: 100000;
+    }
+    #informer-container {
+      position: absolute;
+      z-index: 100000;
+    }
+
   </style>
 </head>
 <body>
+  <div id="informer-container"></div>
+  <div class="window" id="login-window">
+    <div window="login-window" class="close">x</div>
+    <h2>Login</h2>
+    <div id="login-form" class="account-form">
+      <input id="login-username" type="text" placeholder="Username...">
+      <input id="login-password" type="password" placeholder="Password...">
+      <button id="login-submit">Login</button>
+    </div>
+  </div>
+  <div class="window" id="signup-window">
+    <div window="signup-window" class="close">x</div>
+    <h2>Sign Up</h2>
+    <div id="signup-form" class="account-form">
+      <input id="signup-username" type="text" placeholder="Username...">
+      <input id="signup-email" type="email" placeholder="Email...">
+      <input id="signup-password" type="password" placeholder="Password...">
+      <input id="signup-password-verify" type="password" placeholder="Verify Password...">
+      <button id="signup-submit">Sign up</button>
+    </div>
+  </div>
   <div class="window" id="results-window">
     <div window="results-window" class="close">x</div>
     <h2>Results</h2>
@@ -392,6 +468,9 @@
       <div class="menu-item" window="introduction-window">Introduction</div>
       <div class="menu-item" window="popular-pairs-window">Head2heads</div>
       <div class="menu-item" window="recent-races-window">Recent Races</div>
+      <div class="loggedout menu-item" window="login-window">Login</div>
+      <div class="loggedout menu-item" window="signup-window">Sign Up</div>
+      <div id="logout-opt" class="loggedin menu-item">Log out</div>
     </div>
     <div id="starter-form">
       <div id="racer-inputs-container"></div>
@@ -405,7 +484,9 @@
   </div>
   <div id="racer-container"></div>
   <script src="/static/utils.js"></script>
+  <script src="/static/informer.js"></script>
   <script src="/static/race.js"></script>
+  <script src="/static/user.js"></script>
   <script src="/static/insights.js"></script>
   <script src="/static/windows.js"></script>
   <script src="/static/main.js"></script>

@@ -31,3 +31,8 @@ async function _get(url) {
   let result = await fetch(url);
   return await result.json();
 }
+
+
+function getCookie(name) {
+  return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
+}

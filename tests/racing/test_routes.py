@@ -46,9 +46,9 @@ INSERT INTO racer_makes (name) VALUES ('{name}')
 @pytest.fixture(scope='function', autouse=True)
 def clear_racers(db):
   yield
-  db.execute(text('DELETE FROM race_racers'));
-  db.execute(text('DELETE FROM race_history'));
-  db.execute(text('ALTER TABLE race_history AUTO_INCREMENT = 1'));
+  db.execute(text('DELETE FROM race_racers'))
+  db.execute(text('DELETE FROM race_history'))
+  db.execute(text('ALTER TABLE race_history AUTO_INCREMENT = 1'))
   db.commit()
 
 
@@ -60,8 +60,8 @@ def store_racing_makes_models(db):
     db.execute(text(insert_racer_query.format(**model)));
   db.commit()
   yield
-  db.execute(text('DELETE FROM racer_models'));
-  db.execute(text('DELETE FROM racer_makes'));
+  db.execute(text('DELETE FROM racer_models'))
+  db.execute(text('DELETE FROM racer_makes'))
   db.commit()
 
 

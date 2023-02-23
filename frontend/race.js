@@ -225,6 +225,7 @@ class Race {
     }
     this.reset();
     this.startLights();
+    _hide(raceGoOpt);
     this.racers.forEach((racer) => racer.render());
     setTimeout(() => this.racers.forEach((racer) => racer.move()), 4000);
   }
@@ -289,6 +290,7 @@ class Race {
   finish() {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
+    _show(raceGoOpt);
     _show(resultsWindow);
     this.setShare();
   }
