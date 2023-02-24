@@ -10,21 +10,26 @@ from src.user.routes import (
   signup_user,
   login_user,
   logout_user,
+  change_password_user,
+  edit_field_user,
   add_garage_item,
+  delete_garage_item,
   get_garage,
   _SESSION_KEY_NAME,
   _SESSION_EXPIRE,
 )
+from src.user.service import GarageItemRelations
 from src.user.models import (
-  AddGarageItemResponse,
+  SuccessResponse,
   GarageItem,
   LoginRequest,
-  LoginResponse,
-  LogoutResponse,
   SignUpRequest,
   SignUpResponse,
   UserDataResponse,
   UserGarageResponse,
+  DeleteGarageItemRequest,
+  ChangePasswordRequest,
+  EditUserFieldRequest,
 )
 
 _insert_user_query = """
@@ -47,22 +52,22 @@ VALUES({user_id}, {model_id}, '{relation}')
 
 
 class MockResponse:
-  def __init__(self):
+  def __init__(self) -> None:
     self.cookie_key = None
     self.cookie_value = None
     self.cookie_deleted = False
     self.expires = None
 
-  def set_cookie(self, key: str, value: str, expires: int):
+  def set_cookie(self, key: str, value: str, expires: int) -> None:
     self.cookie_key = key
     self.cookie_value = value
     self.expires = expires
 
-  def delete_cookie(self, key: str):
+  def delete_cookie(self, key: str) -> None:
     self.cookie_deleted = True
 
 
-def encrypt_password(password):
+def encrypt_password(password: str) -> str:
   return hashlib.sha512(password.encode('utf-8')).hexdigest()
 
 
@@ -73,6 +78,7 @@ def clear(db):
   db.execute(text('DELETE FROM user_sessions'))
   db.execute(text('DELETE FROM users'))
   db.commit()
+
 
 def _store_user(
   db,
@@ -271,7 +277,7 @@ async def test_login_user(db, freezer):
   result = await login_user(login_request, mock_response)
   user_session = _get_first_user_session(db)
   # Then
-  assert result == LoginResponse(success=True)
+  assert result == SuccessResponse(success=True)
   assert mock_response.cookie_key == _SESSION_KEY_NAME
   assert mock_response.expires == _SESSION_EXPIRE
   assert user_session.user_id == user_id
@@ -303,7 +309,7 @@ async def test_login_user_bad_credentials(
   result = await login_user(login_request, mock_response)
 
   # Then
-  assert result == LoginResponse(success=False)
+  assert result == SuccessResponse(success=False)
   assert mock_response.cookie_key is None
   assert _get_first_user_session(db) is None
 
@@ -321,7 +327,7 @@ async def test_login_user_existing_session_not_expired(db, freezer):
   user_session = _get_first_user_session(db)
 
   # Then
-  assert result == LoginResponse(success=True)
+  assert result == SuccessResponse(success=True)
   assert mock_response.cookie_key == _SESSION_KEY_NAME
   assert user_session.user_id == user_id
   assert user_session.token == token
@@ -341,7 +347,7 @@ async def test_login_user_existing_session_expired(db, freezer):
   user_session = _get_first_user_session(db)
 
   # Then
-  assert result == LoginResponse(success=True)
+  assert result == SuccessResponse(success=True)
   assert mock_response.cookie_key == _SESSION_KEY_NAME
   assert user_session.user_id == user_id
   assert user_session.token != token
@@ -361,7 +367,7 @@ async def test_logout_user(db):
   )
 
   # Then
-  assert result == LogoutResponse(success=True)
+  assert result == SuccessResponse(success=True)
   assert mock_response.cookie_deleted
   assert _get_first_user_session(db) is None
   assert _get_user_session_count(db) == 0
@@ -378,18 +384,169 @@ async def test_logout_user_fails(db):
   )
 
   # Then
-  assert result == LogoutResponse(success=False)
+  assert result == SuccessResponse(success=False)
   assert not mock_response.cookie_deleted
+
+
+@pytest.mark.asyncio
+async def test_change_password_user(db):
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  change_password_request = ChangePasswordRequest(
+    username='user123', old='pass123', new='pass1234',
+  )
+
+  # When
+  result = await change_password_user(
+    change_password_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(success=True)
+  assert _get_first_user(db).password == encrypt_password('pass1234')
+
+
+@pytest.mark.asyncio
+async def test_change_password_user_bad_auth(db):
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  change_password_request = ChangePasswordRequest(
+    username='user123', old='bad', new='pass1234',
+  )
+
+  # When
+  result = await change_password_user(
+    change_password_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(
+    success=False, errors=['Incorrect current password.'],
+  )
+  assert _get_first_user(db).password == encrypt_password('pass123')
+
+
+@pytest.mark.asyncio
+async def test_change_password_user_invalid(db):
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  change_password_request = ChangePasswordRequest(
+    username='user123', old='pass123', new='12',
+  )
+
+  # When
+  result = await change_password_user(
+    change_password_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(
+    success=False, errors=[
+      """
+      invalid password provided.
+      Must be between 5 and 50 characters long.""",
+    ]
+  )
+  assert _get_first_user(db).password == encrypt_password('pass123')
+
+
+@pytest.mark.asyncio
+async def test_edit_field_user(db):
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  edit_field_request = EditUserFieldRequest(
+    field='username', value='user123456'
+  )
+
+  # When
+  result = await edit_field_user(
+    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(success=True)
+  assert _get_first_user(db).username == 'user123456'
+
+
+@pytest.mark.asyncio
+async def test_edit_field_user_bad_field(db):
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  edit_field_request = EditUserFieldRequest(
+    field='bad', value='user123456'
+  )
+
+  # When
+  result = await edit_field_user(
+    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(success=False, errors=['Field unknown'])
+  assert _get_first_user(db).username == 'user123'
+  assert _get_first_user(db).email == 'test@gmail.com'
+
+
+@pytest.mark.asyncio
+async def test_edit_field_user_username_exists(db):
+  # Given
+  user_id = _store_user(db)
+  _store_user(db, username='othername')
+  token = _store_user_session(db, user_id)
+  edit_field_request = EditUserFieldRequest(
+    field='username', value='othername'
+  )
+
+  # When
+  result = await edit_field_user(
+    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(
+    success=False,
+    errors=['Username already in use. Please use another.'],
+  )
+  assert _get_first_user(db).username == 'user123'
+
+
+@pytest.mark.asyncio
+async def test_edit_field_user_email_exists(db):
+  # Given
+  user_id = _store_user(db)
+  _store_user(db, email='other@gmail.com')
+  token = _store_user_session(db, user_id)
+  edit_field_request = EditUserFieldRequest(
+    field='email', value='other@gmail.com'
+  )
+
+  # When
+  result = await edit_field_user(
+    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  assert result == SuccessResponse(
+    success=False,
+    errors=['Email already in use. Please use another.'],
+  )
+  assert _get_first_user(db).email == 'test@gmail.com'
 
 
 @pytest.mark.parametrize(
   'relation',
-  ('ridden', 'owns'),
+  list(GarageItemRelations)
 )
 @pytest.mark.asyncio
 async def test_add_garage_item(db, relation: str) -> None:
   # Given
   user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
   garage_item = GarageItem(
     make_name='MakeA',
     name='Name 1',
@@ -398,7 +555,9 @@ async def test_add_garage_item(db, relation: str) -> None:
   )
 
   # When
-  response = await add_garage_item(user_id, garage_item)
+  response = await add_garage_item(
+    garage_item, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
 
   # Then
   results = _get_user_garage(db, user_id)
@@ -406,13 +565,14 @@ async def test_add_garage_item(db, relation: str) -> None:
   assert results[0].model_id == 1
   assert results[0].relation == relation
   assert results[0].user_id == user_id
-  assert response == AddGarageItemResponse(success=True)
+  assert response == SuccessResponse(success=True)
 
 
 @pytest.mark.asyncio
 async def test_add_garage_item_bad_relation(db) -> None:
   # Given
   user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
   garage_item = GarageItem(
     make_name='MakeA',
     name='Name 1',
@@ -421,12 +581,14 @@ async def test_add_garage_item_bad_relation(db) -> None:
   )
 
   # When
-  response = await add_garage_item(user_id, garage_item)
+  response = await add_garage_item(
+    garage_item, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
 
   # Then
   results = _get_user_garage(db, user_id)
   assert len(results) == 0
-  assert response == AddGarageItemResponse(success=False)
+  assert response == SuccessResponse(success=False)
 
 
 @pytest.mark.asyncio
@@ -434,10 +596,10 @@ async def test_get_garage(db) -> None:
   # Given
   user_id = _store_user(db)
   other_user_id = _store_user(db)
-  _store_garage_item(db, user_id, 1, 'owns')
-  _store_garage_item(db, user_id, 2, 'owns')
-  _store_garage_item(db, user_id, 3, 'ridden')
-  _store_garage_item(db, other_user_id, 3, 'ridden')
+  _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
+  _store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
+  _store_garage_item(db, user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
+  _store_garage_item(db, other_user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
 
   # When
   response = await get_garage(user_id)
@@ -446,13 +608,73 @@ async def test_get_garage(db) -> None:
   assert response == UserGarageResponse(
     items=[
       GarageItem(
-        make_name='MakeA', name='Name 1', year=2022, relation='owns'
+        make_name='MakeA',
+        name='Name 1',
+        year=2022,
+        relation=GarageItemRelations.OWNS.value,
+        model_id=1,
       ),
       GarageItem(
-        make_name='MakeA', name='Name 2', year=2021, relation='owns'
+        make_name='MakeA',
+        name='Name 2',
+        year=2021,
+        relation=GarageItemRelations.OWNS.value,
+        model_id=2,
       ),
       GarageItem(
-        make_name='MakeB', name='Name 3', year=2020, relation='ridden'
+        make_name='MakeB',
+        name='Name 3',
+        year=2020,
+        relation=GarageItemRelations.HAS_RIDDEN.value,
+        model_id=3,
       ),
     ]
   )
+
+
+@pytest.mark.asyncio
+async def test_delete_garage_item(db) -> None:
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
+  _store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
+
+  delete_garage_item_request = DeleteGarageItemRequest(
+    model_id=2,
+  )
+
+  # When
+  response = await delete_garage_item(
+    delete_garage_item_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  results = _get_user_garage(db, user_id)
+  assert len(results) == 1
+  assert results[0].model_id == 1
+  assert response == SuccessResponse(success=True)
+
+
+@pytest.mark.asyncio
+async def test_delete_garage_item_not_exists(db) -> None:
+  # Given
+  user_id = _store_user(db)
+  token = _store_user_session(db, user_id)
+  _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
+
+  delete_garage_item_request = DeleteGarageItemRequest(
+    user_id=user_id,
+    model_id=2,
+  )
+
+  # When
+  response = await delete_garage_item(
+    delete_garage_item_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+  )
+
+  # Then
+  results = _get_user_garage(db, user_id)
+  assert len(results) == 1
+  assert results[0].model_id == 1
+  assert response == SuccessResponse(success=True)

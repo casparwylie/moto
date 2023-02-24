@@ -10,6 +10,7 @@ from sqlalchemy import (
   text,
   or_,
   delete,
+  update,
   literal_column,
 )
 
@@ -101,11 +102,13 @@ def build_get_model_id_query(make: str, model: str, year: str | None):
     racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
   )
 
+
 def build_get_user_garage_query(user_id: int):
   return select(
     user_garage_table.c.relation,
     racer_models_table.c.name,
     racer_models_table.c.year,
+    racer_models_table.c.id,
     racer_makes_table.c.name.label('make_name'),
   ).where(
     user_garage_table.c.user_id == user_id
@@ -114,3 +117,24 @@ def build_get_user_garage_query(user_id: int):
   ).join(
     racer_makes_table, racer_models_table.c.make == racer_makes_table.c.id
   )
+
+
+def build_delete_user_garage_item_query(user_id: int, model_id: int):
+  return delete(user_garage_table).where(
+    user_garage_table.c.user_id == user_id,
+    user_garage_table.c.model_id == model_id,
+  )
+
+
+def build_change_password_query(user_id: int, password: str):
+  return update(users_table).where(
+    users_table.c.id == user_id
+  ).values(password=password)
+
+
+def build_update_user_field_query(
+  user_id: int, field: str, value: str
+):
+  return update(users_table).where(
+    users_table.c.id == user_id
+  ).values(**{field: value})

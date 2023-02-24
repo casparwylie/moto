@@ -3,6 +3,11 @@ from pydantic import BaseModel
 from src.racing.models import Racer
 
 
+class SuccessResponse(BaseModel):
+  success: bool
+  errors: list[str] = []
+
+
 class SignUpRequest(BaseModel):
   username: str
   email: str
@@ -19,16 +24,14 @@ class LoginRequest(BaseModel):
   password: str
 
 
-class LoginResponse(BaseModel):
-  success: bool
+class ChangePasswordRequest(BaseModel):
+  old: str
+  new: str
 
 
-class LogoutResponse(BaseModel):
-  success: bool
-
-
-class AddGarageItemResponse(BaseModel):
-  success: bool
+class EditUserFieldRequest(BaseModel):
+  field: str
+  value: str
 
 
 class UserDataResponse(BaseModel):
@@ -50,6 +53,7 @@ class GarageItem(BaseModel):
   name: str
   make_name: str
   year: int
+  model_id: int | None = None
 
   @classmethod
   def from_db(cls, data) -> 'GarageItem':
@@ -58,6 +62,7 @@ class GarageItem(BaseModel):
       name=data.name,
       make_name=data.make_name,
       year=data.year,
+      model_id=data.id,
     )
 
 
@@ -72,3 +77,8 @@ class UserGarageResponse(BaseModel):
         for item in data
       ]
     )
+
+
+class DeleteGarageItemRequest(BaseModel):
+  model_id: int
+

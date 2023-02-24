@@ -15,6 +15,10 @@ function _el(type, info) {
   return element;
 }
 
+function isShowing(element) {
+  return element.style.display != 'none' && element.style.display != '';
+}
+
 async function _post(url, data) {
   let response = await fetch(url,
     {

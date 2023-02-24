@@ -295,54 +295,6 @@ class Race {
 }
 
 
-class RacerRecommender {
-
-  constructor(makeIn, modelIn, yearIn) {
-    this.makeIn = makeIn;
-    this.modelIn = modelIn;
-    this.yearIn = yearIn;
-  }
-
-  async get() {
-    let make = this.makeIn.value.trim();
-    let model = this.modelIn.value.trim();
-    let year = this.yearIn.value.trim();
-    if (make) {
-      let results = await _get(
-        `${RACING_API_URL}/search?make=${make}&model=${model}&year=${year}`
-      );
-      if (results.length > 0) {
-        _show(recommendationsContainer);
-        this.addRecommendations(results);
-        return;
-      }
-    }
-    _hide(recommendationsContainer);
-  }
-
-  addRecommendations(racerResults) {
-    recommendationsContainer.replaceChildren();
-    racerResults.forEach((racer) => {
-      let row = _el(
-        'div', {
-          className: 'recommendation-row',
-          innerHTML: `${racer.name} ${racer.year}`
-        }
-      );
-      row.addEventListener('click', () => this.selectRecommendation(racer.name, racer.year));
-      recommendationsContainer.appendChild(row);
-    });
-  }
-
-  selectRecommendation(name, year) {
-    this.modelIn.value = name;
-    this.yearIn.value = year;
-    recommendationsContainer.replaceChildren();
-    _hide(recommendationsContainer);
-  }
-}
-
-
 class RacingPage {
 
   constructor() {
@@ -374,9 +326,13 @@ class RacingPage {
     let modelIn = _el('input', {placeholder: 'Model...'});
     let yearIn = _el('input', {placeholder: 'Year...'});
 
-    let recommender = new RacerRecommender(makeIn, modelIn, yearIn);
-    modelIn.addEventListener('keyup', () => recommender.get())
-    modelIn.addEventListener('focus', () => recommender.get())
+    let recommender = new RacerRecommender(
+      makeIn,
+      modelIn,
+      yearIn,
+      recommendationsContainer,
+    );
+    recommender.assignTrigger(modelIn);
 
     if (make && model && year) {
       makeIn.value = make;

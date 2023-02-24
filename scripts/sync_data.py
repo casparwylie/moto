@@ -27,8 +27,7 @@ _MAKES_TRUTH = (
 )
 
 DB_URL = 'mysql://{user}:{password}@{host}:{port}/{database}'
-
-M_API_KEY = 'QvIUv0aywoBXbuXNHAreHQ==t2wcm1EX72ciNWjV'
+M_API_KEY = os.environ.get('MOTO_API_KEY')
 M_API_URL = 'https://api.api-ninjas.com/v1/motorcycles?&make={make}&offset={offset}'
 M_API_PAGE_LENGTH = 30
 

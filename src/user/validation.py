@@ -4,6 +4,8 @@ from email_validator import validate_email as _validate_email, EmailNotValidErro
 
 
 def invalid_email(email):
+  print(email)
+
   try:
     _validate_email(email, check_deliverability=True)
     return False

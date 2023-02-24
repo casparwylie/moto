@@ -10,8 +10,17 @@
       overflow: hidden;
     }
 
-    button, input {
+    button, input, select{
       font-family: 'Space Grotesk', sans-serif;
+      background: #1a1919;
+      color: white;
+    }
+    input, select {
+      border-radius: 5px;
+      outline-width: 0px;
+      border: 1px;
+      font-size: 20px;
+      margin: 1px;
     }
 
     .racer {
@@ -52,14 +61,7 @@
     }
 
     #racer-inputs-container input {
-      border-radius: 5px;
-      outline-width: 0px;
-      border: 1px;
-      font-size: 20px;
-      width: calc(33%);
-      margin: 1px;
-      background: #1a1919;
-      color: white;
+      width: 33%;
     }
 
     .racer-input-row {
@@ -230,7 +232,7 @@
         font-size: 15px;
       }
 
-      #racer-inputs-container input, #race-go-option, button, input {
+      #race-go-option, select, button, input {
         font-size: 10px;
         font-size: 12px;
       }
@@ -339,18 +341,17 @@
     }
 
     .account-form button, .account-form input {
+      width: 100%;
+      margin-top: 5px;
+    }
+    .account-form button {
       border-radius: 5px;
       outline-width: 0px;
       border: 1px;
       font-size: 20px;
       width: 100%;
       margin: 1px;
-      background: #1a1919;
-      color: white;
       margin-top: 5px;
-    }
-    .account-form button {
-      border-radius: 5px;
       width: 40%;
       float: left;
     }
@@ -385,6 +386,10 @@
       z-index: 100000;
     }
 
+    #profile-row-container{
+      margin-top: 10px;
+    }
+
     .profile-row {
       text-align: center;
     }
@@ -392,15 +397,65 @@
       font-weight: bold;
       display: inline-block;
     }
+
+    #add-garage-item-container {
+      display: none;
+    }
+    #add-garage-item-container input {
+      width: 25%;
+    }
+    #add-garage-toggle-opt {
+      margin-left: 10px;
+    }
+    #add-garage-recommender {
+      width: 40%;
+      background: #002d59;
+      border-radius: 5px;
+      float: right;
+      padding: 20px;
+      color: white;
+      display: none;
+      position: absolute;
+      z-index: 1000;
+      margin-left: calc(30% - 40px);
+    }
+
+    #profile-garage-container {
+      border: 6px double black;
+      padding: 20px;
+      margin-top: 10px;
+    }
+
+    .garage-item-row {
+      border-bottom: 1px solid black;
+    }
+
+    .garage-item-delete-opt {
+      color: #ff4c4c;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    #profile-edit-container, #profile-change-pass-container {
+      display: none;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div id="informer-container"></div>
 
+
+
+
   <div class="window" id="myprofile-window">
     <div window="myprofile-window" class="close">x</div>
+
+
     <h2>My Profile</h2>
-    <div id="profile-row-container">
+    <button id="edit-profile-toggle">Edit</button>
+    <button id="change-password-toggle">Change Password</button>
+    <div id="profile-row-container" class="profile-data-view">
       <div class="profile-row">
         Username: <div class="profile-row-value" id="profile-row-username"></div>
       </div>
@@ -408,10 +463,43 @@
         Email: <div class="profile-row-value" id="profile-row-email"></div>
       </div>
     </div>
-    <h2>My Garage</h2>
+    <div id="profile-edit-container" class="profile-data-view">
+      <input type="text" id="profile-edit-username" placeholder="New username...">
+      <button id="edit-username-submit">Save</button><br>
+      <input type="text" id="profile-edit-email" placeholder="New email...">
+      <button id="edit-email-submit">Save</button><br>
+    </div>
+    <div id="profile-change-pass-container" class="profile-data-view">
+      <input type="password" id="profile-change-pass-old" placeholder="Old password..."><br>
+      <input type="password" id="profile-change-pass-new" placeholder="New password..."><br>
+      <input type="password" id="profile-change-pass-verify-new" placeholder="Verify new password..."><br>
+      <button id="change-password-submit">Change</button>
+    </div>
+
+    <h2>My Garage<button id="add-garage-toggle-opt">+</button></h2>
+    <div id="add-garage-item-container">
+      <input type="text" placeholder="Make..." id="add-garage-item-make">
+      <input type="text" placeholder="Model..." id="add-garage-item-model">
+      <input type="text" placeholder="Year..." id="add-garage-item-year">
+      <select id="add-garage-item-relation">
+        <option value="">--Relationship--</option>
+        <option value="OWNS">Currenty Own</option>
+        <option value="HAS_OWNED">Used to Own</option>
+        <option value="HAS_RIDDEN">Have Ridden</option>
+        <option value="SAT_ON">Once Sat On</option>
+      </select>
+      <button id="add-garage-item-submit">+ Add</button>
+      <div id="add-garage-recommender"></div>
+    </div>
     <div id="profile-garage-container"></div>
+
+
     <h2>My Recent Races</h2>
   </div>
+
+
+
+
 
   <div class="window" id="login-window">
     <div window="login-window" class="close">x</div>
@@ -422,6 +510,10 @@
       <button id="login-submit">Login</button>
     </div>
   </div>
+
+
+
+
 
   <div class="window" id="signup-window">
     <div window="signup-window" class="close">x</div>
@@ -435,6 +527,12 @@
     </div>
   </div>
 
+
+
+
+
+
+
   <div class="window" id="results-window">
     <div window="results-window" class="close">x</div>
     <h2>Results</h2>
@@ -442,6 +540,10 @@
     <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
     <div id="results-container"></div>
   </div>
+
+
+
+
 
   <div class="window" id="introduction-window">
     <div window="introduction-window" class="close">x</div>
@@ -472,23 +574,43 @@
     (3) The results are not perfect, hence I will be adding voting and commenting features to allow for debate.
 
   </div>
+
+
+
+
+
   <div class="window" id="popular-pairs-window">
     <div window="popular-pairs-window" class="close">x</div>
     <div class="window-header-image window-header-image-2"></div>
     <h2>Most Popular Raced Pairs</h2>
     <div id="popular-pairs-container"></div>
   </div>
+
+
+
+
+
+
   <div class="window" id="recent-races-window">
     <div window="recent-races-window" class="close">x</div>
     <div class="window-header-image window-header-image-3"></div>
     <h2>Recent Races</h2>
     <div id="recent-races-container"></div>
   </div>
+
+
+
+
   <div id="lights-container">
     <div class="light" id="light-1"></div>
     <div class="light" id="light-2"></div>
     <div class="light" id="light-3"></div>
   </div>
+
+
+
+
+
   <div id="control-panel">
     <div id="heading">Which Bikes Win?<div id="credit"> By Caspar Wylie</div></div>
     <div id="menu">
@@ -510,8 +632,15 @@
       <div id="recommendation-container"></div>
     </div>
   </div>
+
+
   <div id="racer-container"></div>
+
+
+
+
   <script src="/static/utils.js"></script>
+  <script src="/static/racerRecommender.js"></script>
   <script src="/static/informer.js"></script>
   <script src="/static/race.js"></script>
   <script src="/static/user.js"></script>

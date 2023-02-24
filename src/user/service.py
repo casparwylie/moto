@@ -1,4 +1,5 @@
 import hashlib
+from enum import Enum
 from uuid import uuid4
 from datetime import datetime
 
@@ -15,6 +16,9 @@ from src.user.queries import (
   build_get_user_garage_query,
   build_get_model_id_query,
   build_add_user_garage_item_query,
+  build_delete_user_garage_item_query,
+  build_change_password_query,
+  build_update_user_field_query,
 )
 
 #############
@@ -76,14 +80,20 @@ def get_user_token(user_id: str, expires: int) -> str | None:
   return new_token
 
 
-def login(username: str, password: str, expires: int) -> str | None:
+def _authenticate(username: str, password: str) -> int:
   encrypted_pass = encrypt_password(password)
   with db.connect() as conn:
     user = conn.execute(
-      build_user_auth_query(username, encrypted_pass)
-    ).one_or_none()
+        build_user_auth_query(username, encrypted_pass)
+      ).one_or_none()
     if user:
-      return get_user_token(user.id, expires)
+      return user.id
+
+
+def login(username: str, password: str, expires: int) -> str | None:
+  with db.connect() as conn:
+    if user_id := _authenticate(username, password):
+      return get_user_token(user_id, expires)
 
 
 ##############
@@ -115,20 +125,56 @@ def signup(username: str, password: str, email: str) -> None:
 ### PROFILE ###
 ###############
 
-_GARAGE_ITEM_RELATIONS = (
-  'ridden',
-  'owns',
-)
+class GarageItemRelations(str, Enum):
+  HAS_OWNED = 'HAS_OWNED'
+  OWNS = 'OWNS'
+  HAS_RIDDEN = 'HAS_RIDDEN'
+  SAT_ON = 'SAT_ON'
+
+
+_USER_EDITABLE_FIELDS = ('username', 'email')
+
+
+def change_password(username: str, old: str, new: str) -> bool:
+  if user_id := _authenticate(username, old):
+    with db.connect() as conn:
+      conn.execute(
+        build_change_password_query(user_id, encrypt_password(new))
+      )
+      conn.commit()
+    return True
+  else:
+    return False
+
+
+def edit_user_field(user_id, field: str, value: str) -> bool:
+  if field not in _USER_EDITABLE_FIELDS:
+    return False
+  with db.connect() as conn:
+    conn.execute(build_update_user_field_query(user_id, field, value))
+    conn.commit()
+  return True
 
 
 def add_user_garage_item(
   user_id: int, make: str, model: str, year: int, relation: str
 ) -> bool:
-  if relation not in _GARAGE_ITEM_RELATIONS:
+  if relation not in list(GarageItemRelations):
     return False
   with db.connect() as conn:
-    model = conn.execute(build_get_model_id_query(make, model, year)).first()
-    conn.execute(build_add_user_garage_item_query(user_id, model.id, relation))
+    model = conn.execute(
+      build_get_model_id_query(make, model, year)
+    ).first()
+    conn.execute(
+      build_add_user_garage_item_query(user_id, model.id, relation)
+    )
+    conn.commit()
+    return True
+
+
+def delete_user_garage_item(user_id: int, model_id: int) -> bool:
+  with db.connect() as conn:
+    conn.execute(build_delete_user_garage_item_query(user_id, model_id))
     conn.commit()
     return True
 
