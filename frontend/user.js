@@ -301,7 +301,7 @@ class UserState {
 
   async logout() {
     await _get(`${USER_API_URL}/logout`);
-    Informer.inform('Logged out.', 'normal');
+    Informer.inform('Logged out.', 'good');
     this.refresh();
   }
 }

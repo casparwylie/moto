@@ -243,7 +243,7 @@ class Race {
     navigator.clipboard.writeText(shareLink);
     raceShareOpt.innerHTML = shareLink + ' copied &#10003;';
     raceShareOpt.classList.add('shared-link');
-    setTimeout(this.setShare, 3000);
+    setTimeout(() => this.setShare(), 3000);
   }
 
   setShare() {
