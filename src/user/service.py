@@ -3,6 +3,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from src.database import engine as db
+from src.racing.service import get_racer
 from src.user.queries import (
   build_check_user_exists_query,
   build_signup_query,
@@ -11,6 +12,9 @@ from src.user.queries import (
   build_get_user_session_query,
   build_get_user_by_token_query,
   build_delete_session_query,
+  build_get_user_garage_query,
+  build_get_model_id_query,
+  build_add_user_garage_item_query,
 )
 
 #############
@@ -97,7 +101,7 @@ def check_user_exists(username: str, email: str) -> str | None:
     return 'username'
 
 
-def signup(username, password, email):
+def signup(username: str, password: str, email: str) -> None:
   encrypted_pass = encrypt_password(password)
   with db.connect() as conn:
     user = conn.execute(
@@ -106,3 +110,29 @@ def signup(username, password, email):
     user_id = user.lastrowid
     conn.commit()
 
+
+###############
+### PROFILE ###
+###############
+
+_GARAGE_ITEM_RELATIONS = (
+  'ridden',
+  'owns',
+)
+
+
+def add_user_garage_item(
+  user_id: int, make: str, model: str, year: int, relation: str
+) -> bool:
+  if relation not in _GARAGE_ITEM_RELATIONS:
+    return False
+  with db.connect() as conn:
+    model = conn.execute(build_get_model_id_query(make, model, year)).first()
+    conn.execute(build_add_user_garage_item_query(user_id, model.id, relation))
+    conn.commit()
+    return True
+
+
+def get_user_garage(user_id: int):
+  with db.connect() as conn:
+    return conn.execute(build_get_user_garage_query(user_id)).all()

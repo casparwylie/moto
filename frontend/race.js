@@ -183,7 +183,6 @@ class Race {
 
   constructor() {
     this.racers = [];
-    this.unseenRace = false;
   }
 
   reset() {
@@ -214,7 +213,6 @@ class Race {
   async race(save) {
     if (this.racers.length == 0) return;
     if (save) {
-      this.unseenRace = true;
       await this.save();
     }
     if(

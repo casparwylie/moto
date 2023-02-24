@@ -10,16 +10,21 @@ from src.user.routes import (
   signup_user,
   login_user,
   logout_user,
+  add_garage_item,
+  get_garage,
   _SESSION_KEY_NAME,
   _SESSION_EXPIRE,
 )
 from src.user.models import (
-  SignUpRequest,
-  SignUpResponse,
+  AddGarageItemResponse,
+  GarageItem,
   LoginRequest,
   LoginResponse,
   LogoutResponse,
+  SignUpRequest,
+  SignUpResponse,
   UserDataResponse,
+  UserGarageResponse,
 )
 
 _insert_user_query = """
@@ -33,6 +38,13 @@ INSERT INTO user_sessions
   (token, user_id, expire)
 VALUES('{token}', '{user_id}', '{expire}')
 """
+
+_insert_user_garage_query = """
+INSERT INTO user_garage
+    (user_id, model_id, relation)
+VALUES({user_id}, {model_id}, '{relation}')
+"""
+
 
 class MockResponse:
   def __init__(self):
@@ -55,8 +67,9 @@ def encrypt_password(password):
 
 
 @pytest.fixture(scope='function', autouse=True)
-def clear_users(db):
+def clear(db):
   yield
+  db.execute(text('DELETE FROM user_garage'))
   db.execute(text('DELETE FROM user_sessions'))
   db.execute(text('DELETE FROM users'))
   db.commit()
@@ -100,6 +113,22 @@ def _store_user_session(
   return token
 
 
+def _store_garage_item(
+  db,
+  user_id: int,
+  model_id: int,
+  relation: str,
+):
+  db.execute(
+    text(
+      _insert_user_garage_query.format(
+        user_id=user_id, model_id=model_id, relation=relation,
+      )
+    )
+  )
+  db.commit()
+
+
 def _get_first_user_session(db):
   return db.execute(text('SELECT * FROM user_sessions')).first()
 
@@ -107,6 +136,11 @@ def _get_first_user_session(db):
 def _get_first_user(db):
   return db.execute(text('SELECT * FROM users')).first()
 
+
+def _get_user_garage(db, user_id: int):
+  return list(db.execute(
+    text(f'SELECT * FROM user_garage WHERE user_id = {user_id}')
+  ))
 
 def _get_user_count(db):
   return db.execute(
@@ -130,7 +164,11 @@ async def test_get_user(db):
   result = await get_user(f'{_SESSION_KEY_NAME}={token}')
 
   # Then
-  assert result == UserDataResponse(username='user123', email='test@gmail.com')
+  assert result == UserDataResponse(
+    user_id=user_id,
+    username='user123',
+    email='test@gmail.com',
+  )
 
 
 @pytest.mark.asyncio
@@ -342,3 +380,79 @@ async def test_logout_user_fails(db):
   # Then
   assert result == LogoutResponse(success=False)
   assert not mock_response.cookie_deleted
+
+
+@pytest.mark.parametrize(
+  'relation',
+  ('ridden', 'owns'),
+)
+@pytest.mark.asyncio
+async def test_add_garage_item(db, relation: str) -> None:
+  # Given
+  user_id = _store_user(db)
+  garage_item = GarageItem(
+    make_name='MakeA',
+    name='Name 1',
+    year=2022,
+    relation=relation,
+  )
+
+  # When
+  response = await add_garage_item(user_id, garage_item)
+
+  # Then
+  results = _get_user_garage(db, user_id)
+  assert len(results) == 1
+  assert results[0].model_id == 1
+  assert results[0].relation == relation
+  assert results[0].user_id == user_id
+  assert response == AddGarageItemResponse(success=True)
+
+
+@pytest.mark.asyncio
+async def test_add_garage_item_bad_relation(db) -> None:
+  # Given
+  user_id = _store_user(db)
+  garage_item = GarageItem(
+    make_name='MakeA',
+    name='Name 1',
+    year=2022,
+    relation='bad',
+  )
+
+  # When
+  response = await add_garage_item(user_id, garage_item)
+
+  # Then
+  results = _get_user_garage(db, user_id)
+  assert len(results) == 0
+  assert response == AddGarageItemResponse(success=False)
+
+
+@pytest.mark.asyncio
+async def test_get_garage(db) -> None:
+  # Given
+  user_id = _store_user(db)
+  other_user_id = _store_user(db)
+  _store_garage_item(db, user_id, 1, 'owns')
+  _store_garage_item(db, user_id, 2, 'owns')
+  _store_garage_item(db, user_id, 3, 'ridden')
+  _store_garage_item(db, other_user_id, 3, 'ridden')
+
+  # When
+  response = await get_garage(user_id)
+
+  # Then
+  assert response == UserGarageResponse(
+    items=[
+      GarageItem(
+        make_name='MakeA', name='Name 1', year=2022, relation='owns'
+      ),
+      GarageItem(
+        make_name='MakeA', name='Name 2', year=2021, relation='owns'
+      ),
+      GarageItem(
+        make_name='MakeB', name='Name 3', year=2020, relation='ridden'
+      ),
+    ]
+  )

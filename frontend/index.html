@@ -385,10 +385,34 @@
       z-index: 100000;
     }
 
+    .profile-row {
+      text-align: center;
+    }
+    .profile-row-value {
+      font-weight: bold;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
   <div id="informer-container"></div>
+
+  <div class="window" id="myprofile-window">
+    <div window="myprofile-window" class="close">x</div>
+    <h2>My Profile</h2>
+    <div id="profile-row-container">
+      <div class="profile-row">
+        Username: <div class="profile-row-value" id="profile-row-username"></div>
+      </div>
+      <div class="profile-row">
+        Email: <div class="profile-row-value" id="profile-row-email"></div>
+      </div>
+    </div>
+    <h2>My Garage</h2>
+    <div id="profile-garage-container"></div>
+    <h2>My Recent Races</h2>
+  </div>
+
   <div class="window" id="login-window">
     <div window="login-window" class="close">x</div>
     <h2>Login</h2>
@@ -398,6 +422,7 @@
       <button id="login-submit">Login</button>
     </div>
   </div>
+
   <div class="window" id="signup-window">
     <div window="signup-window" class="close">x</div>
     <h2>Sign Up</h2>
@@ -409,6 +434,7 @@
       <button id="signup-submit">Sign up</button>
     </div>
   </div>
+
   <div class="window" id="results-window">
     <div window="results-window" class="close">x</div>
     <h2>Results</h2>
@@ -416,6 +442,7 @@
     <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
     <div id="results-container"></div>
   </div>
+
   <div class="window" id="introduction-window">
     <div window="introduction-window" class="close">x</div>
     <div class="window-header-image window-header-image-1"></div>
@@ -470,6 +497,7 @@
       <div class="menu-item" window="recent-races-window">Recent Races</div>
       <div class="loggedout menu-item" window="login-window">Login</div>
       <div class="loggedout menu-item" window="signup-window">Sign Up</div>
+      <div class="loggedin menu-item" window="myprofile-window">My Profile</div>
       <div id="logout-opt" class="loggedin menu-item">Log out</div>
     </div>
     <div id="starter-form">

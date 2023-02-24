@@ -18,6 +18,15 @@ const logoutOpt = document.getElementById('logout-opt');
 
 const credit = document.getElementById('credit');
 
+const profileRowContainer = document.getElementById('profile-row-container')
+const profileRowEmail = document.getElementById('profile-row-email');
+const profileRowUsername = document.getElementById('profile-row-username');
+
+class UserProfile {
+
+
+}
+
 class UserState {
   constructor () {
     logoutOpt.addEventListener('click', () => this.logout());
@@ -29,6 +38,7 @@ class UserState {
 
   async refresh() {
     await this.setCurrentUser();
+    this.setProfile();
     for (let element of loggedinElements) {
         (this.currentUser)? _show(element): _hide(element);
     }
@@ -39,6 +49,16 @@ class UserState {
       credit.innerHTML = `welcome, ${this.currentUser.username}`;
     } else {
       credit.innerHTML = 'By Caspar Wylie';
+    }
+  }
+
+  setProfile() {
+    if (this.currentUser) {
+      profileRowUsername.innerHTML = this.currentUser.username;
+      profileRowEmail.innerHTML = this.currentUser.email;
+    } else {
+      profileRowUsername.innerHTML = '';
+      profileRowEmail.innerHTML = '';
     }
   }
 

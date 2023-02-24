@@ -3,9 +3,31 @@ import os
 import pytest
 from sqlalchemy import create_engine, text
 import uvicorn
+
+from tests.dummy_data import TEST_DATA_MAKES, TEST_DATA_MODELS
+
 MIGRATIONS_DIR = os.path.join(os.getcwd(), 'migrations')
 DB_NAME = os.environ.get('DB_NAME')
 
+insert_racer_query = """
+INSERT INTO racer_models
+(name, make, style, year, power, torque, weight, weight_type)
+VALUES
+ (
+  '{name}',
+  {make},
+  '{style}',
+  {year},
+  {power},
+  {torque},
+  {weight},
+  '{weight_type}'
+)
+"""
+
+insert_make_query = """
+INSERT INTO racer_makes (name) VALUES ('{name}')
+"""
 
 def _create_engine():
   db_user = os.environ.get('DB_USER')
@@ -37,3 +59,15 @@ def pytest_sessionstart(session):
       conn.execute(text(migration_query))
     conn.commit()
 
+
+@pytest.fixture(scope='session', autouse=True)
+def store_racing_makes_models(db):
+  for make in TEST_DATA_MAKES.values():
+    db.execute(text(insert_make_query.format(name=make)));
+  for model in TEST_DATA_MODELS.values():
+    db.execute(text(insert_racer_query.format(**model)));
+  db.commit()
+  yield
+  db.execute(text('DELETE FROM racer_models'))
+  db.execute(text('DELETE FROM racer_makes'))
+  db.commit()

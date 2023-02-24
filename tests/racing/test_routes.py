@@ -16,32 +16,8 @@ from src.racing.models import (
   RaceListing,
   SaveRequest,
 )
-from tests.racing.dummy_data import TEST_DATA_MAKES, TEST_DATA_MODELS
 
-
-###############
-### UTILITY ###
-###############
-
-insert_racer_query = """
-INSERT INTO racer_models
-(name, make, style, year, power, torque, weight, weight_type)
-VALUES
- (
-  '{name}',
-  {make},
-  '{style}',
-  {year},
-  {power},
-  {torque},
-  {weight},
-  '{weight_type}'
-)
-"""
-
-insert_make_query = """
-INSERT INTO racer_makes (name) VALUES ('{name}')
-"""
+from tests.dummy_data import TEST_DATA_MODELS, TEST_DATA_MAKES
 
 @pytest.fixture(scope='function', autouse=True)
 def clear_racers(db):
@@ -49,19 +25,6 @@ def clear_racers(db):
   db.execute(text('DELETE FROM race_racers'))
   db.execute(text('DELETE FROM race_history'))
   db.execute(text('ALTER TABLE race_history AUTO_INCREMENT = 1'))
-  db.commit()
-
-
-@pytest.fixture(scope='module', autouse=True)
-def store_racing_makes_models(db):
-  for make in TEST_DATA_MAKES.values():
-    db.execute(text(insert_make_query.format(name=make)));
-  for model in TEST_DATA_MODELS.values():
-    db.execute(text(insert_racer_query.format(**model)));
-  db.commit()
-  yield
-  db.execute(text('DELETE FROM racer_models'))
-  db.execute(text('DELETE FROM racer_makes'))
   db.commit()
 
 

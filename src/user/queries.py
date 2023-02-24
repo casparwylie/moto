@@ -10,31 +10,18 @@ from sqlalchemy import (
   text,
   or_,
   delete,
+  literal_column,
 )
 
-metadata = MetaData()
-
-
-### TABLES ###
-
-users_table = Table(
-  'users',
-  metadata,
-  Column('id', Integer, primary_key=True),
-  Column('username', String(100)),
-  Column('email', String(500)),
-  Column('password', String(500)),
+from src.database import (
+  racer_makes_table,
+  racer_models_table,
+  users_table,
+  user_sessions_table,
+  user_garage_table,
 )
+from src.racing.queries import racer_makes_table, racer_models_table
 
-user_sessions_table = Table(
-  'user_sessions',
-  metadata,
-  Column('token', String(32)),
-  Column('user_id', Integer, ForeignKey(users_table.c.id)),
-  Column('expire', Integer),
-)
-
-### QUERIES ###
 
 def build_check_user_exists_query(username: str, email: str):
   return select(users_table).where(
@@ -75,8 +62,10 @@ def build_make_user_session_query(
     expire=expire,
   )
 
+
 def build_get_user_by_token_query(token: str):
   return select(
+    users_table.c.id,
     users_table.c.username,
     users_table.c.email
   ).where(
@@ -85,7 +74,43 @@ def build_get_user_by_token_query(token: str):
     users_table, user_sessions_table.c.user_id == users_table.c.id
   )
 
+
 def build_delete_session_query(token: str):
   return delete(user_sessions_table).where(
     user_sessions_table.c.token == token
+  )
+
+
+def build_add_user_garage_item_query(user_id: int, model_id: int, relation: str):
+  return insert(user_garage_table).values(
+    user_id=user_id, model_id=model_id, relation=relation
+  )
+
+
+def build_get_model_id_query(make: str, model: str, year: str | None):
+  filters = [
+    racer_models_table.c.name == model,
+    literal_column('make_name') == make,
+  ]
+  if year:
+   filters.append(racer_models_table.c.year == year)
+  return select(
+    racer_models_table.columns,
+    racer_makes_table.c.name.label('make_name'),
+  ).having(*filters).join(
+    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
+  )
+
+def build_get_user_garage_query(user_id: int):
+  return select(
+    user_garage_table.c.relation,
+    racer_models_table.c.name,
+    racer_models_table.c.year,
+    racer_makes_table.c.name.label('make_name'),
+  ).where(
+    user_garage_table.c.user_id == user_id
+  ).join(
+    racer_models_table, user_garage_table.c.model_id == racer_models_table.c.id
+  ).join(
+    racer_makes_table, racer_models_table.c.make == racer_makes_table.c.id
   )

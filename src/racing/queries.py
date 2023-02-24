@@ -1,12 +1,4 @@
 from sqlalchemy import (
-  Table,
-  MetaData,
-  Column,
-  ForeignKey,
-  Index,
-  Integer,
-  DateTime,
-  String,
   select,
   insert,
   distinct,
@@ -14,50 +6,14 @@ from sqlalchemy import (
   text,
 )
 
-### TABLES ###
-metadata = MetaData()
 
-
-racer_makes_table = Table(
-    'racer_makes',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(50), index=True),
+from src.database import (
+  racer_makes_table,
+  racer_models_table,
+  race_history_table,
+  race_racers_table,
 )
 
-
-racer_models_table = Table(
-    'racer_models',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(500), index=True),
-    Column('style', String(100)),
-    Column('make', Integer, ForeignKey(racer_makes_table.c.id), index=True),
-    Column('year', Integer),
-    Column('power', Integer),
-    Column('torque', Integer),
-    Column('weight', Integer),
-    Column('weight_type', String(10)),
-)
-
-
-race_history_table = Table(
-  'race_history',
-  metadata,
-  Column('id', Integer, primary_key=True),
-  Column('created_at', DateTime),
-)
-
-
-race_racers_table = Table(
-  'race_racers',
-  metadata,
-  Column('race_id', Integer, ForeignKey(race_history_table.c.id)),
-  Column('model_id', Integer, ForeignKey(racer_models_table.c.id)),
-)
-
-
-### QUERIES ###
 
 def build_search_racer_query(make: str, model: str, year: str):
   return select(

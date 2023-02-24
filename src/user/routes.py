@@ -12,6 +12,9 @@ from src.user.models import (
   LoginResponse,
   LogoutResponse,
   UserDataResponse,
+  UserGarageResponse,
+  GarageItem,
+  AddGarageItemResponse,
 )
 from src.user.service import (
   signup,
@@ -19,13 +22,15 @@ from src.user.service import (
   delete_session,
   get_user_by_token,
   check_user_exists,
+  get_user_garage,
+  add_user_garage_item,
 )
 
 
 router = APIRouter(prefix='/api/user')
 
 _SESSION_KEY_NAME = 'session_token'
-_SESSION_EXPIRE = 10#86400 * 7 * 2 # 2 weeks
+_SESSION_EXPIRE = 86400 * 7 * 2 # 2 weeks
 
 
 def get_token_from_cookie(cookie: Header):
@@ -88,3 +93,20 @@ async def logout_user(response: Response, cookie = Header(None)) -> None:
     response.delete_cookie(_SESSION_KEY_NAME)
     return LogoutResponse(success=True)
   return LogoutResponse(success=False)
+
+
+@router.post('/garage')
+async def add_garage_item(user_id: int, item: GarageItem) -> AddGarageItemResponse:
+  success = add_user_garage_item(
+    user_id=user_id,
+    make=item.make_name,
+    model=item.name,
+    year=item.year,
+    relation=item.relation,
+  )
+  return AddGarageItemResponse(success=success)
+
+
+@router.get('/garage')
+async def get_garage(user_id: int) -> UserGarageResponse | None:
+  return UserGarageResponse.from_db(get_user_garage(user_id))
