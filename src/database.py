@@ -10,11 +10,14 @@ from sqlalchemy import (
   String,
 )
 
+from sqlalchemy.engine.base import Engine
+
+
 ### CONNECTION ###
 
 DB_URL = 'mysql://{user}:{password}@{host}:{port}/{database}'
 
-def _create_engine():
+def _create_engine() -> Engine:
   db_user = os.environ.get('DB_USER')
   db_password = os.environ.get('DB_PASS')
   host = 'mysql'

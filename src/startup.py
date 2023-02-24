@@ -4,7 +4,7 @@ from src.database import engine as db
 from datetime import datetime
 
 
-def _expire_user_sessions():
+def _expire_user_sessions() -> None:
   timestamp_now = int(datetime.timestamp(datetime.now()))
   with db.connect() as conn:
     conn.execute(text(
@@ -17,7 +17,7 @@ SEQUENCE = {
   'Expire user sessions': _expire_user_sessions
 }
 
-def run_startup_sequence():
+def run_startup_sequence() -> None:
   for name, task in SEQUENCE.items():
     print(f'[STARTUP] Running {name}')
     task()

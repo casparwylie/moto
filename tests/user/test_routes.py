@@ -15,6 +15,8 @@ from src.user.routes import (
   add_garage_item,
   delete_garage_item,
   get_garage,
+  auth_required,
+  NotAuthenticatedException,
   _SESSION_KEY_NAME,
   _SESSION_EXPIRE,
 )
@@ -135,6 +137,10 @@ def _store_garage_item(
   db.commit()
 
 
+def _make_auth_required(token: str):
+  return auth_required(f'{_SESSION_KEY_NAME}={token}')
+
+
 def _get_first_user_session(db):
   return db.execute(text('SELECT * FROM user_sessions')).first()
 
@@ -167,7 +173,7 @@ async def test_get_user(db):
   token = _store_user_session(db, user_id=user_id)
 
   # When
-  result = await get_user(f'{_SESSION_KEY_NAME}={token}')
+  result = await get_user(user=_make_auth_required(token))
 
   # Then
   assert result == UserDataResponse(
@@ -178,16 +184,13 @@ async def test_get_user(db):
 
 
 @pytest.mark.asyncio
-async def test_get_user_no_cookie(db):
+async def test_get_user_no_token(db):
   # Given
   user_id = _store_user(db)
-  token = _store_user_session(db, user_id=user_id)
-
-  # When
-  result = await get_user(None)
 
   # Then
-  assert result is None
+  with pytest.raises(NotAuthenticatedException):
+    result = await get_user(user=_make_auth_required("bad"))
 
 
 @pytest.mark.asyncio
@@ -380,7 +383,7 @@ async def test_logout_user_fails(db):
 
   # When
   result = await logout_user(
-    mock_response, f'{_SESSION_KEY_NAME}=123'
+    mock_response, f'{_SESSION_KEY_NAME}='
   )
 
   # Then
@@ -399,7 +402,7 @@ async def test_change_password_user(db):
 
   # When
   result = await change_password_user(
-    change_password_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    change_password_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -418,7 +421,7 @@ async def test_change_password_user_bad_auth(db):
 
   # When
   result = await change_password_user(
-    change_password_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    change_password_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -439,7 +442,7 @@ async def test_change_password_user_invalid(db):
 
   # When
   result = await change_password_user(
-    change_password_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    change_password_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -464,7 +467,7 @@ async def test_edit_field_user(db):
 
   # When
   result = await edit_field_user(
-    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    edit_field_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -483,7 +486,7 @@ async def test_edit_field_user_bad_field(db):
 
   # When
   result = await edit_field_user(
-    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    edit_field_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -504,7 +507,7 @@ async def test_edit_field_user_username_exists(db):
 
   # When
   result = await edit_field_user(
-    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    edit_field_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -527,7 +530,7 @@ async def test_edit_field_user_email_exists(db):
 
   # When
   result = await edit_field_user(
-    edit_field_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    edit_field_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -556,7 +559,7 @@ async def test_add_garage_item(db, relation: str) -> None:
 
   # When
   response = await add_garage_item(
-    garage_item, cookie=f'{_SESSION_KEY_NAME}={token}',
+    garage_item, user=_make_auth_required(token),
   )
 
   # Then
@@ -582,7 +585,7 @@ async def test_add_garage_item_bad_relation(db) -> None:
 
   # When
   response = await add_garage_item(
-    garage_item, cookie=f'{_SESSION_KEY_NAME}={token}',
+    garage_item, user=_make_auth_required(token),
   )
 
   # Then
@@ -646,7 +649,7 @@ async def test_delete_garage_item(db) -> None:
 
   # When
   response = await delete_garage_item(
-    delete_garage_item_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    delete_garage_item_request, user=_make_auth_required(token),
   )
 
   # Then
@@ -670,7 +673,7 @@ async def test_delete_garage_item_not_exists(db) -> None:
 
   # When
   response = await delete_garage_item(
-    delete_garage_item_request, cookie=f'{_SESSION_KEY_NAME}={token}',
+    delete_garage_item_request, user=_make_auth_required(token),
   )
 
   # Then

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response, APIRouter, Header
+from fastapi import Depends, FastAPI, Response, APIRouter, Header
 
 from src.user.validation import (
   invalid_username,
@@ -37,17 +37,21 @@ _SESSION_KEY_NAME = 'session_token'
 _SESSION_EXPIRE = 86400 * 7 * 2 # 2 weeks
 
 
+class NotAuthenticatedException(Exception):
+  ...
+
+
 def _get_token_from_cookie(cookie: str | None) -> str | None:
   if cookie:
     parts = cookie.split('=')
     return parts[1] if parts[0] == _SESSION_KEY_NAME else None
 
 
-@router.get('')
-async def get_user(cookie = Header(None)) -> UserDataResponse | None:
-  token = _get_token_from_cookie(cookie)
-  if token and (user := get_user_by_token(token)):
-    return UserDataResponse.from_db(user)
+def auth_required(cookie: str = Header(None)):
+  if token := _get_token_from_cookie(cookie):
+    if user := get_user_by_token(token):
+      return user
+  raise NotAuthenticatedException
 
 
 ##############
@@ -102,10 +106,16 @@ async def get_garage(user_id: int) -> UserGarageResponse | None:
 ### AUTH ONLY ###
 #################
 
+@router.get('')
+async def get_user(user = Depends(auth_required)) -> UserDataResponse | None:
+  return UserDataResponse.from_db(user)
+
+
 @router.get('/logout')
-async def logout_user(response: Response, cookie = Header(None)) -> None:
-  token = _get_token_from_cookie(cookie)
-  if token and get_user_by_token(token):
+async def logout_user(
+  response: Response, cookie: str = Header(None),
+) -> SuccessResponse:
+  if token := _get_token_from_cookie(cookie):
     delete_session(token)
     response.delete_cookie(_SESSION_KEY_NAME)
     return SuccessResponse(success=True)
@@ -114,13 +124,8 @@ async def logout_user(response: Response, cookie = Header(None)) -> None:
 
 @router.post('/change-password')
 async def change_password_user(
-  request: ChangePasswordRequest, cookie = Header(None),
-) -> SuccessResponse | None:
-
-  token = _get_token_from_cookie(cookie)
-  if not (user := get_user_by_token(token)):
-    return SuccessResponse(success=False)
-
+  request: ChangePasswordRequest, user = Depends(auth_required),
+) -> SuccessResponse:
   errors = []
   if err := invalid_password(request.new):
     errors.append(err)
@@ -142,13 +147,8 @@ async def change_password_user(
 
 @router.post('/edit')
 async def edit_field_user(
-  request: EditUserFieldRequest, cookie = Header(None),
-) -> SuccessResponse | None:
-
-  token = _get_token_from_cookie(cookie)
-  if not (user := get_user_by_token(token)):
-    return SuccessResponse(success=False)
-
+  request: EditUserFieldRequest, user = Depends(auth_required),
+) -> SuccessResponse:
   errors = []
   validators = {
     'username': invalid_username, 'email': invalid_email,
@@ -175,29 +175,21 @@ async def edit_field_user(
 
 @router.post('/garage')
 async def add_garage_item(
-  item: GarageItem, cookie = Header(None)
+  item: GarageItem, user = Depends(auth_required),
 ) -> SuccessResponse:
-  token = _get_token_from_cookie(cookie)
-  if user := get_user_by_token(token):
-    success = add_user_garage_item(
-      user_id=user.id,
-      make=item.make_name,
-      model=item.name,
-      year=item.year,
-      relation=item.relation,
-    )
-    return SuccessResponse(success=success)
-  return SuccessResponse(success=False)
+  success = add_user_garage_item(
+    user_id=user.id,
+    make=item.make_name,
+    model=item.name,
+    year=item.year,
+    relation=item.relation,
+  )
+  return SuccessResponse(success=success)
 
 
 @router.post('/garage/delete')
 async def delete_garage_item(
-  request: DeleteGarageItemRequest, cookie = Header(None),
+  request: DeleteGarageItemRequest, user = Depends(auth_required),
 ) -> SuccessResponse:
-  token = _get_token_from_cookie(cookie)
-  if user := get_user_by_token(token):
-    success = delete_user_garage_item(
-      user_id=user.id, model_id=request.model_id,
-    )
-    return SuccessResponse(success=success)
-  return SuccessResponse(success=False)
+  success = delete_user_garage_item(user_id=user.id, model_id=request.model_id)
+  return SuccessResponse(success=success)

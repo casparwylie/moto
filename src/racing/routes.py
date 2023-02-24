@@ -26,7 +26,7 @@ async def racer(make: str, model: str, year: str) -> Racer | None:
 
 
 @router.get('/race')
-async def race(race_id: int) -> Race:
+async def race(race_id: int) -> Race | None:
   if race := get_race(race_id):
     return Race.from_service(*race)
 

@@ -1,7 +1,9 @@
 import hashlib
+from typing import cast
 from enum import Enum
 from uuid import uuid4
 from datetime import datetime
+from sqlalchemy import Row
 
 from src.database import engine as db
 from src.racing.service import get_racer
@@ -25,10 +27,10 @@ from src.user.queries import (
 ### UTILS ###
 #############
 
-def encrypt_password(password):
+def encrypt_password(password: str) -> str:
   return hashlib.sha512(password.encode('utf-8')).hexdigest()
 
-def generate_user_session_token():
+def generate_user_session_token() -> str:
   return uuid4().hex
 
 
@@ -37,13 +39,13 @@ def generate_user_session_token():
 ################
 
 
-def delete_session(token: str):
+def delete_session(token: str) -> None:
   with db.connect() as conn:
     conn.execute(build_delete_session_query(token))
     conn.commit()
 
 
-def get_user_by_token(token: str) -> str | None:
+def get_user_by_token(token: str) -> Row | None:
   with db.connect() as conn:
     user = conn.execute(
         build_get_user_by_token_query(token)
@@ -57,7 +59,7 @@ def expired_session(expires_timestamp) -> bool:
     datetime.fromtimestamp(expires_timestamp) < datetime.now()
   )
 
-def get_user_token(user_id: str, expires: int) -> str | None:
+def get_user_token(user_id: int, expires: int) -> str | None:
   with db.connect() as conn:
     session = conn.execute(
         build_get_user_session_query(user_id)
@@ -66,10 +68,10 @@ def get_user_token(user_id: str, expires: int) -> str | None:
       if expired_session(session.expire):
         delete_session(session.token)
       else:
-        return session.token
+        return cast(str, session.token)
     new_token = generate_user_session_token()
     timestamp_now = int(datetime.timestamp(datetime.now()))
-    session = conn.execute(
+    conn.execute(
       build_make_user_session_query(
         new_token,
         user_id,
@@ -80,14 +82,14 @@ def get_user_token(user_id: str, expires: int) -> str | None:
   return new_token
 
 
-def _authenticate(username: str, password: str) -> int:
+def _authenticate(username: str, password: str) -> None | int:
   encrypted_pass = encrypt_password(password)
   with db.connect() as conn:
     user = conn.execute(
         build_user_auth_query(username, encrypted_pass)
       ).one_or_none()
     if user:
-      return user.id
+      return cast(int, user.id)
 
 
 def login(username: str, password: str, expires: int) -> str | None:
@@ -162,14 +164,16 @@ def add_user_garage_item(
   if relation not in list(GarageItemRelations):
     return False
   with db.connect() as conn:
-    model = conn.execute(
+    result = conn.execute(
       build_get_model_id_query(make, model, year)
     ).first()
-    conn.execute(
-      build_add_user_garage_item_query(user_id, model.id, relation)
-    )
-    conn.commit()
-    return True
+    if result:
+      conn.execute(
+        build_add_user_garage_item_query(user_id, result.id, relation)
+      )
+      conn.commit()
+      return True
+    return False
 
 
 def delete_user_garage_item(user_id: int, model_id: int) -> bool:
@@ -179,6 +183,6 @@ def delete_user_garage_item(user_id: int, model_id: int) -> bool:
     return True
 
 
-def get_user_garage(user_id: int):
+def get_user_garage(user_id: int) -> list[Row]:
   with db.connect() as conn:
-    return conn.execute(build_get_user_garage_query(user_id)).all()
+    return list(conn.execute(build_get_user_garage_query(user_id)).all())

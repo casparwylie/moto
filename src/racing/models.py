@@ -56,8 +56,8 @@ class RaceListing(BaseModel):
 
   @classmethod
   def from_service(
-    cls, races_and_racers: Generator[tuple, None, None]
-  ) -> 'Race':
+    cls, races_and_racers: list[tuple[None | Row, list[Row]]]
+  ) -> 'RaceListing':
     return cls(
       races=[
         Race.from_service(*race_and_racer)

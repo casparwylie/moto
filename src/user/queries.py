@@ -88,7 +88,7 @@ def build_add_user_garage_item_query(user_id: int, model_id: int, relation: str)
   )
 
 
-def build_get_model_id_query(make: str, model: str, year: str | None):
+def build_get_model_id_query(make: str, model: str, year: int | None):
   filters = [
     racer_models_table.c.name == model,
     literal_column('make_name') == make,
