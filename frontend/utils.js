@@ -40,3 +40,9 @@ async function _get(url) {
 function getCookie(name) {
   return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
 }
+
+function resetForm(id) {
+  document.querySelectorAll(`#${id} input`).forEach(
+    (element) => element.value = ''
+  )
+}

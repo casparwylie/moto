@@ -185,7 +185,8 @@ class Profile {
   unsetAll() {
     profileRowUsername.innerHTML = '';
     profileRowEmail.innerHTML = '';
-    this.unsetChangePassword();
+    resetForm('profile-change-pass-container');
+    resetForm('profile-edit-container');
   }
 
   resetProfileDataView() {
@@ -228,7 +229,7 @@ class Profile {
       });
       if (response.success) {
         Informer.inform('Successfully changed!', 'good');
-        this.unsetChangePassword();
+        resetForm('profile-change-pass-container');
         this.toggleEditChangePassword();
       } else {
         response.errors.forEach((error) => Informer.inform(error, 'bad'));
@@ -254,7 +255,7 @@ class Profile {
         Informer.inform('Successfully updated!', 'good');
         this.userState.refresh();
         this.toggleEditProfileData();
-        inputElement.value = '';
+        resetForm('profile-edit-container');
       } else {
         response.errors.forEach((error) => Informer.inform(error, 'bad'));
       }
@@ -341,18 +342,12 @@ class SignupForm {
     Informer.inform('Successfully signed up! You can now login.', 'good');
     loginUsernameIn.value = signupUsernameIn.value;
     loginPasswordIn.value = signupPasswordIn.value;
-    this.resetForm();
+    resetForm('signup-form');
     _hide(signupWindow);
   }
 
   failedSignup(errors) {
     errors.forEach((error) => Informer.inform(error, 'bad'));
-  }
-
-  resetForm() {
-    document.querySelectorAll('#signup-form input').forEach(
-      (element) => element.value = ''
-    )
   }
 }
 
@@ -382,18 +377,12 @@ class LoginForm {
   async successLogin() {
     Informer.inform('Successfully logged in!', 'good');
     await this.userState.refresh();
-    this.resetForm();
+    resetForm('login-form');
     _hide(loginWindow);
   }
 
   failedLogin() {
     Informer.inform('Incorrect username or password.', 'bad');
-  }
-
-  resetForm() {
-    document.querySelectorAll('#login-form input').forEach(
-      (element) => element.value = ''
-    )
   }
 }
 
