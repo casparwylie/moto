@@ -55,7 +55,6 @@ def auth_required(response: Response, cookie: str = Header(None)) -> Row:
     raise HTTPException(status.HTTP_403_FORBIDDEN)
 
 
-
 ##############
 ### PUBLIC ###
 ##############
