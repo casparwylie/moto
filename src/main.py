@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory=_FE_DIR), name="static")
 
 
 @app.get("{path:path}")
-async def index(path) -> FileResponse:
+async def index(path: str) -> FileResponse:
     return FileResponse(os.path.join(_FE_DIR, "index.html"))
 
 
