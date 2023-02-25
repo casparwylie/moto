@@ -32,10 +32,6 @@ _SESSION_KEY_NAME = "session_token"
 _SESSION_EXPIRE = 86400 * 7 * 2  # 2 weeks
 
 
-class NotAuthenticatedException(Exception):
-    ...
-
-
 def _get_token_from_cookie(cookie: str | None) -> str | None:
     if cookie:
         parts = cookie.split("=")
@@ -150,7 +146,7 @@ async def edit_field_user(
         if err := validator(request.value):
             errors.append(err)
     else:
-        errors.append("Field unknown")
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
 
     if request.field == "username" and check_user_exists(request.value, ""):
         errors.append("Username already in use. Please use another.")
