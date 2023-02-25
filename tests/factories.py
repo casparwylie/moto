@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from sqlalchemy import Connection, Row, text
 
-from src.auth import SESSION_KEY_NAME, auth_optional, auth_required
+from src.auth import auth_optional, auth_required
 
 _insert_user_query = """
 INSERT INTO users
@@ -25,11 +25,11 @@ def encrypt_password(password: str) -> str:
 
 
 def make_auth_required(token: str) -> Row:
-    return auth_required(f"{SESSION_KEY_NAME}={token}")
+    return auth_required(token)
 
 
 def make_auth_optional(token: str) -> Row:
-    return auth_optional(f"{SESSION_KEY_NAME}={token}")
+    return auth_optional(token)
 
 
 def store_user(
