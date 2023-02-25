@@ -61,7 +61,7 @@ def auth_required(cookie: str = Header(None)) -> Row:
 
 
 @router.post("/signup")
-async def signup_user(request: SignUpRequest) -> SuccessResponse | None:
+async def signup_user(request: SignUpRequest) -> SuccessResponse:
     errors = []
     if err := invalid_username(request.username):
         errors.append(err)
@@ -86,7 +86,7 @@ async def signup_user(request: SignUpRequest) -> SuccessResponse | None:
 async def login_user(
     request: LoginRequest,
     response: Response,
-) -> SuccessResponse | None:
+) -> SuccessResponse:
     if token := login(request.username, request.password, _SESSION_EXPIRE):
         response.set_cookie(
             key=_SESSION_KEY_NAME,
@@ -98,7 +98,7 @@ async def login_user(
 
 
 @router.get("/garage")
-async def get_garage(user_id: int) -> UserGarageResponse | None:
+async def get_garage(user_id: int) -> UserGarageResponse:
     return UserGarageResponse.from_db(get_user_garage(user_id))
 
 
@@ -108,7 +108,7 @@ async def get_garage(user_id: int) -> UserGarageResponse | None:
 
 
 @router.get("")
-async def get_user(user=Depends(auth_required)) -> UserDataResponse | None:
+async def get_user(user=Depends(auth_required)) -> UserDataResponse:
     return UserDataResponse.from_db(user)
 
 

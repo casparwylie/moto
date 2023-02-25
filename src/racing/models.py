@@ -56,7 +56,8 @@ class RaceListing(BaseModel):
     ) -> "RaceListing":
         return cls(
             races=[
-                Race.from_service(*race_and_racer)
-                for race_and_racer in races_and_racers
+                Race.from_service(race, racers)
+                for race, racers in races_and_racers
+                if race and racers
             ]
         )
