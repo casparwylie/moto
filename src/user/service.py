@@ -55,7 +55,7 @@ def get_user_by_token(token: str) -> Row | None:
             return user
 
 
-def expired_session(expires_timestamp) -> bool:
+def expired_session(expires_timestamp: int) -> bool:
     return bool(datetime.fromtimestamp(expires_timestamp) < datetime.now())
 
 
@@ -143,7 +143,7 @@ def change_password(username: str, old: str, new: str) -> bool:
         return False
 
 
-def edit_user_field(user_id, field: str, value: str) -> bool:
+def edit_user_field(user_id: int, field: str, value: str) -> bool:
     if field not in _USER_EDITABLE_FIELDS:
         return False
     with db.connect() as conn:

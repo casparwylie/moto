@@ -71,7 +71,7 @@ class UserGarageResponse(BaseModel):
     items: list[GarageItem]
 
     @classmethod
-    def from_db(cls, data) -> "UserGarageResponse":
+    def from_db(cls, data: Row) -> "UserGarageResponse":
         return cls(items=[GarageItem.from_db(item) for item in data])
 
 

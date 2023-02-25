@@ -1,7 +1,7 @@
-from typing import cast
+from typing import Generator, cast
 
 import pytest
-from sqlalchemy import text
+from sqlalchemy import Connection, Row, text
 
 from src.racing.models import Race, RaceListing, Racer, SaveRequest
 from src.racing.routes import insight_popular_pairs, insight_recent_races
@@ -13,7 +13,7 @@ from tests.dummy_data import TEST_DATA_MAKES, TEST_DATA_MODELS
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clear_racers(db):
+def clear_racers(db: Connection) -> Generator:
     yield
     db.execute(text("DELETE FROM race_racers"))
     db.execute(text("DELETE FROM race_history"))
@@ -21,7 +21,7 @@ def clear_racers(db):
     db.commit()
 
 
-def _store_race(db, model_ids: list[int]) -> int:
+def _store_race(db: Connection, model_ids: list[int]) -> int:
     result = db.execute(text("INSERT INTO race_history VALUES()"))
     race_id = cast(int, result.lastrowid)
     for model_id in model_ids:
@@ -30,9 +30,9 @@ def _store_race(db, model_ids: list[int]) -> int:
     return race_id
 
 
-def racer_from_data(model_id):
+def _racer_from_data(model_id: int) -> Racer:
     data = TEST_DATA_MODELS[model_id]
-    make_name = TEST_DATA_MAKES[data["make"]]
+    make_name = TEST_DATA_MAKES[cast(int, data["make"])]
     return Racer(
         **data,
         model_id=model_id,
@@ -49,8 +49,8 @@ def racer_from_data(model_id):
 @pytest.mark.parametrize(
     "make,model,year,expected",
     (
-        ("MakeA", "Name 1", "", racer_from_data(1)),
-        ("MakeA", "Name 1", "2022", racer_from_data(1)),
+        ("MakeA", "Name 1", "", _racer_from_data(1)),
+        ("MakeA", "Name 1", "2022", _racer_from_data(1)),
         ("MakeA", "Name 1", "2023", None),
         ("MakeA", "Nam", "", None),
         ("MakeB", "Name 1", "", None),
@@ -59,7 +59,9 @@ def racer_from_data(model_id):
     ),
 )
 @pytest.mark.asyncio
-async def test_racer(db, make, model, year, expected):
+async def test_racer(
+    db: Connection, make: str, model: str, year: str, expected: Row | None
+) -> None:
     # When
     result = await route_racer(make=make, model=model, year=year)
 
@@ -68,7 +70,7 @@ async def test_racer(db, make, model, year, expected):
 
 
 @pytest.mark.asyncio
-async def test_race(db):
+async def test_race(db: Connection) -> None:
     # Given
     race_id_1 = _store_race(db, [3, 2])
     _store_race(db, [1, 2])
@@ -80,14 +82,14 @@ async def test_race(db):
     assert result == Race(
         race_id=race_id_1,
         racers=[
-            racer_from_data(3),
-            racer_from_data(2),
+            _racer_from_data(3),
+            _racer_from_data(2),
         ],
     )
 
 
 @pytest.mark.asyncio
-async def test_race_not_found(db):
+async def test_race_not_found(db: Connection) -> None:
     # When
     result = await route_race(2)
 
@@ -99,14 +101,14 @@ async def test_race_not_found(db):
 @pytest.mark.parametrize(
     "make,model,year,expected",
     (
-        ("MakeA", "Name 1", "", [racer_from_data(1)]),
+        ("MakeA", "Name 1", "", [_racer_from_data(1)]),
         (
             "MakeA",
             "Nam",
             "",
             [
-                racer_from_data(1),
-                racer_from_data(2),
+                _racer_from_data(1),
+                _racer_from_data(2),
             ],
         ),
         (
@@ -114,18 +116,20 @@ async def test_race_not_found(db):
             "",
             "",
             [
-                racer_from_data(4),
-                racer_from_data(5),
-                racer_from_data(6),
+                _racer_from_data(4),
+                _racer_from_data(5),
+                _racer_from_data(6),
             ],
         ),
-        ("Make", "Name 1", "2022", [racer_from_data(1)]),
+        ("Make", "Name 1", "2022", [_racer_from_data(1)]),
         ("MakeB", "Name 1", "", []),
         ("", "Name 1", "", []),
         ("", "", "", []),
     ),
 )
-async def test_search(db, make, model, year, expected):
+async def test_search(
+    db: Connection, make: str, model: str, year: str, expected: Row | None
+) -> None:
     # When
     result = await route_search(make=make, model=model, year=year)
 
@@ -134,7 +138,7 @@ async def test_search(db, make, model, year, expected):
 
 
 @pytest.mark.asyncio
-async def test_save(db):
+async def test_save(db: Connection) -> None:
     # Given
     request = SaveRequest(model_ids=[1, 2])
 
@@ -144,12 +148,12 @@ async def test_save(db):
     # Then
     assert result == Race(
         race_id=1,
-        racers=[racer_from_data(1), racer_from_data(2)],
+        racers=[_racer_from_data(1), _racer_from_data(2)],
     )
 
 
 @pytest.mark.asyncio
-async def test_get_popular_pairs(db):
+async def test_get_popular_pairs(db: Connection) -> None:
     # Given
     _store_race(db, [3, 2])
     _store_race(db, [3, 4])
@@ -166,15 +170,15 @@ async def test_get_popular_pairs(db):
             Race(
                 race_id=1,
                 racers=[
-                    racer_from_data(3),
-                    racer_from_data(2),
+                    _racer_from_data(3),
+                    _racer_from_data(2),
                 ],
             ),
             Race(
                 race_id=5,
                 racers=[
-                    racer_from_data(1),
-                    racer_from_data(2),
+                    _racer_from_data(1),
+                    _racer_from_data(2),
                 ],
             ),
         ],
@@ -182,7 +186,7 @@ async def test_get_popular_pairs(db):
 
 
 @pytest.mark.asyncio
-async def test_get_popular_pairs_creates_race(db):
+async def test_get_popular_pairs_creates_race(db: Connection) -> None:
     # Given
     _store_race(db, [3, 2, 5])
     _store_race(db, [3, 4])
@@ -199,15 +203,15 @@ async def test_get_popular_pairs_creates_race(db):
             Race(
                 race_id=6,  # Created
                 racers=[
-                    racer_from_data(2),
-                    racer_from_data(3),
+                    _racer_from_data(2),
+                    _racer_from_data(3),
                 ],
             ),
             Race(
                 race_id=5,
                 racers=[
-                    racer_from_data(1),
-                    racer_from_data(2),
+                    _racer_from_data(1),
+                    _racer_from_data(2),
                 ],
             ),
         ],
@@ -215,7 +219,7 @@ async def test_get_popular_pairs_creates_race(db):
 
 
 @pytest.mark.asyncio
-async def test_get_popular_pairs_multi_same_race(db):
+async def test_get_popular_pairs_multi_same_race(db: Connection) -> None:
     # Given
     _store_race(db, [1, 3, 5])
     _store_race(db, [3, 4, 1])
@@ -232,22 +236,22 @@ async def test_get_popular_pairs_multi_same_race(db):
             Race(
                 race_id=6,  # Created
                 racers=[
-                    racer_from_data(1),
-                    racer_from_data(3),
+                    _racer_from_data(1),
+                    _racer_from_data(3),
                 ],
             ),
             Race(
                 race_id=5,
                 racers=[
-                    racer_from_data(1),
-                    racer_from_data(5),
+                    _racer_from_data(1),
+                    _racer_from_data(5),
                 ],
             ),
             Race(
                 race_id=7,  # Created
                 racers=[
-                    racer_from_data(3),
-                    racer_from_data(5),
+                    _racer_from_data(3),
+                    _racer_from_data(5),
                 ],
             ),
         ],
@@ -255,7 +259,7 @@ async def test_get_popular_pairs_multi_same_race(db):
 
 
 @pytest.mark.asyncio
-async def test_get_recent_races(db):
+async def test_get_recent_races(db: Connection) -> None:
     _store_race(db, [1, 3, 5])
     _store_race(db, [3, 4, 1])
     _store_race(db, [3, 5, 1])
@@ -269,25 +273,25 @@ async def test_get_recent_races(db):
             Race(
                 race_id=1,
                 racers=[
-                    racer_from_data(1),
-                    racer_from_data(3),
-                    racer_from_data(5),
+                    _racer_from_data(1),
+                    _racer_from_data(3),
+                    _racer_from_data(5),
                 ],
             ),
             Race(
                 race_id=2,
                 racers=[
-                    racer_from_data(3),
-                    racer_from_data(4),
-                    racer_from_data(1),
+                    _racer_from_data(3),
+                    _racer_from_data(4),
+                    _racer_from_data(1),
                 ],
             ),
             Race(
                 race_id=3,
                 racers=[
-                    racer_from_data(3),
-                    racer_from_data(5),
-                    racer_from_data(1),
+                    _racer_from_data(3),
+                    _racer_from_data(5),
+                    _racer_from_data(1),
                 ],
             ),
         ],

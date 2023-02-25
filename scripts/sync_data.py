@@ -1,9 +1,11 @@
 import enum
 import os
 import sys
+from typing import cast
 
 import requests
-from sqlalchemy import create_engine, text
+from sqlalchemy import Connection, Row, create_engine, text
+from sqlalchemy.engine.base import Engine
 
 _MAKES_TRUTH = (
     "Honda",
@@ -54,7 +56,15 @@ INSERT INTO racer_makes (name) VALUES ('{name}')
 """
 
 
-class LocalDb:
+class Env:
+    db_user: str
+    db_password: str
+    host: str
+    port: str
+    database: str
+
+
+class LocalDb(Env):
     db_user = "user"
     db_password = "password"
     host = "127.0.0.1"
@@ -62,15 +72,15 @@ class LocalDb:
     database = "moto"
 
 
-class ProdDb:
-    db_user = os.environ.get("MOTO_DB_USER_PROD")
-    db_password = os.environ.get("MOTO_DB_PASS_PROD")
+class ProdDb(Env):
+    db_user = os.environ.get("MOTO_DB_USER_PROD", "")
+    db_password = os.environ.get("MOTO_DB_PASS_PROD", "")
     host = "108.61.173.62"
     port = "3307"
     database = "moto"
 
 
-def _create_engine(env):
+def _create_engine(env: Env) -> Engine:
     url = DB_URL.format(
         user=env.db_user,
         password=env.db_password,
@@ -81,12 +91,12 @@ def _create_engine(env):
     return create_engine(url)
 
 
-def get_env():
+def get_env() -> Env:
     match sys.argv[-2]:
         case "production":
-            return ProdDb
+            return cast(Env, ProdDb)
         case _:
-            return LocalDb
+            return cast(Env, LocalDb)
 
 
 engine = _create_engine(get_env())
@@ -97,11 +107,11 @@ def find_number_by_metric(value: str, metric: str) -> int | None:
         return int(float(value[0 : value.lower().find(metric.lower())].strip()))
 
 
-def get_makes_from_db(conn):
+def get_makes_from_db(conn: Connection) -> list[Row]:
     return list(conn.execute(text(select_makes_query)))
 
 
-def get_scanned_makes_from_db(conn):
+def get_scanned_makes_from_db(conn: Connection) -> list[Row]:
     return list(conn.execute(text(select_scanned_makes_query)))
 
 
@@ -130,17 +140,17 @@ STYLE_MAP = {
 }
 
 
-def get_style_from_api_type(given_type):
+def get_style_from_api_type(given_type: str) -> str:
     global unknown_styles
     for terms, style in STYLE_MAP.items():
         for term in terms:
             if term.lower() in given_type.lower():
-                return style.value
+                return cast(str, style.value)
     unknown_styles.add(given_type)
     return RacerStyles.RETRO.value
 
 
-def prepare_model(data, make_id):
+def prepare_model(data: dict, make_id: int) -> dict:
     weight = None
     weight_type = None
     if weight := data.get("total_weight"):
@@ -150,21 +160,20 @@ def prepare_model(data, make_id):
     elif weight := data.get("dry_weight"):
         weight_type = "dry"
     weight = find_number_by_metric(weight, "kg")
-    data.get("make").strip()
-    model = data.get("model").strip()
+    model = data.get("model", "").strip()
     return dict(
         name=model,
         make=make_id,
-        style=get_style_from_api_type(data.get("type").strip()),
-        year=data.get("year").strip(),
-        power=find_number_by_metric(data.get("power"), "hp"),
-        torque=find_number_by_metric(data.get("torque"), "nm"),
+        style=get_style_from_api_type(data.get("type", "").strip()),
+        year=data.get("year", "").strip(),
+        power=find_number_by_metric(data.get("power", ""), "hp"),
+        torque=find_number_by_metric(data.get("torque", ""), "nm"),
         weight=weight,
         weight_type=weight_type,
     )
 
 
-def run_sync(makes, conn):
+def run_sync(makes: list[Row], conn: Connection) -> None:
     for make in makes:
         print(f"\n\nFetching models for {make.name}...")
         models_data = get_models_by_make_api(make.name)
@@ -178,13 +187,13 @@ def run_sync(makes, conn):
             print("Failed to find model! Skipping...")
 
 
-def sync_models(models, conn):
+def sync_models(models: list[Row], conn: Connection) -> None:
     for model in models:
         query = insert_racer_query.format(**model)
         conn.execute(text(query))
 
 
-def get_models_by_make_api(make_name):
+def get_models_by_make_api(make_name: str) -> list[dict]:
     all_data = []
     result_length = M_API_PAGE_LENGTH
     offset = 0
@@ -201,15 +210,15 @@ def get_models_by_make_api(make_name):
     return all_data
 
 
-def clear_all(conn):
+def clear_all(conn: Connection) -> None:
     conn.execute(text(delete_racers_query))
 
 
-def add_make(name, conn):
+def add_make(name: str, conn: Connection) -> None:
     conn.execute(text(add_make_query.format(name=name)))
 
 
-def factory_run():
+def factory_run() -> None:
     """Deletes all models and rescans them"""
     with engine.connect() as conn:
         clear_all(conn)
@@ -220,7 +229,7 @@ def factory_run():
         print("Done!")
 
 
-def update_run():
+def update_run() -> None:
     """Scans newly added makes"""
     with engine.connect() as conn:
         makes = get_makes_from_db(conn)
@@ -236,7 +245,7 @@ def update_run():
             print("Nothing to sync.")
 
 
-def sync_makes_run():
+def sync_makes_run() -> None:
     with engine.connect() as conn:
         make_names = [make.name for make in get_makes_from_db(conn)]
         to_add = [make for make in _MAKES_TRUTH if make not in make_names]
@@ -250,7 +259,7 @@ def sync_makes_run():
             print("Nothing to add.")
 
 
-def main():
+def main() -> None:
     sys.argv[-1]
     match sys.argv[-1]:
         case "factory":

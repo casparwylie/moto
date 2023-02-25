@@ -38,7 +38,7 @@ def _get_token_from_cookie(cookie: str | None) -> str | None:
         return parts[1] if parts[0] == _SESSION_KEY_NAME else None
 
 
-def auth_required(response: Response, cookie: str = Header(None)) -> Row:
+def auth_required(cookie: str = Header(None)) -> Row:
     if token := _get_token_from_cookie(cookie):
         if user := get_user_by_token(token):
             return user
@@ -98,7 +98,7 @@ async def get_garage(user_id: int) -> UserGarageResponse:
 
 
 @router.get("")
-async def get_user(user=Depends(auth_required)) -> UserDataResponse:
+async def get_user(user: Row = Depends(auth_required)) -> UserDataResponse:
     return UserDataResponse.from_db(user)
 
 
@@ -117,7 +117,7 @@ async def logout_user(
 @router.post("/change-password")
 async def change_password_user(
     request: ChangePasswordRequest,
-    user=Depends(auth_required),
+    user: Row = Depends(auth_required),
 ) -> SuccessResponse:
     errors = []
     if err := invalid_password(request.new):
@@ -135,7 +135,7 @@ async def change_password_user(
 @router.post("/edit")
 async def edit_field_user(
     request: EditUserFieldRequest,
-    user=Depends(auth_required),
+    user: Row = Depends(auth_required),
 ) -> SuccessResponse:
     errors = []
     validators = {
@@ -161,7 +161,7 @@ async def edit_field_user(
 @router.post("/garage")
 async def add_garage_item(
     item: GarageItem,
-    user=Depends(auth_required),
+    user: Row = Depends(auth_required),
 ) -> SuccessResponse:
     success = add_user_garage_item(
         user_id=user.id,
@@ -176,7 +176,7 @@ async def add_garage_item(
 @router.post("/garage/delete")
 async def delete_garage_item(
     request: DeleteGarageItemRequest,
-    user=Depends(auth_required),
+    user: Row = Depends(auth_required),
 ) -> SuccessResponse:
     success = delete_user_garage_item(user_id=user.id, model_id=request.model_id)
     return SuccessResponse(success=success)

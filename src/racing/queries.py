@@ -1,4 +1,13 @@
-from sqlalchemy import distinct, insert, literal_column, select, text
+from sqlalchemy import (
+    Insert,
+    Select,
+    Text,
+    distinct,
+    insert,
+    literal_column,
+    select,
+    text,
+)
 
 from src.database import (
     race_history_table,
@@ -8,7 +17,7 @@ from src.database import (
 )
 
 
-def build_search_racer_query(make: str, model: str, year: str):
+def build_search_racer_query(make: str, model: str, year: str) -> Select:
     return (
         select(
             racer_models_table.columns,
@@ -23,7 +32,7 @@ def build_search_racer_query(make: str, model: str, year: str):
     )
 
 
-def build_get_race_racers_query(race_id: int):
+def build_get_race_racers_query(race_id: int) -> Select:
     return (
         select(
             racer_models_table,
@@ -40,11 +49,13 @@ def build_get_race_racers_query(race_id: int):
     )
 
 
-def build_get_race_query(race_id):
+def build_get_race_query(race_id: int) -> Select:
     return select(race_history_table).where(race_history_table.c.id == race_id)
 
 
-def build_get_racer_by_make_model_query(make: str, model: str, year: str | None):
+def build_get_racer_by_make_model_query(
+    make: str, model: str, year: str | None
+) -> Select:
     filters = [
         racer_models_table.c.name == model,
         literal_column("make_name") == make,
@@ -61,17 +72,17 @@ def build_get_racer_by_make_model_query(make: str, model: str, year: str | None)
     )
 
 
-def build_insert_race_query():
+def build_insert_race_query() -> Insert:
     return insert(race_history_table)
 
 
-def build_insert_race_racers_query(race_id: int, model_ids: list[int]):
+def build_insert_race_racers_query(race_id: int, model_ids: list[int]) -> Insert:
     return insert(race_racers_table).values(
         [dict(race_id=race_id, model_id=model_id) for model_id in model_ids]
     )
 
 
-def build_popular_pairs_query(limit):
+def build_popular_pairs_query(limit: int) -> Text:
     return text(
         f"""
     SELECT
@@ -101,13 +112,13 @@ def build_popular_pairs_query(limit):
     )
 
 
-def build_most_recent_races_query():
+def build_most_recent_races_query() -> Select:
     return select(race_history_table.columns).order_by(
         race_history_table.c.created_at.desc()
     )
 
 
-def build_check_race_by_racers_query(model_ids: list[int]):
+def build_check_race_by_racers_query(model_ids: list[int]) -> Text:
     return text(
         f"""
       SELECT race_id

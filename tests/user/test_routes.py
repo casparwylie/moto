@@ -1,11 +1,12 @@
 import hashlib
 from datetime import datetime
-from typing import cast
+from typing import Generator, cast
 from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
-from sqlalchemy import text
+from freezegun.api import FrozenDateTimeFactory
+from sqlalchemy import Connection, Row, text
 
 from src.user.models import (
     ChangePasswordRequest,
@@ -75,7 +76,7 @@ def encrypt_password(password: str) -> str:
 
 
 @pytest.fixture(scope="function", autouse=True)
-def clear(db):
+def clear(db: Connection) -> Generator:
     yield
     db.execute(text("DELETE FROM user_garage"))
     db.execute(text("DELETE FROM user_sessions"))
@@ -84,7 +85,7 @@ def clear(db):
 
 
 def _store_user(
-    db,
+    db: Connection,
     username: str = "user123",
     email: str = "test@gmail.com",
     password: str = "pass123",
@@ -103,7 +104,7 @@ def _store_user(
 
 
 def _store_user_session(
-    db,
+    db: Connection,
     user_id: int,
     expire: int | None = None,
 ) -> str:
@@ -123,11 +124,11 @@ def _store_user_session(
 
 
 def _store_garage_item(
-    db,
+    db: Connection,
     user_id: int,
     model_id: int,
     relation: str,
-):
+) -> None:
     db.execute(
         text(
             _insert_user_garage_query.format(
@@ -140,38 +141,41 @@ def _store_garage_item(
     db.commit()
 
 
-def _make_auth_required(token: str):
+def _make_auth_required(token: str) -> Row:
     return auth_required(f"{_SESSION_KEY_NAME}={token}")
 
 
-def _get_first_user_session(db):
+def _get_first_user_session(db: Connection) -> Row:
     return db.execute(text("SELECT * FROM user_sessions")).first()
 
 
-def _get_first_user(db):
+def _get_first_user(db: Connection) -> Row:
     return db.execute(text("SELECT * FROM users")).first()
 
 
-def _get_user_garage(db, user_id: int):
+def _get_user_garage(db: Connection, user_id: int) -> list[Row]:
     return list(
         db.execute(text(f"SELECT * FROM user_garage WHERE user_id = {user_id}"))
     )
 
 
-def _get_user_count(db):
-    return db.execute(text("SELECT COUNT(*) as count FROM users")).one_or_none().count
+def _get_user_count(db: Connection) -> int:
+    return cast(
+        int, db.execute(text("SELECT COUNT(*) as count FROM users")).one_or_none().count
+    )
 
 
-def _get_user_session_count(db):
-    return (
+def _get_user_session_count(db: Connection) -> int:
+    return cast(
+        int,
         db.execute(text("SELECT COUNT(*) as count FROM user_sessions"))
         .one_or_none()
-        .count
+        .count,
     )
 
 
 @pytest.mark.asyncio
-async def test_get_user(db):
+async def test_get_user(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id=user_id)
@@ -188,17 +192,17 @@ async def test_get_user(db):
 
 
 @pytest.mark.asyncio
-async def test_get_user_no_token(db):
+async def test_get_user_no_token(db: Connection) -> None:
     # Given
     _store_user(db)
 
     # Then
     with pytest.raises(HTTPException):
-        result = await get_user(user=_make_auth_required("bad"))
+        await get_user(user=_make_auth_required("bad"))
 
 
 @pytest.mark.asyncio
-async def test_sign_up_success(db):
+async def test_sign_up_success(db: Connection) -> None:
     # Given
     signup_request = SignUpRequest(
         username="user123", email="test@gmail.com", password="123456"
@@ -215,7 +219,7 @@ async def test_sign_up_success(db):
 
 
 @pytest.mark.asyncio
-async def test_sign_up_user_exists_username(db):
+async def test_sign_up_user_exists_username(db: Connection) -> None:
     # Given
     _store_user(db)
     signup_request = SignUpRequest(
@@ -232,7 +236,7 @@ async def test_sign_up_user_exists_username(db):
 
 
 @pytest.mark.asyncio
-async def test_sign_up_user_exists_email(db):
+async def test_sign_up_user_exists_email(db: Connection) -> None:
     # Given
     _store_user(db)
     signup_request = SignUpRequest(
@@ -249,7 +253,7 @@ async def test_sign_up_user_exists_email(db):
 
 
 @pytest.mark.asyncio
-async def test_sign_up_validations(db):
+async def test_sign_up_validations(db: Connection) -> None:
     # Given
     signup_request = SignUpRequest(username="bad", email="bad", password="1234")
     # When
@@ -273,7 +277,7 @@ async def test_sign_up_validations(db):
 
 
 @pytest.mark.asyncio
-async def test_login_user(db, freezer):
+async def test_login_user(db: Connection, freezer: FrozenDateTimeFactory) -> None:
     # Given
     user_id = _store_user(db)
     mock_response = MockResponse()
@@ -303,7 +307,9 @@ async def test_login_user(db, freezer):
     ),
 )
 @pytest.mark.asyncio
-async def test_login_user_bad_credentials(db, username: str, password: str) -> None:
+async def test_login_user_bad_credentials(
+    db: Connection, username: str, password: str
+) -> None:
     # Given
     _store_user(db)
     mock_response = MockResponse()
@@ -319,7 +325,10 @@ async def test_login_user_bad_credentials(db, username: str, password: str) -> N
 
 
 @pytest.mark.asyncio
-async def test_login_user_existing_session_not_expired(db, freezer) -> None:
+async def test_login_user_existing_session_not_expired(
+    db: Connection, freezer: FrozenDateTimeFactory
+) -> None:
+
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -339,7 +348,9 @@ async def test_login_user_existing_session_not_expired(db, freezer) -> None:
 
 
 @pytest.mark.asyncio
-async def test_login_user_existing_session_expired(db, freezer) -> None:
+async def test_login_user_existing_session_expired(
+    db: Connection, freezer: FrozenDateTimeFactory
+) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id, expire=100)
@@ -359,7 +370,7 @@ async def test_login_user_existing_session_expired(db, freezer) -> None:
 
 
 @pytest.mark.asyncio
-async def test_logout_user(db) -> None:
+async def test_logout_user(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -376,7 +387,7 @@ async def test_logout_user(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_logout_user_fails(db) -> None:
+async def test_logout_user_fails(db: Connection) -> None:
     # Given
     mock_response = MockResponse()
 
@@ -389,7 +400,7 @@ async def test_logout_user_fails(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_change_password_user(db) -> None:
+async def test_change_password_user(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -411,7 +422,7 @@ async def test_change_password_user(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_change_password_user_bad_auth(db) -> None:
+async def test_change_password_user_bad_auth(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -436,7 +447,7 @@ async def test_change_password_user_bad_auth(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_change_password_user_invalid(db) -> None:
+async def test_change_password_user_invalid(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -465,7 +476,7 @@ async def test_change_password_user_invalid(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user(db) -> None:
+async def test_edit_field_user(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -483,26 +494,25 @@ async def test_edit_field_user(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user_bad_field(db) -> None:
+async def test_edit_field_user_bad_field(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
     edit_field_request = EditUserFieldRequest(field="bad", value="user123456")
 
-    # When
-    result = await edit_field_user(
-        edit_field_request,
-        user=_make_auth_required(token),
-    )
-
     # Then
-    assert result == SuccessResponse(success=False, errors=["Field unknown"])
+    with pytest.raises(HTTPException):
+        result = await edit_field_user(
+            edit_field_request,
+            user=_make_auth_required(token),
+        )
+
     assert _get_first_user(db).username == "user123"
     assert _get_first_user(db).email == "test@gmail.com"
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user_username_exists(db) -> None:
+async def test_edit_field_user_username_exists(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     _store_user(db, username="othername")
@@ -524,7 +534,7 @@ async def test_edit_field_user_username_exists(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user_email_exists(db) -> None:
+async def test_edit_field_user_email_exists(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     _store_user(db, email="other@gmail.com")
@@ -547,7 +557,7 @@ async def test_edit_field_user_email_exists(db) -> None:
 
 @pytest.mark.parametrize("relation", list(GarageItemRelations))
 @pytest.mark.asyncio
-async def test_add_garage_item(db, relation: str) -> None:
+async def test_add_garage_item(db: Connection, relation: str) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -574,7 +584,7 @@ async def test_add_garage_item(db, relation: str) -> None:
 
 
 @pytest.mark.asyncio
-async def test_add_garage_item_bad_relation(db) -> None:
+async def test_add_garage_item_bad_relation(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -598,7 +608,7 @@ async def test_add_garage_item_bad_relation(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_garage(db) -> None:
+async def test_get_garage(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     other_user_id = _store_user(db)
@@ -639,7 +649,7 @@ async def test_get_garage(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_delete_garage_item(db) -> None:
+async def test_delete_garage_item(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -664,7 +674,7 @@ async def test_delete_garage_item(db) -> None:
 
 
 @pytest.mark.asyncio
-async def test_delete_garage_item_not_exists(db) -> None:
+async def test_delete_garage_item_not_exists(db: Connection) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)

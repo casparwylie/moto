@@ -4,9 +4,7 @@ from email_validator import EmailNotValidError
 from email_validator import validate_email as _validate_email
 
 
-def invalid_email(email):
-    print(email)
-
+def invalid_email(email: str) -> bool | str:
     try:
         _validate_email(email, check_deliverability=True)
         return False
@@ -14,7 +12,7 @@ def invalid_email(email):
         return "Invalid email provided."
 
 
-def invalid_username(username):
+def invalid_username(username: str) -> bool | str:
     if (30 > len(username) > 3) and (re.match(r"^[\w][\w_.-]+$", username)):
         return False
     else:
@@ -24,7 +22,7 @@ def invalid_username(username):
       and contain normal characters."""
 
 
-def invalid_password(password):
+def invalid_password(password: str) -> bool | str:
     if 50 > len(password) > 5:
         return False
     else:
