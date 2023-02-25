@@ -1,4 +1,5 @@
 from sqlalchemy import text
+from typing import cast
 import pytest
 
 from src.racing.routes import (
@@ -31,7 +32,7 @@ def clear_racers(db):
 
 def _store_race(db, model_ids: list[int]) -> int:
     result = db.execute(text("INSERT INTO race_history VALUES()"))
-    race_id = result.lastrowid
+    race_id = cast(int, result.lastrowid)
     for model_id in model_ids:
         db.execute(text(f"INSERT INTO race_racers VALUES({race_id}, {model_id})"))
     db.commit()

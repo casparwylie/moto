@@ -1,5 +1,6 @@
 import pytest
 import hashlib
+from typing import cast
 from uuid import uuid4
 from datetime import datetime
 
@@ -55,10 +56,10 @@ VALUES({user_id}, {model_id}, '{relation}')
 
 class MockResponse:
     def __init__(self) -> None:
-        self.cookie_key = None
-        self.cookie_value = None
-        self.cookie_deleted = False
-        self.expires = None
+        self.cookie_key: str | None  = None
+        self.cookie_value: str | None = None
+        self.cookie_deleted: bool = False
+        self.expires: int | None = None
 
     def set_cookie(self, key: str, value: str, expires: int) -> None:
         self.cookie_key = key
@@ -98,14 +99,14 @@ def _store_user(
         )
     )
     db.commit()
-    return result.lastrowid
+    return cast(int, result.lastrowid)
 
 
 def _store_user_session(
     db,
     user_id: int,
     expire: int | None = None,
-) -> int:
+) -> str:
     token = uuid4().hex
     expire = expire or int(datetime.timestamp(datetime.now())) + 100
     result = db.execute(
@@ -302,7 +303,7 @@ async def test_login_user(db, freezer):
     ),
 )
 @pytest.mark.asyncio
-async def test_login_user_bad_credentials(db, username: str, password: str):
+async def test_login_user_bad_credentials(db, username: str, password: str) -> None:
     # Given
     user_id = _store_user(db)
     mock_response = MockResponse()
@@ -318,7 +319,7 @@ async def test_login_user_bad_credentials(db, username: str, password: str):
 
 
 @pytest.mark.asyncio
-async def test_login_user_existing_session_not_expired(db, freezer):
+async def test_login_user_existing_session_not_expired(db, freezer) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -338,7 +339,7 @@ async def test_login_user_existing_session_not_expired(db, freezer):
 
 
 @pytest.mark.asyncio
-async def test_login_user_existing_session_expired(db, freezer):
+async def test_login_user_existing_session_expired(db, freezer) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id, expire=100)
@@ -358,7 +359,7 @@ async def test_login_user_existing_session_expired(db, freezer):
 
 
 @pytest.mark.asyncio
-async def test_logout_user(db):
+async def test_logout_user(db) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -375,7 +376,7 @@ async def test_logout_user(db):
 
 
 @pytest.mark.asyncio
-async def test_logout_user_fails(db):
+async def test_logout_user_fails(db) -> None:
     # Given
     mock_response = MockResponse()
 
@@ -388,7 +389,7 @@ async def test_logout_user_fails(db):
 
 
 @pytest.mark.asyncio
-async def test_change_password_user(db):
+async def test_change_password_user(db) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -410,7 +411,7 @@ async def test_change_password_user(db):
 
 
 @pytest.mark.asyncio
-async def test_change_password_user_bad_auth(db):
+async def test_change_password_user_bad_auth(db) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -435,7 +436,7 @@ async def test_change_password_user_bad_auth(db):
 
 
 @pytest.mark.asyncio
-async def test_change_password_user_invalid(db):
+async def test_change_password_user_invalid(db) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -464,7 +465,7 @@ async def test_change_password_user_invalid(db):
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user(db):
+async def test_edit_field_user(db) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -482,7 +483,7 @@ async def test_edit_field_user(db):
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user_bad_field(db):
+async def test_edit_field_user_bad_field(db) -> None:
     # Given
     user_id = _store_user(db)
     token = _store_user_session(db, user_id)
@@ -501,7 +502,7 @@ async def test_edit_field_user_bad_field(db):
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user_username_exists(db):
+async def test_edit_field_user_username_exists(db) -> None:
     # Given
     user_id = _store_user(db)
     _store_user(db, username="othername")
@@ -523,7 +524,7 @@ async def test_edit_field_user_username_exists(db):
 
 
 @pytest.mark.asyncio
-async def test_edit_field_user_email_exists(db):
+async def test_edit_field_user_email_exists(db) -> None:
     # Given
     user_id = _store_user(db)
     _store_user(db, email="other@gmail.com")

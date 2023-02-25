@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, Response, APIRouter, Header
+from sqlalchemy import Row
 
 from src.user.validation import (
     invalid_username,
@@ -47,7 +48,7 @@ def _get_token_from_cookie(cookie: str | None) -> str | None:
         return parts[1] if parts[0] == _SESSION_KEY_NAME else None
 
 
-def auth_required(cookie: str = Header(None)):
+def auth_required(cookie: str = Header(None)) -> Row:
     if token := _get_token_from_cookie(cookie):
         if user := get_user_by_token(token):
             return user
