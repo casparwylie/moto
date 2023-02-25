@@ -52,6 +52,7 @@ def auth_required(response: Response, cookie: str = Header(None)) -> Row:
     if token := _get_token_from_cookie(cookie):
         if user := get_user_by_token(token):
             return user
+    return None
     raise HTTPException(status.HTTP_403_FORBIDDEN)
 
 
