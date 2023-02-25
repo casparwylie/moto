@@ -1,5 +1,3 @@
-from typing import Generator
-
 from pydantic import BaseModel
 from sqlalchemy import Row
 

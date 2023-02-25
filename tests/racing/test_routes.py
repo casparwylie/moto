@@ -71,7 +71,7 @@ async def test_racer(db, make, model, year, expected):
 async def test_race(db):
     # Given
     race_id_1 = _store_race(db, [3, 2])
-    race_id_2 = _store_race(db, [1, 2])
+    _store_race(db, [1, 2])
 
     # When
     result = await route_race(race_id_1)
@@ -151,11 +151,11 @@ async def test_save(db):
 @pytest.mark.asyncio
 async def test_get_popular_pairs(db):
     # Given
-    race_id_1 = _store_race(db, [3, 2])
-    race_id_2 = _store_race(db, [3, 4])
-    race_id_3 = _store_race(db, [3, 2, 1])
-    race_id_4 = _store_race(db, [3, 6, 2])
-    race_id_5 = _store_race(db, [1, 2])
+    _store_race(db, [3, 2])
+    _store_race(db, [3, 4])
+    _store_race(db, [3, 2, 1])
+    _store_race(db, [3, 6, 2])
+    _store_race(db, [1, 2])
 
     # When
     results = await insight_popular_pairs()
@@ -184,11 +184,11 @@ async def test_get_popular_pairs(db):
 @pytest.mark.asyncio
 async def test_get_popular_pairs_creates_race(db):
     # Given
-    race_id_1 = _store_race(db, [3, 2, 5])
-    race_id_2 = _store_race(db, [3, 4])
-    race_id_3 = _store_race(db, [3, 2, 1])
-    race_id_4 = _store_race(db, [3, 6, 2])
-    race_id_5 = _store_race(db, [1, 2])
+    _store_race(db, [3, 2, 5])
+    _store_race(db, [3, 4])
+    _store_race(db, [3, 2, 1])
+    _store_race(db, [3, 6, 2])
+    _store_race(db, [1, 2])
 
     # When
     results = await insight_popular_pairs()
@@ -217,11 +217,11 @@ async def test_get_popular_pairs_creates_race(db):
 @pytest.mark.asyncio
 async def test_get_popular_pairs_multi_same_race(db):
     # Given
-    race_id_1 = _store_race(db, [1, 3, 5])
-    race_id_2 = _store_race(db, [3, 4, 1])
-    race_id_3 = _store_race(db, [3, 5, 1])
-    race_id_4 = _store_race(db, [3, 1, 2])
-    race_id_5 = _store_race(db, [1, 5])
+    _store_race(db, [1, 3, 5])
+    _store_race(db, [3, 4, 1])
+    _store_race(db, [3, 5, 1])
+    _store_race(db, [3, 1, 2])
+    _store_race(db, [1, 5])
 
     # When
     results = await insight_popular_pairs()
@@ -256,9 +256,9 @@ async def test_get_popular_pairs_multi_same_race(db):
 
 @pytest.mark.asyncio
 async def test_get_recent_races(db):
-    race_id_1 = _store_race(db, [1, 3, 5])
-    race_id_2 = _store_race(db, [3, 4, 1])
-    race_id_3 = _store_race(db, [3, 5, 1])
+    _store_race(db, [1, 3, 5])
+    _store_race(db, [3, 4, 1])
+    _store_race(db, [3, 5, 1])
 
     # When
     results = await insight_recent_races()

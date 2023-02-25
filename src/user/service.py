@@ -114,7 +114,7 @@ def signup(username: str, password: str, email: str) -> None:
     encrypted_pass = encrypt_password(password)
     with db.connect() as conn:
         user = conn.execute(build_signup_query(username, encrypted_pass, email))
-        user_id = user.lastrowid
+        user.lastrowid
         conn.commit()
 
 

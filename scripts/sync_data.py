@@ -150,7 +150,7 @@ def prepare_model(data, make_id):
     elif weight := data.get("dry_weight"):
         weight_type = "dry"
     weight = find_number_by_metric(weight, "kg")
-    make = data.get("make").strip()
+    data.get("make").strip()
     model = data.get("model").strip()
     return dict(
         name=model,
@@ -251,7 +251,7 @@ def sync_makes_run():
 
 
 def main():
-    option = sys.argv[-1]
+    sys.argv[-1]
     match sys.argv[-1]:
         case "factory":
             factory_run()

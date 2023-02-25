@@ -10,7 +10,7 @@ def invalid_email(email):
     try:
         _validate_email(email, check_deliverability=True)
         return False
-    except EmailNotValidError as _:
+    except EmailNotValidError:
         return "Invalid email provided."
 
 

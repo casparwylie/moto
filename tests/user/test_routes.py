@@ -4,6 +4,7 @@ from typing import cast
 from uuid import uuid4
 
 import pytest
+from fastapi import HTTPException
 from sqlalchemy import text
 
 from src.user.models import (
@@ -21,7 +22,6 @@ from src.user.models import (
 from src.user.routes import (
     _SESSION_EXPIRE,
     _SESSION_KEY_NAME,
-    NotAuthenticatedException,
     add_garage_item,
     auth_required,
     change_password_user,
@@ -190,10 +190,10 @@ async def test_get_user(db):
 @pytest.mark.asyncio
 async def test_get_user_no_token(db):
     # Given
-    user_id = _store_user(db)
+    _store_user(db)
 
     # Then
-    with pytest.raises(NotAuthenticatedException):
+    with pytest.raises(HTTPException):
         result = await get_user(user=_make_auth_required("bad"))
 
 
@@ -305,7 +305,7 @@ async def test_login_user(db, freezer):
 @pytest.mark.asyncio
 async def test_login_user_bad_credentials(db, username: str, password: str) -> None:
     # Given
-    user_id = _store_user(db)
+    _store_user(db)
     mock_response = MockResponse()
     login_request = LoginRequest(username=username, password=password)
 

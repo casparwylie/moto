@@ -1,5 +1,3 @@
-from typing import Generator
-
 from sqlalchemy import Row
 
 from src.database import engine as db
