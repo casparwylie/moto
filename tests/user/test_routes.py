@@ -194,7 +194,7 @@ async def test_get_user_no_token(db):
 
     # Then
     with pytest.raises(HTTPException):
-        result = await get_user(user=_make_auth_required("bad"))
+        await get_user(user=_make_auth_required("bad"))
 
 
 @pytest.mark.asyncio
