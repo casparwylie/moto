@@ -1,14 +1,12 @@
-import hashlib
 from datetime import datetime
 from typing import Generator, cast
-from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
 from freezegun.api import FrozenDateTimeFactory
 from sqlalchemy import Connection, Row, text
 
-from src.auth import SESSION_KEY_NAME, auth_required
+from src.auth import SESSION_KEY_NAME
 from src.user.models import (
     ChangePasswordRequest,
     DeleteGarageItemRequest,
@@ -34,18 +32,12 @@ from src.user.routes import (
     signup_user,
 )
 from src.user.service import GarageItemRelations
-
-_insert_user_query = """
-INSERT INTO users
-  (username, email, password)
-VALUES('{username}', '{email}', '{password}')
-"""
-
-_insert_user_session_query = """
-INSERT INTO user_sessions
-  (token, user_id, expire)
-VALUES('{token}', '{user_id}', '{expire}')
-"""
+from tests.factories import (
+    encrypt_password,
+    make_auth_required,
+    store_user,
+    store_user_session,
+)
 
 _insert_user_garage_query = """
 INSERT INTO user_garage
@@ -70,10 +62,6 @@ class MockResponse:
         self.cookie_deleted = True
 
 
-def encrypt_password(password: str) -> str:
-    return hashlib.sha512(password.encode("utf-8")).hexdigest()
-
-
 @pytest.fixture(scope="function", autouse=True)
 def clear(db: Connection) -> Generator:
     yield
@@ -81,45 +69,6 @@ def clear(db: Connection) -> Generator:
     db.execute(text("DELETE FROM user_sessions"))
     db.execute(text("DELETE FROM users"))
     db.commit()
-
-
-def _store_user(
-    db: Connection,
-    username: str = "user123",
-    email: str = "test@gmail.com",
-    password: str = "pass123",
-) -> int:
-    result = db.execute(
-        text(
-            _insert_user_query.format(
-                username=username,
-                email=email,
-                password=encrypt_password(password),
-            )
-        )
-    )
-    db.commit()
-    return cast(int, result.lastrowid)
-
-
-def _store_user_session(
-    db: Connection,
-    user_id: int,
-    expire: int | None = None,
-) -> str:
-    token = uuid4().hex
-    expire = expire or int(datetime.timestamp(datetime.now())) + 100
-    result = db.execute(
-        text(
-            _insert_user_session_query.format(
-                token=token,
-                user_id=user_id,
-                expire=expire,
-            )
-        )
-    )
-    db.commit()
-    return token
 
 
 def _store_garage_item(
@@ -138,10 +87,6 @@ def _store_garage_item(
         )
     )
     db.commit()
-
-
-def _make_auth_required(token: str) -> Row:
-    return auth_required(f"{SESSION_KEY_NAME}={token}")
 
 
 def _get_first_user_session(db: Connection) -> Row:
@@ -176,11 +121,11 @@ def _get_user_session_count(db: Connection) -> int:
 @pytest.mark.asyncio
 async def test_get_user(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id=user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id=user_id)
 
     # When
-    result = await get_user(user=_make_auth_required(token))
+    result = await get_user(user=make_auth_required(token))
 
     # Then
     assert result == UserDataResponse(
@@ -193,11 +138,11 @@ async def test_get_user(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_get_user_no_token(db: Connection) -> None:
     # Given
-    _store_user(db)
+    store_user(db)
 
     # Then
     with pytest.raises(HTTPException):
-        await get_user(user=_make_auth_required("bad"))
+        await get_user(user=make_auth_required("bad"))
 
 
 @pytest.mark.asyncio
@@ -220,7 +165,7 @@ async def test_sign_up_success(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_sign_up_user_exists_username(db: Connection) -> None:
     # Given
-    _store_user(db)
+    store_user(db)
     signup_request = SignUpRequest(
         username="user123", email="e@gmail.com", password="123456"
     )
@@ -237,7 +182,7 @@ async def test_sign_up_user_exists_username(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_sign_up_user_exists_email(db: Connection) -> None:
     # Given
-    _store_user(db)
+    store_user(db)
     signup_request = SignUpRequest(
         username="user1234", email="test@gmail.com", password="123456"
     )
@@ -278,7 +223,7 @@ async def test_sign_up_validations(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_login_user(db: Connection, freezer: FrozenDateTimeFactory) -> None:
     # Given
-    user_id = _store_user(db)
+    user_id = store_user(db)
     mock_response = MockResponse()
     login_request = LoginRequest(username="user123", password="pass123")
 
@@ -310,7 +255,7 @@ async def test_login_user_bad_credentials(
     db: Connection, username: str, password: str
 ) -> None:
     # Given
-    _store_user(db)
+    store_user(db)
     mock_response = MockResponse()
     login_request = LoginRequest(username=username, password=password)
 
@@ -329,8 +274,8 @@ async def test_login_user_existing_session_not_expired(
 ) -> None:
 
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     mock_response = MockResponse()
     login_request = LoginRequest(username="user123", password="pass123")
 
@@ -351,8 +296,8 @@ async def test_login_user_existing_session_expired(
     db: Connection, freezer: FrozenDateTimeFactory
 ) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id, expire=100)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id, expire=100)
     mock_response = MockResponse()
     login_request = LoginRequest(username="user123", password="pass123")
 
@@ -371,8 +316,8 @@ async def test_login_user_existing_session_expired(
 @pytest.mark.asyncio
 async def test_logout_user(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     mock_response = MockResponse()
 
     # When
@@ -401,8 +346,8 @@ async def test_logout_user_fails(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_change_password_user(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     change_password_request = ChangePasswordRequest(
         username="user123",
         old="pass123",
@@ -412,7 +357,7 @@ async def test_change_password_user(db: Connection) -> None:
     # When
     result = await change_password_user(
         change_password_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -423,8 +368,8 @@ async def test_change_password_user(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_change_password_user_bad_auth(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     change_password_request = ChangePasswordRequest(
         username="user123",
         old="bad",
@@ -434,7 +379,7 @@ async def test_change_password_user_bad_auth(db: Connection) -> None:
     # When
     result = await change_password_user(
         change_password_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -448,8 +393,8 @@ async def test_change_password_user_bad_auth(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_change_password_user_invalid(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     change_password_request = ChangePasswordRequest(
         username="user123",
         old="pass123",
@@ -459,7 +404,7 @@ async def test_change_password_user_invalid(db: Connection) -> None:
     # When
     result = await change_password_user(
         change_password_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -477,14 +422,14 @@ async def test_change_password_user_invalid(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_edit_field_user(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     edit_field_request = EditUserFieldRequest(field="username", value="user123456")
 
     # When
     result = await edit_field_user(
         edit_field_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -495,15 +440,15 @@ async def test_edit_field_user(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_edit_field_user_bad_field(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     edit_field_request = EditUserFieldRequest(field="bad", value="user123456")
 
     # Then
     with pytest.raises(HTTPException):
         result = await edit_field_user(
             edit_field_request,
-            user=_make_auth_required(token),
+            user=make_auth_required(token),
         )
 
     assert _get_first_user(db).username == "user123"
@@ -513,15 +458,15 @@ async def test_edit_field_user_bad_field(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_edit_field_user_username_exists(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    _store_user(db, username="othername")
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    store_user(db, username="othername")
+    token = store_user_session(db, user_id)
     edit_field_request = EditUserFieldRequest(field="username", value="othername")
 
     # When
     result = await edit_field_user(
         edit_field_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -535,15 +480,15 @@ async def test_edit_field_user_username_exists(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_edit_field_user_email_exists(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    _store_user(db, email="other@gmail.com")
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    store_user(db, email="other@gmail.com")
+    token = store_user_session(db, user_id)
     edit_field_request = EditUserFieldRequest(field="email", value="other@gmail.com")
 
     # When
     result = await edit_field_user(
         edit_field_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -558,8 +503,8 @@ async def test_edit_field_user_email_exists(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_add_garage_item(db: Connection, relation: str) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     garage_item = GarageItem(
         make_name="MakeA",
         name="Name 1",
@@ -570,7 +515,7 @@ async def test_add_garage_item(db: Connection, relation: str) -> None:
     # When
     response = await add_garage_item(
         garage_item,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -585,8 +530,8 @@ async def test_add_garage_item(db: Connection, relation: str) -> None:
 @pytest.mark.asyncio
 async def test_add_garage_item_bad_relation(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     garage_item = GarageItem(
         make_name="MakeA",
         name="Name 1",
@@ -597,7 +542,7 @@ async def test_add_garage_item_bad_relation(db: Connection) -> None:
     # When
     response = await add_garage_item(
         garage_item,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -609,8 +554,8 @@ async def test_add_garage_item_bad_relation(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_get_garage(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    other_user_id = _store_user(db)
+    user_id = store_user(db)
+    other_user_id = store_user(db)
     _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
     _store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
     _store_garage_item(db, user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
@@ -650,8 +595,8 @@ async def test_get_garage(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_delete_garage_item(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
     _store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
 
@@ -662,7 +607,7 @@ async def test_delete_garage_item(db: Connection) -> None:
     # When
     response = await delete_garage_item(
         delete_garage_item_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then
@@ -675,8 +620,8 @@ async def test_delete_garage_item(db: Connection) -> None:
 @pytest.mark.asyncio
 async def test_delete_garage_item_not_exists(db: Connection) -> None:
     # Given
-    user_id = _store_user(db)
-    token = _store_user_session(db, user_id)
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
     _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
 
     delete_garage_item_request = DeleteGarageItemRequest(
@@ -687,7 +632,7 @@ async def test_delete_garage_item_not_exists(db: Connection) -> None:
     # When
     response = await delete_garage_item(
         delete_garage_item_request,
-        user=_make_auth_required(token),
+        user=make_auth_required(token),
     )
 
     # Then

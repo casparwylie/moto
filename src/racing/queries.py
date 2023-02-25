@@ -72,8 +72,8 @@ def build_get_racer_by_make_model_query(
     )
 
 
-def build_insert_race_query() -> Insert:
-    return insert(race_history_table)
+def build_insert_race_query(user_id: None | int = None) -> Insert:
+    return insert(race_history_table).values(user_id=user_id)
 
 
 def build_insert_race_racers_query(race_id: int, model_ids: list[int]) -> Insert:
@@ -112,9 +112,11 @@ def build_popular_pairs_query(limit: int) -> Text:
     )
 
 
-def build_most_recent_races_query() -> Select:
-    return select(race_history_table.columns).order_by(
-        race_history_table.c.created_at.desc()
+def build_most_recent_races_query(user_id: int | None = None) -> Select:
+    return (
+        select(race_history_table)
+        .where(race_history_table.c.user_id == user_id)
+        .order_by(race_history_table.c.created_at.desc())
     )
 
 

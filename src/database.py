@@ -43,6 +43,17 @@ engine = _create_engine()
 
 metadata = MetaData()
 
+
+users_table = Table(
+    "users",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("username", String(100)),
+    Column("email", String(500)),
+    Column("password", String(500)),
+)
+
+
 racer_makes_table = Table(
     "racer_makes",
     metadata,
@@ -65,14 +76,13 @@ racer_models_table = Table(
     Column("weight_type", String(10)),
 )
 
-
 race_history_table = Table(
     "race_history",
     metadata,
     Column("id", Integer, primary_key=True),
     Column("created_at", DateTime),
+    Column("user_id", Integer, ForeignKey(users_table.c.id)),
 )
-
 
 race_racers_table = Table(
     "race_racers",
@@ -81,15 +91,6 @@ race_racers_table = Table(
     Column("model_id", Integer, ForeignKey(racer_models_table.c.id)),
 )
 
-
-users_table = Table(
-    "users",
-    metadata,
-    Column("id", Integer, primary_key=True),
-    Column("username", String(100)),
-    Column("email", String(500)),
-    Column("password", String(500)),
-)
 
 user_sessions_table = Table(
     "user_sessions",

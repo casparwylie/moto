@@ -48,9 +48,11 @@ def search_racers(make: str, model: str, year: str) -> list[Row]:
     return []
 
 
-def save_race(model_ids: list[int]) -> tuple[None | Row, list[Row]]:
+def save_race(
+    model_ids: list[int], user_id: None | int = None
+) -> tuple[None | Row, list[Row]]:
     with db.connect() as conn:
-        race = conn.execute(build_insert_race_query())
+        race = conn.execute(build_insert_race_query(user_id))
         race_id = race.lastrowid
         conn.execute(build_insert_race_racers_query(race_id, model_ids))
         conn.commit()
@@ -71,10 +73,12 @@ def get_popular_pairs() -> list[tuple[None | Row, list[Row]]]:
     return pairs
 
 
-def get_recent_races() -> list[tuple[None | Row, list[Row]]]:
+def get_recent_races(user_id: int | None = None) -> list[tuple[None | Row, list[Row]]]:
     races = []
     with db.connect() as conn:
-        results = conn.execute(build_most_recent_races_query().limit(_MAX_RECENT_RACES))
+        results = conn.execute(
+            build_most_recent_races_query(user_id).limit(_MAX_RECENT_RACES)
+        )
         for result in results:
             races.append(get_race(result.id))
     return races

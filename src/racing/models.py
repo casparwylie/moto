@@ -37,12 +37,14 @@ class SaveRequest(BaseModel):
 class Race(BaseModel):
     race_id: int
     racers: list[Racer]
+    user_id: int | None = None
 
     @classmethod
     def from_service(cls, race: Row, racers: list[Row]) -> "Race":
         return cls(
             race_id=race.id,
             racers=[Racer.from_db_data(racer_data) for racer_data in racers],
+            user_id=race.user_id,
         )
 
 

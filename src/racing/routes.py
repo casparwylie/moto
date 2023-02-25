@@ -37,7 +37,8 @@ async def search(make: str, model: str, year: str) -> list[Racer]:
 async def save(
     request: SaveRequest, user: None | Row = Depends(auth_optional)
 ) -> Race | None:
-    race, racers = save_race(request.model_ids)
+    user_id = user.id if user else None
+    race, racers = save_race(request.model_ids, user_id)
     if race and racers:
         return Race.from_service(race, racers)
 
@@ -48,5 +49,5 @@ async def insight_popular_pairs() -> RaceListing:
 
 
 @router.get("/insight/recent-races")
-async def insight_recent_races() -> RaceListing:
-    return RaceListing.from_service(get_recent_races())
+async def insight_recent_races(user_id: None | int = None) -> RaceListing:
+    return RaceListing.from_service(get_recent_races(user_id))

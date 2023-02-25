@@ -18,6 +18,7 @@ const logoutOpt = document.getElementById('logout-opt');
 
 const credit = document.getElementById('credit');
 
+const myProfileWindow = document.getElementById('myprofile-window');
 const profileRowContainer = document.getElementById('profile-row-container')
 const profileRowEmail = document.getElementById('profile-row-email');
 const profileRowUsername = document.getElementById('profile-row-username');
@@ -47,7 +48,7 @@ const changePasswordOldIn = document.getElementById('profile-change-pass-old');
 const changePasswordNewIn = document.getElementById('profile-change-pass-new');
 const changePasswordNewVerifyIn = document.getElementById('profile-change-pass-verify-new');
 
-
+const myRecentRacesContainer = document.getElementById('my-recent-races-container');
 
 const GARAGE_ITEM_RELATIONSHIP_MAP = {
   'OWNS': 'Currently Own',
@@ -59,6 +60,12 @@ const EMPTY_GARAGE_TEXT = `
   Your garage is empty.
   Add bikes now (via + above) so others can see what you ride.
 `
+
+class MyRecentRacesInsight extends RaceListing {
+  api_url = `${INSIGHTS_API_URL}/recent-races`;
+  container = myRecentRacesContainer;
+  window_ = myProfileWindow;
+}
 
 class Garage {
   constructor(userState) {
@@ -174,6 +181,7 @@ class Profile {
 
   async setAll() {
     this.setProfileData();
+    this.setRecentRaces();
     await this.garage.set();
   }
 
@@ -191,6 +199,14 @@ class Profile {
 
   resetProfileDataView() {
     for (let view of profileDataViews) _hide(view);
+  }
+
+
+  async setRecentRaces() {
+    let user_id = this.userState.currentUser.user_id;
+    let listing = new MyRecentRacesInsight();
+    listing.api_url += `?user_id=${user_id}`;
+    listing.populate();
   }
 
   toggleEditProfileData() {
@@ -380,4 +396,3 @@ class LoginForm {
     Informer.inform('Incorrect username or password.', 'bad');
   }
 }
-
