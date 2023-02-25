@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, Response, APIRouter, Header
+from fastapi import Depends, FastAPI, HTTPException, status, Response, APIRouter, Header
 from sqlalchemy import Row
 
 from src.user.validation import (
@@ -48,11 +48,12 @@ def _get_token_from_cookie(cookie: str | None) -> str | None:
         return parts[1] if parts[0] == _SESSION_KEY_NAME else None
 
 
-def auth_required(cookie: str = Header(None)) -> Row:
+def auth_required(response: Response, cookie: str = Header(None)) -> Row:
     if token := _get_token_from_cookie(cookie):
         if user := get_user_by_token(token):
             return user
-    raise NotAuthenticatedException
+    raise HTTPException(status.HTTP_403_FORBIDDEN)
+
 
 
 ##############

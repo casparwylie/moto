@@ -268,23 +268,18 @@ class UserState {
   constructor () {
     logoutOpt.addEventListener('click', () => this.logout());
     this.profile = new Profile(this);
-  }
-
-  async setCurrentUser() {
-    this.currentUser = await _get(USER_API_URL);
+    this.currentUser = null;
   }
 
   async refresh() {
-    await this.setCurrentUser();
-    for (let element of loggedinElements) {
-        (this.currentUser)? _show(element): _hide(element);
-    }
-    for (let element of loggedoutElements) {
-        (this.currentUser)? _hide(element): _show(element);
-    }
-    if (this.currentUser) {
+    if (getCookie('session_token')) {
+      for (let element of loggedinElements) _show(element);
+      for (let element of loggedoutElements) _hide(element);
+      this.currentUser = await _get(USER_API_URL);
       await this.loadUser();
     } else {
+      for (let element of loggedinElements) _hide(element);
+      for (let element of loggedoutElements) _show(element);
       this.unloadUser();
     }
   }

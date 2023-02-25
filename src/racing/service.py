@@ -14,7 +14,7 @@ from src.racing.queries import (
 )
 
 
-_MAX_SEARCH_RESULT = 20
+_MAX_SEARCH_RESULT = 10
 _MAX_RECENT_RACES = 30
 _MAX_POPULAR_PAIRS = 10
 

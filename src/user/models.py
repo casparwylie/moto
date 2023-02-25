@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from sqlalchemy import Row
 
 from src.racing.models import Racer
 
@@ -40,7 +41,7 @@ class UserDataResponse(BaseModel):
     email: str
 
     @classmethod
-    def from_db(cls, data) -> "UserDataResponse":
+    def from_db(cls, data: Row) -> "UserDataResponse":
         return cls(
             user_id=data.id,
             username=data.username,
@@ -56,7 +57,7 @@ class GarageItem(BaseModel):
     model_id: int | None = None
 
     @classmethod
-    def from_db(cls, data) -> "GarageItem":
+    def from_db(cls, data: Row) -> "GarageItem":
         return cls(
             relation=data.relation,
             name=data.name,
