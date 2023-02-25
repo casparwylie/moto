@@ -1,8 +1,8 @@
 import os
 
 import pytest
-from sqlalchemy import create_engine, text
 import uvicorn
+from sqlalchemy import create_engine, text
 
 from tests.dummy_data import TEST_DATA_MAKES, TEST_DATA_MODELS
 

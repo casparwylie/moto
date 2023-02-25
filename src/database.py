@@ -1,17 +1,16 @@
 import os
+
 from sqlalchemy import (
-    create_engine,
-    Table,
-    MetaData,
     Column,
-    ForeignKey,
     DateTime,
+    ForeignKey,
     Integer,
+    MetaData,
     String,
+    Table,
+    create_engine,
 )
-
 from sqlalchemy.engine.base import Engine
-
 
 ### CONNECTION ###
 

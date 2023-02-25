@@ -1,26 +1,27 @@
 import hashlib
-from typing import cast
-from enum import Enum
-from uuid import uuid4
 from datetime import datetime
+from enum import Enum
+from typing import cast
+from uuid import uuid4
+
 from sqlalchemy import Row
 
 from src.database import engine as db
 from src.racing.service import get_racer
 from src.user.queries import (
-    build_check_user_exists_query,
-    build_signup_query,
-    build_user_auth_query,
-    build_make_user_session_query,
-    build_get_user_session_query,
-    build_get_user_by_token_query,
-    build_delete_session_query,
-    build_get_user_garage_query,
-    build_get_model_id_query,
     build_add_user_garage_item_query,
-    build_delete_user_garage_item_query,
     build_change_password_query,
+    build_check_user_exists_query,
+    build_delete_session_query,
+    build_delete_user_garage_item_query,
+    build_get_model_id_query,
+    build_get_user_by_token_query,
+    build_get_user_garage_query,
+    build_get_user_session_query,
+    build_make_user_session_query,
+    build_signup_query,
     build_update_user_field_query,
+    build_user_auth_query,
 )
 
 #############

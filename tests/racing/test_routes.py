@@ -1,24 +1,15 @@
-from sqlalchemy import text
 from typing import cast
+
 import pytest
+from sqlalchemy import text
 
-from src.racing.routes import (
-    racer as route_racer,
-    race as route_race,
-    save as route_save,
-    search as route_search,
-    insight_popular_pairs,
-    insight_recent_races,
-)
-
-from src.racing.models import (
-    Race,
-    Racer,
-    RaceListing,
-    SaveRequest,
-)
-
-from tests.dummy_data import TEST_DATA_MODELS, TEST_DATA_MAKES
+from src.racing.models import Race, RaceListing, Racer, SaveRequest
+from src.racing.routes import insight_popular_pairs, insight_recent_races
+from src.racing.routes import race as route_race
+from src.racing.routes import racer as route_racer
+from src.racing.routes import save as route_save
+from src.racing.routes import search as route_search
+from tests.dummy_data import TEST_DATA_MAKES, TEST_DATA_MODELS
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -1,25 +1,25 @@
 from sqlalchemy import (
-    Table,
-    MetaData,
     Column,
     ForeignKey,
     Integer,
+    MetaData,
     String,
-    select,
-    insert,
-    text,
-    or_,
+    Table,
     delete,
-    update,
+    insert,
     literal_column,
+    or_,
+    select,
+    text,
+    update,
 )
 
 from src.database import (
     racer_makes_table,
     racer_models_table,
-    users_table,
-    user_sessions_table,
     user_garage_table,
+    user_sessions_table,
+    users_table,
 )
 from src.racing.queries import racer_makes_table, racer_models_table
 

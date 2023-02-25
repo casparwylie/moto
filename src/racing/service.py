@@ -1,18 +1,19 @@
-from sqlalchemy import Row
 from typing import Generator
+
+from sqlalchemy import Row
+
 from src.database import engine as db
 from src.racing.queries import (
+    build_check_race_by_racers_query,
     build_get_race_query,
     build_get_race_racers_query,
     build_get_racer_by_make_model_query,
     build_insert_race_query,
     build_insert_race_racers_query,
-    build_search_racer_query,
-    build_popular_pairs_query,
     build_most_recent_races_query,
-    build_check_race_by_racers_query,
+    build_popular_pairs_query,
+    build_search_racer_query,
 )
-
 
 _MAX_SEARCH_RESULT = 10
 _MAX_RECENT_RACES = 30

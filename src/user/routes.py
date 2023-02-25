@@ -1,36 +1,30 @@
-from fastapi import Depends, FastAPI, HTTPException, status, Response, APIRouter, Header
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Response, status
 from sqlalchemy import Row
 
-from src.user.validation import (
-    invalid_username,
-    invalid_email,
-    invalid_password,
-)
 from src.user.models import (
-    SignUpRequest,
-    SuccessResponse,
-    LoginRequest,
-    UserDataResponse,
-    UserGarageResponse,
-    GarageItem,
-    SuccessResponse,
     ChangePasswordRequest,
     DeleteGarageItemRequest,
     EditUserFieldRequest,
+    GarageItem,
+    LoginRequest,
+    SignUpRequest,
+    SuccessResponse,
+    UserDataResponse,
+    UserGarageResponse,
 )
 from src.user.service import (
-    signup,
-    login,
-    change_password,
-    delete_session,
-    get_user_by_token,
-    check_user_exists,
-    get_user_garage,
     add_user_garage_item,
+    change_password,
+    check_user_exists,
+    delete_session,
     delete_user_garage_item,
     edit_user_field,
+    get_user_by_token,
+    get_user_garage,
+    login,
+    signup,
 )
-
+from src.user.validation import invalid_email, invalid_password, invalid_username
 
 router = APIRouter(prefix="/api/user")
 

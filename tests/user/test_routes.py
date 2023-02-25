@@ -1,39 +1,39 @@
-import pytest
 import hashlib
+from datetime import datetime
 from typing import cast
 from uuid import uuid4
-from datetime import datetime
 
+import pytest
 from sqlalchemy import text
 
-from src.user.routes import (
-    get_user,
-    signup_user,
-    login_user,
-    logout_user,
-    change_password_user,
-    edit_field_user,
-    add_garage_item,
-    delete_garage_item,
-    get_garage,
-    auth_required,
-    NotAuthenticatedException,
-    _SESSION_KEY_NAME,
-    _SESSION_EXPIRE,
-)
-from src.user.service import GarageItemRelations
 from src.user.models import (
-    SuccessResponse,
+    ChangePasswordRequest,
+    DeleteGarageItemRequest,
+    EditUserFieldRequest,
     GarageItem,
     LoginRequest,
     SignUpRequest,
     SignUpResponse,
+    SuccessResponse,
     UserDataResponse,
     UserGarageResponse,
-    DeleteGarageItemRequest,
-    ChangePasswordRequest,
-    EditUserFieldRequest,
 )
+from src.user.routes import (
+    _SESSION_EXPIRE,
+    _SESSION_KEY_NAME,
+    NotAuthenticatedException,
+    add_garage_item,
+    auth_required,
+    change_password_user,
+    delete_garage_item,
+    edit_field_user,
+    get_garage,
+    get_user,
+    login_user,
+    logout_user,
+    signup_user,
+)
+from src.user.service import GarageItemRelations
 
 _insert_user_query = """
 INSERT INTO users

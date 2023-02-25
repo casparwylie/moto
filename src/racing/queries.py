@@ -1,17 +1,10 @@
-from sqlalchemy import (
-    select,
-    insert,
-    distinct,
-    literal_column,
-    text,
-)
-
+from sqlalchemy import distinct, insert, literal_column, select, text
 
 from src.database import (
-    racer_makes_table,
-    racer_models_table,
     race_history_table,
     race_racers_table,
+    racer_makes_table,
+    racer_models_table,
 )
 
 

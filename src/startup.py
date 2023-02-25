@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy import text
 
 from src.database import engine as db
-from datetime import datetime
 
 
 def _expire_user_sessions() -> None:

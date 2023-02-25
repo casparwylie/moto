@@ -1,20 +1,14 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter, FastAPI
 
-from src.racing.models import (
-    Racer,
-    Race,
-    RaceListing,
-    SaveRequest,
-)
+from src.racing.models import Race, RaceListing, Racer, SaveRequest
 from src.racing.service import (
-    get_racer,
-    get_race,
-    search_racers,
-    save_race,
     get_popular_pairs,
+    get_race,
+    get_racer,
     get_recent_races,
+    save_race,
+    search_racers,
 )
-
 
 router = APIRouter(prefix="/api/racing")
 

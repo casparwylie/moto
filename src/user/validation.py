@@ -1,6 +1,7 @@
 import re
 
-from email_validator import validate_email as _validate_email, EmailNotValidError
+from email_validator import EmailNotValidError
+from email_validator import validate_email as _validate_email
 
 
 def invalid_email(email):

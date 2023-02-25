@@ -1,16 +1,15 @@
+import dataclasses
 import os
 
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import FileResponse
-from pydantic import BaseModel
-import dataclasses
 import requests
 import uvicorn
-
-from src.startup import run_startup_sequence
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from starlette.responses import FileResponse
 
 from src.racing.routes import router as racing_api_router
+from src.startup import run_startup_sequence
 from src.user.routes import router as user_api_router
 
 _FE_DIR = os.path.join(os.getcwd(), "frontend")
