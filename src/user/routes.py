@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Response, status
 from sqlalchemy import Row
 
+from src.auth import SESSION_KEY_NAME, auth_required, get_token
 from src.user.models import (
     ChangePasswordRequest,
     DeleteGarageItemRequest,
@@ -28,21 +29,7 @@ from src.user.validation import invalid_email, invalid_password, invalid_usernam
 
 router = APIRouter(prefix="/api/user")
 
-_SESSION_KEY_NAME = "session_token"
 _SESSION_EXPIRE = 86400 * 7 * 2  # 2 weeks
-
-
-def _get_token_from_cookie(cookie: str | None) -> str | None:
-    if cookie:
-        parts = cookie.split("=")
-        return parts[1] if parts[0] == _SESSION_KEY_NAME else None
-
-
-def auth_required(cookie: str = Header(None)) -> Row:
-    if token := _get_token_from_cookie(cookie):
-        if user := get_user_by_token(token):
-            return user
-    raise HTTPException(status.HTTP_403_FORBIDDEN)
 
 
 ##############
@@ -79,7 +66,7 @@ async def login_user(
 ) -> SuccessResponse:
     if token := login(request.username, request.password, _SESSION_EXPIRE):
         response.set_cookie(
-            key=_SESSION_KEY_NAME,
+            key=SESSION_KEY_NAME,
             value=token,
             expires=_SESSION_EXPIRE,
         )
@@ -105,11 +92,11 @@ async def get_user(user: Row = Depends(auth_required)) -> UserDataResponse:
 @router.get("/logout")
 async def logout_user(
     response: Response,
-    cookie: str = Header(None),
+    token: None | str = Depends(get_token),
 ) -> SuccessResponse:
-    if token := _get_token_from_cookie(cookie):
+    if token:
         delete_session(token)
-        response.delete_cookie(_SESSION_KEY_NAME)
+        response.delete_cookie(SESSION_KEY_NAME)
         return SuccessResponse(success=True)
     return SuccessResponse(success=False)
 

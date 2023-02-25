@@ -1,5 +1,7 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, Header
+from sqlalchemy import Row
 
+from src.auth import auth_optional
 from src.racing.models import Race, RaceListing, Racer, SaveRequest
 from src.racing.service import (
     get_popular_pairs,
@@ -32,7 +34,9 @@ async def search(make: str, model: str, year: str) -> list[Racer]:
 
 
 @router.post("/save")
-async def save(request: SaveRequest) -> Race | None:
+async def save(
+    request: SaveRequest, user: None | Row = Depends(auth_optional)
+) -> Race | None:
     race, racers = save_race(request.model_ids)
     if race and racers:
         return Race.from_service(race, racers)

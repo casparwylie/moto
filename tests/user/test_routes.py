@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from freezegun.api import FrozenDateTimeFactory
 from sqlalchemy import Connection, Row, text
 
+from src.auth import SESSION_KEY_NAME, auth_required
 from src.user.models import (
     ChangePasswordRequest,
     DeleteGarageItemRequest,
@@ -22,9 +23,7 @@ from src.user.models import (
 )
 from src.user.routes import (
     _SESSION_EXPIRE,
-    _SESSION_KEY_NAME,
     add_garage_item,
-    auth_required,
     change_password_user,
     delete_garage_item,
     edit_field_user,
@@ -142,7 +141,7 @@ def _store_garage_item(
 
 
 def _make_auth_required(token: str) -> Row:
-    return auth_required(f"{_SESSION_KEY_NAME}={token}")
+    return auth_required(f"{SESSION_KEY_NAME}={token}")
 
 
 def _get_first_user_session(db: Connection) -> Row:
@@ -288,7 +287,7 @@ async def test_login_user(db: Connection, freezer: FrozenDateTimeFactory) -> Non
     user_session = _get_first_user_session(db)
     # Then
     assert result == SuccessResponse(success=True)
-    assert mock_response.cookie_key == _SESSION_KEY_NAME
+    assert mock_response.cookie_key == SESSION_KEY_NAME
     assert mock_response.expires == _SESSION_EXPIRE
     assert user_session.user_id == user_id
     assert (
@@ -341,7 +340,7 @@ async def test_login_user_existing_session_not_expired(
 
     # Then
     assert result == SuccessResponse(success=True)
-    assert mock_response.cookie_key == _SESSION_KEY_NAME
+    assert mock_response.cookie_key == SESSION_KEY_NAME
     assert user_session.user_id == user_id
     assert user_session.token == token
     assert _get_user_session_count(db) == 1
@@ -363,7 +362,7 @@ async def test_login_user_existing_session_expired(
 
     # Then
     assert result == SuccessResponse(success=True)
-    assert mock_response.cookie_key == _SESSION_KEY_NAME
+    assert mock_response.cookie_key == SESSION_KEY_NAME
     assert user_session.user_id == user_id
     assert user_session.token != token
     assert _get_user_session_count(db) == 1
@@ -377,7 +376,7 @@ async def test_logout_user(db: Connection) -> None:
     mock_response = MockResponse()
 
     # When
-    result = await logout_user(mock_response, f"{_SESSION_KEY_NAME}={token}")
+    result = await logout_user(mock_response, token)
 
     # Then
     assert result == SuccessResponse(success=True)
@@ -392,7 +391,7 @@ async def test_logout_user_fails(db: Connection) -> None:
     mock_response = MockResponse()
 
     # When
-    result = await logout_user(mock_response, f"{_SESSION_KEY_NAME}=")
+    result = await logout_user(mock_response, None)
 
     # Then
     assert result == SuccessResponse(success=False)
