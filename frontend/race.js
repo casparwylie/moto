@@ -232,6 +232,7 @@ class Race {
       let modelIds = this.racers.map((racer) => racer.modelId);
       let data = await _post(`${RACING_API_URL}/save`, {'model_ids': modelIds});
       this.raceId = data.race_id;
+      await userState.refresh();
   }
 
   getShareLink() {
@@ -401,4 +402,3 @@ class RacingPage {
     }
   }
 }
-
