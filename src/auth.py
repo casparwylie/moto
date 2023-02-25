@@ -16,7 +16,6 @@ def get_token(session_token: str = Cookie(None)) -> None | str:
 
 
 def auth_required(session_token: str = Cookie(None)) -> Row:
-    print(session_token, "!!!")
     if user := _auth(session_token):
         return user
     raise HTTPException(status.HTTP_403_FORBIDDEN)
