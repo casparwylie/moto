@@ -40,7 +40,7 @@ class Race(BaseModel):
     racers: list[Racer]
 
     @classmethod
-    def from_service(cls, race, racers) -> "Race":
+    def from_service(cls, race: Row, racers: list[Row]) -> "Race":
         return cls(
             race_id=race.id,
             racers=[Racer.from_db_data(racer_data) for racer_data in racers],

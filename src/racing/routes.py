@@ -27,8 +27,9 @@ async def racer(make: str, model: str, year: str) -> Racer | None:
 
 @router.get("/race")
 async def race(race_id: int) -> Race | None:
-    if race := get_race(race_id):
-        return Race.from_service(*race)
+    race, racers = get_race(race_id)
+    if race and racers:
+        return Race.from_service(race, racers)
 
 
 @router.get("/search")
@@ -38,8 +39,9 @@ async def search(make: str, model: str, year: str) -> list[Racer]:
 
 @router.post("/save")
 async def save(request: SaveRequest) -> Race | None:
-    if race := save_race(request.model_ids):
-        return Race.from_service(*race)
+    race, racers = save_race(request.model_ids)
+    if race and racers:
+        return Race.from_service(race, racers)
 
 
 @router.get("/insight/popular-pairs")
