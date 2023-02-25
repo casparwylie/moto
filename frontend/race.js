@@ -183,7 +183,6 @@ class Race {
 
   constructor() {
     this.racers = [];
-    this.unseenRace = false;
   }
 
   reset() {
@@ -214,7 +213,6 @@ class Race {
   async race(save) {
     if (this.racers.length == 0) return;
     if (save) {
-      this.unseenRace = true;
       await this.save();
     }
     if(
@@ -225,6 +223,7 @@ class Race {
     }
     this.reset();
     this.startLights();
+    _hide(raceGoOpt);
     this.racers.forEach((racer) => racer.render());
     setTimeout(() => this.racers.forEach((racer) => racer.move()), 4000);
   }
@@ -233,6 +232,7 @@ class Race {
       let modelIds = this.racers.map((racer) => racer.modelId);
       let data = await _post(`${RACING_API_URL}/save`, {'model_ids': modelIds});
       this.raceId = data.race_id;
+      await userState.refresh();
   }
 
   getShareLink() {
@@ -244,7 +244,7 @@ class Race {
     navigator.clipboard.writeText(shareLink);
     raceShareOpt.innerHTML = shareLink + ' copied &#10003;';
     raceShareOpt.classList.add('shared-link');
-    setTimeout(this.setShare, 3000);
+    setTimeout(() => this.setShare(), 3000);
   }
 
   setShare() {
@@ -289,56 +289,9 @@ class Race {
   finish() {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
+    _show(raceGoOpt);
     _show(resultsWindow);
     this.setShare();
-  }
-}
-
-
-class RacerRecommender {
-
-  constructor(makeIn, modelIn, yearIn) {
-    this.makeIn = makeIn;
-    this.modelIn = modelIn;
-    this.yearIn = yearIn;
-  }
-
-  async get() {
-    let make = this.makeIn.value.trim();
-    let model = this.modelIn.value.trim();
-    let year = this.yearIn.value.trim();
-    if (make) {
-      let results = await _get(
-        `${RACING_API_URL}/search?make=${make}&model=${model}&year=${year}`
-      );
-      if (results.length > 0) {
-        _show(recommendationsContainer);
-        this.addRecommendations(results);
-        return;
-      }
-    }
-    _hide(recommendationsContainer);
-  }
-
-  addRecommendations(racerResults) {
-    recommendationsContainer.replaceChildren();
-    racerResults.forEach((racer) => {
-      let row = _el(
-        'div', {
-          className: 'recommendation-row',
-          innerHTML: `${racer.name} ${racer.year}`
-        }
-      );
-      row.addEventListener('click', () => this.selectRecommendation(racer.name, racer.year));
-      recommendationsContainer.appendChild(row);
-    });
-  }
-
-  selectRecommendation(name, year) {
-    this.modelIn.value = name;
-    this.yearIn.value = year;
-    recommendationsContainer.replaceChildren();
-    _hide(recommendationsContainer);
   }
 }
 
@@ -374,9 +327,13 @@ class RacingPage {
     let modelIn = _el('input', {placeholder: 'Model...'});
     let yearIn = _el('input', {placeholder: 'Year...'});
 
-    let recommender = new RacerRecommender(makeIn, modelIn, yearIn);
-    modelIn.addEventListener('keyup', () => recommender.get())
-    modelIn.addEventListener('focus', () => recommender.get())
+    let recommender = new RacerRecommender(
+      makeIn,
+      modelIn,
+      yearIn,
+      recommendationsContainer,
+    );
+    recommender.assignTrigger(modelIn);
 
     if (make && model && year) {
       makeIn.value = make;
@@ -445,4 +402,3 @@ class RacingPage {
     }
   }
 }
-

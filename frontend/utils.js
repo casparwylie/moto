@@ -15,6 +15,10 @@ function _el(type, info) {
   return element;
 }
 
+function isShowing(element) {
+  return element.style.display != 'none' && element.style.display != '';
+}
+
 async function _post(url, data) {
   let response = await fetch(url,
     {
@@ -30,4 +34,15 @@ async function _post(url, data) {
 async function _get(url) {
   let result = await fetch(url);
   return await result.json();
+}
+
+
+function getCookie(name) {
+  return document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
+}
+
+function resetForm(id) {
+  document.querySelectorAll(`#${id} input`).forEach(
+    (element) => element.value = ''
+  )
 }

@@ -1,9 +1,14 @@
+const menuContainer = document.getElementById('menu');
+
 class Windows {
   constructor() {
-    for(let windowItem of document.getElementsByClassName('menu-item')) {
-      windowItem.addEventListener('click', () => {
-        _show(document.getElementById(windowItem.getAttribute('window')));
-      });
+    for(let windowItem of menuContainer.children) {
+      let windowId = windowItem.getAttribute('window');
+      if (windowId) {
+        windowItem.addEventListener('click', () => {
+          _show(document.getElementById(windowId));
+        });
+      }
     }
 
     for(let closeOpt of document.getElementsByClassName('close')) {

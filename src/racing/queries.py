@@ -1,122 +1,90 @@
 from sqlalchemy import (
-  Table,
-  MetaData,
-  Column,
-  ForeignKey,
-  Index,
-  Integer,
-  DateTime,
-  String,
-  select,
-  insert,
-  distinct,
-  literal_column,
-  text,
+    Insert,
+    Select,
+    Text,
+    distinct,
+    insert,
+    literal_column,
+    select,
+    text,
 )
 
-### TABLES ###
-metadata = MetaData()
-
-
-racer_makes_table = Table(
-    'racer_makes',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(50), index=True),
-)
-
-
-racer_models_table = Table(
-    'racer_models',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String(500), index=True),
-    Column('style', String(100)),
-    Column('make', Integer, ForeignKey(racer_makes_table.c.id), index=True),
-    Column('year', Integer),
-    Column('power', Integer),
-    Column('torque', Integer),
-    Column('weight', Integer),
-    Column('weight_type', String(10)),
-)
-
-
-race_history_table = Table(
-  'race_history',
-  metadata,
-  Column('id', Integer, primary_key=True),
-  Column('created_at', DateTime),
-)
-
-
-race_racers_table = Table(
-  'race_racers',
-  metadata,
-  Column('race_id', Integer, ForeignKey(race_history_table.c.id)),
-  Column('model_id', Integer, ForeignKey(racer_models_table.c.id)),
-)
-
-
-### QUERIES ###
-
-def build_search_racer_query(make: str, model: str, year: str):
-  return select(
-    racer_models_table.columns,
-    racer_makes_table.c.name.label('make_name'),
-  ).having(
-    racer_models_table.c.name.contains(model),
-    racer_models_table.c.year.contains(year),
-    literal_column('make_name').contains(make),
-  ).join(
-    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
-  )
-
-
-def build_get_race_racers_query(race_id: int):
-  return select(
+from src.database import (
+    race_history_table,
+    race_racers_table,
+    racer_makes_table,
     racer_models_table,
-    racer_makes_table.c.name.label('make_name'),
-  ).where(race_racers_table.c.race_id == race_id
-  ).join(
-    race_racers_table, race_racers_table.c.model_id == racer_models_table.c.id
-  ).join(
-    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make,
-  )
+)
 
 
-def build_get_race_query(race_id):
-  return select(race_history_table).where(race_history_table.c.id == race_id)
+def build_search_racer_query(make: str, model: str, year: str) -> Select:
+    return (
+        select(
+            racer_models_table.columns,
+            racer_makes_table.c.name.label("make_name"),
+        )
+        .having(
+            racer_models_table.c.name.contains(model),
+            racer_models_table.c.year.contains(year),
+            literal_column("make_name").contains(make),
+        )
+        .join(racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make)
+    )
 
 
-def build_get_racer_by_make_model_query(make: str, model: str, year: str | None):
-  filters = [
-    racer_models_table.c.name == model,
-    literal_column('make_name') == make,
-  ]
-  if year:
-   filters.append(racer_models_table.c.year == year)
-  return select(
-    racer_models_table.columns,
-    racer_makes_table.c.name.label('make_name'),
-  ).having(*filters).join(
-    racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make
-  )
+def build_get_race_racers_query(race_id: int) -> Select:
+    return (
+        select(
+            racer_models_table,
+            racer_makes_table.c.name.label("make_name"),
+        )
+        .where(race_racers_table.c.race_id == race_id)
+        .join(
+            race_racers_table, race_racers_table.c.model_id == racer_models_table.c.id
+        )
+        .join(
+            racer_makes_table,
+            racer_makes_table.c.id == racer_models_table.c.make,
+        )
+    )
 
 
-def build_insert_race_query():
-  return insert(race_history_table)
+def build_get_race_query(race_id: int) -> Select:
+    return select(race_history_table).where(race_history_table.c.id == race_id)
 
 
-def build_insert_race_racers_query(race_id: int, model_ids: list[int]):
-  return insert(race_racers_table).values([
-    dict(race_id=race_id, model_id=model_id)
-    for model_id in model_ids
-  ])
+def build_get_racer_by_make_model_query(
+    make: str, model: str, year: str | None
+) -> Select:
+    filters = [
+        racer_models_table.c.name == model,
+        literal_column("make_name") == make,
+    ]
+    if year:
+        filters.append(racer_models_table.c.year == year)
+    return (
+        select(
+            racer_models_table.columns,
+            racer_makes_table.c.name.label("make_name"),
+        )
+        .having(*filters)
+        .join(racer_makes_table, racer_makes_table.c.id == racer_models_table.c.make)
+    )
 
 
-def build_popular_pairs_query(limit):
-  return text(
-    f"""
+def build_insert_race_query(user_id: None | int = None) -> Insert:
+    return insert(race_history_table).values(user_id=user_id)
+
+
+def build_insert_race_racers_query(race_id: int, model_ids: list[int]) -> Insert:
+    return insert(race_racers_table).values(
+        [dict(race_id=race_id, model_id=model_id) for model_id in model_ids]
+    )
+
+
+def build_popular_pairs_query(limit: int) -> Text:
+    return text(
+        f"""
     SELECT
       p1.id AS id_1,
       p2.id AS id_2,
@@ -141,18 +109,20 @@ def build_popular_pairs_query(limit):
     WHERE occurence > 1
     ORDER BY occurence DESC LIMIT {limit}
     """
-  )
+    )
 
 
-def build_most_recent_races_query():
-  return select(
-    race_history_table.columns
-  ).order_by(race_history_table.c.created_at.desc())
+def build_most_recent_races_query(user_id: int | None = None) -> Select:
+    return (
+        select(race_history_table)
+        .where(race_history_table.c.user_id == user_id)
+        .order_by(race_history_table.c.created_at.desc())
+    )
 
 
-def build_check_race_by_racers_query(model_ids: list[int]):
-  return text(
-    f"""
+def build_check_race_by_racers_query(model_ids: list[int]) -> Text:
+    return text(
+        f"""
       SELECT race_id
       FROM race_racers WHERE race_id IN (
         SELECT race_id
@@ -163,4 +133,4 @@ def build_check_race_by_racers_query(model_ids: list[int]):
       )
       GROUP BY race_id HAVING COUNT(*) = {len(model_ids)}
     """
-  )
+    )

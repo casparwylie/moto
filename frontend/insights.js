@@ -12,8 +12,13 @@ class RaceListing {
   window_ = null;
 
   async populate() {
+    this.container.replaceChildren();
     let results = await _get(this.api_url);
-    results.races.forEach((race) => this.addRow(race));
+    if (results.races.length > 0) {
+      results.races.forEach((race) => this.addRow(race));
+    } else {
+      this.container.innerHTML = 'There aren\'t any races here yet.';
+    }
   }
 
   addRow(race) {
