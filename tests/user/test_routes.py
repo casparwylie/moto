@@ -56,7 +56,7 @@ VALUES({user_id}, {model_id}, '{relation}')
 
 class MockResponse:
     def __init__(self) -> None:
-        self.cookie_key: str | None  = None
+        self.cookie_key: str | None = None
         self.cookie_value: str | None = None
         self.cookie_deleted: bool = False
         self.expires: int | None = None
