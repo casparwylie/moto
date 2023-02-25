@@ -1,25 +1,34 @@
+var userState;
+var racingPage;
+var windows;
+var popularPairsInsight;
+var recentRacesInsight;
+var signupForm;
+var loginForm;
+
+
 async function main() {
   // Initiate user state
-  const userState = new UserState();
+  userState = new UserState();
   await userState.refresh();
 
   // Initiate racing page
-  const racingPage = new RacingPage();
+  racingPage = new RacingPage();
   await racingPage.checkSharedRace();
 
   // Initiate windows
-  const windows = new Windows();
+  windows = new Windows();
 
   // Populate insights
-  const popularPairsInsight = new PopularPairsInsight();
+  popularPairsInsight = new PopularPairsInsight();
   await popularPairsInsight.populate();
 
-  const recentRacesInsight = new RecentRacesInsight();
+  recentRacesInsight = new RecentRacesInsight();
   await recentRacesInsight.populate();
 
   // Initiate account forms
-  const signupForm = new SignupForm();
-  const loginForm = new LoginForm(userState);
+  signupForm = new SignupForm();
+  loginForm = new LoginForm(userState);
 }
 
 main();
