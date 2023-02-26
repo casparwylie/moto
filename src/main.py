@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from starlette.responses import FileResponse
 
 from src.racing.routes import router as racing_api_router
+from src.social.routes import router as social_api_router
 from src.startup import run_startup_sequence
 from src.user.routes import router as user_api_router
 
@@ -17,6 +18,7 @@ app = FastAPI()
 
 app.include_router(racing_api_router)
 app.include_router(user_api_router)
+app.include_router(social_api_router)
 app.mount("/static", StaticFiles(directory=_FE_DIR), name="static")
 
 

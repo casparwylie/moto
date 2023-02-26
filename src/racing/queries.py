@@ -3,6 +3,7 @@ from sqlalchemy import (
     Select,
     Text,
     distinct,
+    func,
     insert,
     literal_column,
     select,
@@ -12,6 +13,7 @@ from sqlalchemy import (
 from src.database import (
     race_history_table,
     race_racers_table,
+    race_votes_table,
     racer_makes_table,
     racer_models_table,
 )
@@ -72,8 +74,10 @@ def build_get_racer_by_make_model_query(
     )
 
 
-def build_insert_race_query(user_id: None | int = None) -> Insert:
-    return insert(race_history_table).values(user_id=user_id)
+def build_insert_race_query(race_unique_id: str, user_id: None | int = None) -> Insert:
+    return insert(race_history_table).values(
+        race_unique_id=race_unique_id, user_id=user_id
+    )
 
 
 def build_insert_race_racers_query(race_id: int, model_ids: list[int]) -> Insert:
@@ -113,24 +117,52 @@ def build_popular_pairs_query(limit: int) -> Text:
 
 
 def build_most_recent_races_query(user_id: int | None = None) -> Select:
+    filters = (race_history_table.c.user_id == user_id,) if user_id else ()
     return (
         select(race_history_table)
-        .where(race_history_table.c.user_id == user_id)
+        .where(*filters)
         .order_by(race_history_table.c.created_at.desc())
     )
 
 
-def build_check_race_by_racers_query(model_ids: list[int]) -> Text:
+def build_check_race_by_racers_query(race_unique_id: str) -> Select:
+    return select(race_history_table).where(
+        race_history_table.c.race_unique_id == race_unique_id
+    )
+
+
+def build_get_race_upvotes_query(race_unique_id: str) -> Text:
     return text(
         f"""
-      SELECT race_id
-      FROM race_racers WHERE race_id IN (
-        SELECT race_id
-        FROM race_racers
-        WHERE model_id IN ({','.join(map(str, model_ids))})
-        GROUP BY race_id
-        HAVING COUNT(DISTINCT model_id) = {len(model_ids)}
-      )
-      GROUP BY race_id HAVING COUNT(*) = {len(model_ids)}
+      SELECT COUNT(*) as count FROM race_votes WHERE race_unique_id = '{race_unique_id}'
+      AND vote = 1
     """
     )
+
+
+def build_get_race_downvotes_query(race_unique_id: str) -> Text:
+    return text(
+        f"""
+      SELECT COUNT(*) as count FROM race_votes WHERE race_unique_id = '{race_unique_id}'
+      AND vote = 0
+    """
+    )
+
+
+def build_check_user_vote_query(race_unique_id: str, user_id: int) -> Select:
+    return select(race_votes_table).where(
+        race_votes_table.c.race_unique_id == race_unique_id,
+        race_votes_table.c.user_id == user_id,
+    )
+
+
+def build_vote_race_query(race_unique_id: str, user_id: int, vote: int) -> Insert:
+    return insert(race_votes_table).values(
+        race_unique_id=race_unique_id,
+        user_id=user_id,
+        vote=vote,
+    )
+
+
+def build_insert_race_unique_query(unique_id: str) -> Text:
+    return text(f"INSERT IGNORE race_unique VALUES('{unique_id}')")

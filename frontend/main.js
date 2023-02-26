@@ -5,7 +5,7 @@ var popularPairsInsight;
 var recentRacesInsight;
 var signupForm;
 var loginForm;
-
+var social;
 
 async function main() {
   // Initiate user state
@@ -13,7 +13,7 @@ async function main() {
   await userState.refresh();
 
   // Initiate racing page
-  racingPage = new RacingPage();
+  racingPage = new Racing();
   await racingPage.checkSharedRace();
 
   // Initiate windows
@@ -29,6 +29,8 @@ async function main() {
   // Initiate account forms
   signupForm = new SignupForm();
   loginForm = new LoginForm(userState);
+
+  social = new Social();
 }
 
 main();

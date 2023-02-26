@@ -15,6 +15,11 @@ const controlPanel = document.getElementById('control-panel');
 const fbShareOpt = document.getElementById('fb-share-opt');
 const resultsWindow = document.getElementById('results-window');
 
+const raceUpvotes = document.getElementById('race-upvotes');
+const raceDownvotes = document.getElementById('race-downvotes');
+const upvoteRaceOpt = document.getElementById('upvote-result-opt');
+const downvoteRaceOpt = document.getElementById('downvote-result-opt');
+
 
 class Racer {
   constructor(
@@ -114,7 +119,7 @@ class Racer {
     }
   }
 
-  move() {
+  async move() {
     this._finished = false;
     this._progress = this.torque / 25;
     this._interval = setInterval(() => {
@@ -130,7 +135,7 @@ class Racer {
         this.finish();
         clearInterval(this._interval);
       }
-    }, 40);
+    }, 4);
   }
 
   getStatsString() {
@@ -143,9 +148,9 @@ class Racer {
     `
   }
 
-  finish() {
+  async finish() {
     this._finished = true;
-    this.race.checkFinished();
+    await this.race.checkFinished();
 
     let position = resultsContainer.children.length + 1;
     var posDisplay;
@@ -208,6 +213,7 @@ class Race {
       Racer.fromData(racer, this)
     ));
     this.raceId = result.race_id;
+    this.raceUniqueId = result.race_unique_id;
   }
 
   async race(save) {
@@ -222,16 +228,17 @@ class Race {
       _hide(controlPanel);
     }
     this.reset();
-    this.startLights();
+    //this.startLights();
     _hide(raceGoOpt);
     this.racers.forEach((racer) => racer.render());
-    setTimeout(() => this.racers.forEach((racer) => racer.move()), 4000);
+    setTimeout(() => this.racers.forEach((racer) => racer.move()), 500);
   }
 
   async save() {
       let modelIds = this.racers.map((racer) => racer.modelId);
-      let data = await _post(`${RACING_API_URL}/save`, {'model_ids': modelIds});
+      let data = await _post(`${RACING_API_URL}/race/save`, {'model_ids': modelIds});
       this.raceId = data.race_id;
+      this.raceUniqueId = data.race_unique_id;
       await userState.refresh();
   }
 
@@ -260,9 +267,41 @@ class Race {
     );
   }
 
-  checkFinished() {
+  async vote(vote) {
+    let result = await _post(
+      `${RACING_API_URL}/race/vote`, {race_unique_id: this.raceUniqueId, vote: vote}
+    );
+    if (result.success) {
+      Informer.inform('Successfully voted', 'good');
+    } else if (result._status_code == 403) {
+      Informer.inform('You must have an account to vote.', 'bad');
+    }
+    await this.setVotes();
+  }
+
+  async setVotes() {
+    let result = await _get(
+      `${RACING_API_URL}/race/votes?race_unique_id=${this.raceUniqueId}`
+    );
+    let alreadyVoted = await _get(
+      `${RACING_API_URL}/race/vote/voted?race_unique_id=${this.raceUniqueId}`
+    );
+
+    raceUpvotes.innerHTML = result.upvotes;
+    raceDownvotes.innerHTML = result.downvotes;
+
+    if (alreadyVoted.voted) {
+      downvoteRaceOpt.classList.add('disabled-vote-opt');
+      upvoteRaceOpt.classList.add('disabled-vote-opt');
+    } else {
+      downvoteRaceOpt.classList.remove('disabled-vote-opt');
+      upvoteRaceOpt.classList.remove('disabled-vote-opt');
+    }
+  }
+
+  async checkFinished() {
       let finished = this.racers.every((racer) => racer._finished);
-      if (finished) this.finish();
+      if (finished) await this.finish();
   }
 
   startLights() {
@@ -286,17 +325,18 @@ class Race {
     setTimeout(() => _hide(lightsContainer), 4000);
   }
 
-  finish() {
+  async finish() {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
     _show(raceGoOpt);
     _show(resultsWindow);
     this.setShare();
+    await this.setVotes();
   }
 }
 
 
-class RacingPage {
+class Racing {
 
   constructor() {
     this.addEventListeners();
@@ -313,6 +353,15 @@ class RacingPage {
     controlPanel.addEventListener('click', (evt) => {
       if (evt.target == controlPanel) _hide(recommendationsContainer);
     });
+
+    downvoteRaceOpt.addEventListener('click', () => this.voteRace(0));
+    upvoteRaceOpt.addEventListener('click', () => this.voteRace(1));
+  }
+
+  voteRace(vote) {
+    if (this.race && this.race.raceId) {
+      this.race.vote(vote);
+    }
   }
 
   share() {

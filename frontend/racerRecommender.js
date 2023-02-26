@@ -13,7 +13,7 @@ class RacerRecommender {
     let year = this.yearIn.value.trim();
     if (make) {
       let results = await _get(
-        `${RACING_API_URL}/search?make=${make}&model=${model}&year=${year}`
+        `${RACING_API_URL}/race/search?make=${make}&model=${model}&year=${year}`
       );
       if (results.length > 0) {
         _show(this.container);
@@ -33,14 +33,15 @@ class RacerRecommender {
           innerHTML: `${racer.name} ${racer.year}`
         }
       );
-      row.addEventListener('click', () => this.selectRecommendation(racer.name, racer.year));
+      row.addEventListener('click', () => this.selectRecommendation(racer));
       this.container.appendChild(row);
     });
   }
 
-  selectRecommendation(name, year) {
-    this.modelIn.value = name;
-    this.yearIn.value = year;
+  selectRecommendation(racer) {
+    this.makeIn.value = racer.make_name;
+    this.modelIn.value = racer.name;
+    this.yearIn.value = racer.year;
     this.container.replaceChildren();
     _hide(this.container);
   }

@@ -22,7 +22,18 @@
       outline-width: 0px;
       border: 1px;
       font-size: 20px;
-      margin: 1px;
+    }
+
+
+    textarea {
+      border-radius: 5px;
+      font-family: 'Chakra Petch', sans-serif;
+      outline-width: 0px;
+      border: 1px;
+      font-size: 15px;
+      background: black;
+      color: white;
+      padding: 10px;
     }
 
     .racer {
@@ -62,6 +73,10 @@
       padding-right: 0px;
     }
 
+    #control-panel button, input {
+      margin: 1px;
+    }
+
     #racer-inputs-container input {
       width: 33%;
     }
@@ -79,7 +94,6 @@
       outline-width: 0px;
       border: 1px;
       font-size: 15px;
-      margin: 1px;
       cursor: pointer;
     }
 
@@ -225,35 +239,10 @@
     .window-header-image {
        background-size: 100%;
        background-repeat: no-repeat;
-       height: 18%;
+       height: 100px;
        width: 20%;
        margin: 0 auto;
     }
-    @media only screen and (max-width: 900px) {
-      #menu {
-        width: 60%;
-        font-size: 15px;
-      }
-
-      #race-go-option, select, button, input {
-        font-size: 10px;
-        font-size: 12px;
-      }
-
-      #recommendation-container {
-        padding: 5px;
-        font-size: 12px;
-      }
-      .window {
-        width: 80%;
-        margin-left: calc(10% - 20px);
-      }
-
-      .window-header-image {
-       height: 28%;
-      }
-    }
-
     .window-header-image-1 {
        background-image: url('/static/images/classic_type.svg');
     }
@@ -264,6 +253,14 @@
 
     .window-header-image-3 {
        background-image: url('/static/images/sport_type.svg');
+    }
+
+    .window-header-image-4 {
+       background-image: url('/static/images/cross_type.svg');
+    }
+
+    .window-header-image-5 {
+       background-image: url('/static/images/retro_type.svg');
     }
 
     #popular-pairs-container {
@@ -285,21 +282,6 @@
       color: #004545;
       padding-left: 20px;
       padding-right: 20px;
-    }
-
-    #fb-share-opt {
-     background: #3399ff;
-    }
-
-    .share-opt {
-      padding: 15px;
-      font-size: 20px;
-    }
-
-    #fb-f {
-      font-weight: bold;
-      padding-right: 6px;
-      color: white;
     }
 
     .result-container {
@@ -336,11 +318,11 @@
     }
 
     #login-window {
-      height: 30vh;
+      height: 45vh;
     }
 
     #signup-window {
-      height: 35vh;
+      height: 55vh;
     }
 
     .account-form button, .account-form input {
@@ -443,18 +425,147 @@
       display: none;
       margin-top: 10px;
     }
+
+
+    #upvote-result-opt {
+      background-color: #39ae86;
+    }
+
+    #downvote-result-opt {
+      background-color: #ff4c4c;
+    }
+    .vote-opt {
+      width: 100%;
+      text-align: left;
+    }
+
+    #vote-opt-container {
+    }
+
+    #results-opt-container>*{
+      flex: 1;
+      margin: 1px;
+    }
+
+    #results-opt-container button:hover:not(button.disabled-vote-opt){
+      color: black;
+    }
+    #results-opt-container {
+      display: flex;
+      margin: 0 auto;
+      width: 70%;
+    }
+
+    #fb-share-opt {
+     background: #3399ff;
+    }
+
+    #fb-f {
+      font-weight: bold;
+      padding-right: 6px;
+      color: white;
+    }
+
+    #view-comments-opt {
+      background: #c44597;
+    }
+
+    .disabled-vote-opt {
+      cursor:not-allowed;
+      opacity: 0.7;
+    }
+
+    #add-comment-text {
+      width: 80%;
+      height: 15%;
+      resize: none;
+    }
+
+    #comments-container {
+      height: 60%;
+      width: 80%;
+      overflow-y: scroll;
+      margin: 0 auto;
+    }
+
+    .comment-container {
+      background: #007d7d;
+      padding: 5px;
+      margin-top: 5px;
+      border-radius: 5px;
+    }
+
+    .comment-text-container {
+      width: 100%;
+      padding: 5px;
+    }
+
+    .comment-info-container {
+      color: #005353;
+      font-size: 12px;
+    }
+
+    #add-comment-container {
+      width: 100%;
+      margin: 10px auto;
+    }
+
+    #add-comment-opt {
+      margin-top: 5px;
+    }
+
+
+    #social-window {
+      z-index: 100000;
+    }
+
+    @media only screen and (max-width: 900px) {
+      #menu {
+        width: 60%;
+        font-size: 15px;
+      }
+
+      #race-go-option, .account-form button, select, button, input {
+        font-size: 10px;
+        font-size: 12px;
+      }
+
+      #recommendation-container {
+        padding: 5px;
+        font-size: 12px;
+      }
+      .window {
+        width: 80%;
+        margin-left: calc(10% - 20px);
+      }
+
+      .window-header-image {
+       height: 28%;
+      }
+    }
+
+
   </style>
 </head>
 <body>
   <div id="informer-container"></div>
 
 
+  <div class="window" id="social-window">
+    <div window="social-window" class="close">x</div>
+    <h2>Comments</h2>
+    <div id="comments-container"></div>
+    <div id="add-comment-container">
+      <textarea placeholder="Enter comment..." id="add-comment-text"></textarea>
+      <br>
+      <button id="add-comment-opt">Comment</div>
+    </div>
+
+  </div>
 
 
   <div class="window" id="myprofile-window">
     <div window="myprofile-window" class="close">x</div>
-
-
     <h2>My Profile</h2>
     <button id="edit-profile-toggle">Edit</button>
     <button id="change-password-toggle">Change Password</button>
@@ -507,6 +618,7 @@
 
   <div class="window" id="login-window">
     <div window="login-window" class="close">x</div>
+    <div class="window-header-image window-header-image-4"></div>
     <h2>Login</h2>
     <div id="login-form" class="account-form">
       <input id="login-username" type="text" placeholder="Username...">
@@ -521,6 +633,7 @@
 
   <div class="window" id="signup-window">
     <div window="signup-window" class="close">x</div>
+    <div class="window-header-image window-header-image-5"></div>
     <h2>Sign Up</h2>
     <div id="signup-form" class="account-form">
       <input id="signup-username" type="text" placeholder="Username...">
@@ -540,8 +653,19 @@
   <div class="window" id="results-window">
     <div window="results-window" class="close">x</div>
     <h2>Results</h2>
-    <button id="link-share-opt" class="share-opt"><b>Share Race</b></button>
-    <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
+    <div id="results-opt-container">
+      <button id="link-share-opt" class="share-opt"><b>Share Race</b></button>
+      <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
+      <div id="vote-opt-container">
+        <button class="vote-opt" id="upvote-result-opt">
+          &#9650; Upvote (<span id="race-upvotes">0</span>)
+        </button>
+        <button class="vote-opt" id="downvote-result-opt">
+          &#9660; Downvote (<span id="race-downvotes">0</span>)
+        </button>
+      </div>
+      <button id="view-comments-opt">View Comments</button>
+    </div>
     <div id="results-container"></div>
   </div>
 
@@ -650,6 +774,7 @@
   <script src="/static/race.js"></script>
   <script src="/static/user.js"></script>
   <script src="/static/windows.js"></script>
+  <script src="/static/social.js"></script>
   <script src="/static/main.js"></script>
 </body>
 </html>

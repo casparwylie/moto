@@ -42,8 +42,12 @@ def _create_engine() -> Engine:
 db_engine = _create_engine()
 
 
+def _sort_migration(name: str) -> int:
+    return int(name[1 : name.find("__")])
+
+
 def get_migrations() -> Generator:
-    for filepath in sorted(os.listdir(MIGRATIONS_DIR)):
+    for filepath in sorted(os.listdir(MIGRATIONS_DIR), key=_sort_migration):
         with open(os.path.join(MIGRATIONS_DIR, filepath), "r") as migration:
             yield migration.read()
 
