@@ -1,11 +1,11 @@
 import hashlib
 from datetime import datetime
-from enum import Enum
 from typing import cast
 from uuid import uuid4
 
 from sqlalchemy import Row
 
+from src.constants import GarageItemRelations
 from src.database import engine as db
 from src.racing.service import get_racer
 from src.user.queries import (
@@ -123,13 +123,6 @@ def signup(username: str, password: str, email: str) -> None:
 ###############
 
 
-class GarageItemRelations(str, Enum):
-    HAS_OWNED = "HAS_OWNED"
-    OWNS = "OWNS"
-    HAS_RIDDEN = "HAS_RIDDEN"
-    SAT_ON = "SAT_ON"
-
-
 _USER_EDITABLE_FIELDS = ("username", "email")
 
 
@@ -156,6 +149,7 @@ def add_user_garage_item(
     user_id: int, make: str, model: str, year: int, relation: str
 ) -> bool:
     if relation not in list(GarageItemRelations):
+        print("relation", relation)
         return False
     with db.connect() as conn:
         result = conn.execute(build_get_model_id_query(make, model, year)).first()

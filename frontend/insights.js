@@ -34,7 +34,7 @@ class RaceListing {
   }
 
   newRace(raceId) {
-    racingPage.runRace(raceId);
+    racingPage.runRace(false, raceId);
     if (this.window_) _hide(this.window_);
   }
 }

@@ -27,7 +27,9 @@ async function _post(url, data) {
       body: JSON.stringify(data),
     }
   );
-  return await response.json();
+  var result = await response.json();
+  result._status_code = response.status;
+  return result;
 }
 
 

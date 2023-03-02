@@ -76,12 +76,30 @@ racer_models_table = Table(
     Column("weight_type", String(10)),
 )
 
+
+race_unique_table = Table(
+    "race_unique",
+    metadata,
+    Column("id", Integer, primary_key=True),
+)
+
+
 race_history_table = Table(
     "race_history",
     metadata,
     Column("id", Integer, primary_key=True),
     Column("created_at", DateTime),
     Column("user_id", Integer, ForeignKey(users_table.c.id)),
+    Column("race_unique_id", Integer, ForeignKey(race_unique_table.c.id)),
+)
+
+
+race_votes_table = Table(
+    "race_votes",
+    metadata,
+    Column("race_unique_id", Integer, ForeignKey(race_unique_table.c.id)),
+    Column("user_id", Integer, ForeignKey(users_table.c.id)),
+    Column("vote", Integer),
 )
 
 race_racers_table = Table(
@@ -106,4 +124,15 @@ user_garage_table = Table(
     Column("user_id", Integer, ForeignKey(users_table.c.id)),
     Column("model_id", Integer, ForeignKey(racer_models_table.c.id)),
     Column("relation", String(50)),
+)
+
+
+race_comments_table = Table(
+    "race_comments",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("race_unique_id", Integer, ForeignKey(race_unique_table.c.id)),
+    Column("user_id", Integer, ForeignKey(users_table.c.id)),
+    Column("text", String(4000)),
+    Column("created_at", Integer),
 )

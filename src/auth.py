@@ -11,16 +11,15 @@ def _auth(session_token: str | None) -> None | Row:
         return user
 
 
-def get_token(session_token: str = Cookie(None)) -> None | str:
+def get_token(session_token: None | str = Cookie(None)) -> None | str:
     return session_token
 
 
-def auth_required(session_token: str = Cookie(None)) -> Row:
-    print(session_token, "!!!")
+def auth_required(session_token: None | str = Cookie(None)) -> Row:
     if user := _auth(session_token):
         return user
     raise HTTPException(status.HTTP_403_FORBIDDEN)
 
 
-def auth_optional(session_token: str = Cookie(None)) -> None | Row:
+def auth_optional(session_token: None | str = Cookie(None)) -> None | Row:
     return _auth(session_token)

@@ -27,6 +27,7 @@ _MAKES_TRUTH = (
     "Victory",
     "Keeway",
     "CCM",
+    "Husqvarna",
 )
 
 DB_URL = "mysql://{user}:{password}@{host}:{port}/{database}"

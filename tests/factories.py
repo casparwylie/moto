@@ -6,6 +6,7 @@ from uuid import uuid4
 from sqlalchemy import Connection, Row, text
 
 from src.auth import auth_optional, auth_required
+from src.racing.service import make_unique_race_id
 
 _insert_user_query = """
 INSERT INTO users
@@ -17,6 +18,13 @@ _insert_user_session_query = """
 INSERT INTO user_sessions
   (token, user_id, expire)
 VALUES('{token}', '{user_id}', '{expire}')
+"""
+
+
+_insert_user_garage_query = """
+INSERT INTO user_garage
+    (user_id, model_id, relation)
+VALUES({user_id}, {model_id}, '{relation}')
 """
 
 
@@ -69,3 +77,45 @@ def store_user_session(
     )
     db.commit()
     return token
+
+
+def store_race(
+    db: Connection, model_ids: list[int], user_id: None | int = None
+) -> tuple[int, str]:
+    race_unique_id = make_unique_race_id(model_ids)
+    db.execute(text(f"INSERT IGNORE race_unique (id) VALUES('{race_unique_id}')"))
+    if user_id:
+        result = db.execute(
+            text(
+                f"INSERT INTO race_history (user_id, race_unique_id) VALUES({user_id}, '{race_unique_id}')"
+            )
+        )
+    else:
+        result = db.execute(
+            text(
+                f"INSERT INTO race_history (race_unique_id) VALUES('{race_unique_id}')"
+            )
+        )
+    race_id = cast(int, result.lastrowid)
+    for model_id in model_ids:
+        db.execute(text(f"INSERT INTO race_racers VALUES({race_id}, {model_id})"))
+    db.commit()
+    return race_id, race_unique_id
+
+
+def store_garage_item(
+    db: Connection,
+    user_id: int,
+    model_id: int,
+    relation: str,
+) -> None:
+    db.execute(
+        text(
+            _insert_user_garage_query.format(
+                user_id=user_id,
+                model_id=model_id,
+                relation=relation,
+            )
+        )
+    )
+    db.commit()

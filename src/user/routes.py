@@ -6,6 +6,7 @@ from src.user.models import (
     ChangePasswordRequest,
     DeleteGarageItemRequest,
     EditUserFieldRequest,
+    ForgotPasswordRequest,
     GarageItem,
     LoginRequest,
     SignUpRequest,
@@ -38,7 +39,7 @@ _SESSION_EXPIRE = 86400 * 7 * 2  # 2 weeks
 
 
 @router.post("/signup")
-async def signup_user(request: SignUpRequest) -> SuccessResponse:
+async def _signup_user(request: SignUpRequest) -> SuccessResponse:
     errors = []
     if err := invalid_username(request.username):
         errors.append(err)
@@ -60,7 +61,7 @@ async def signup_user(request: SignUpRequest) -> SuccessResponse:
 
 
 @router.post("/login")
-async def login_user(
+async def _login_user(
     request: LoginRequest,
     response: Response,
 ) -> SuccessResponse:
@@ -75,8 +76,15 @@ async def login_user(
 
 
 @router.get("/garage")
-async def get_garage(user_id: int) -> UserGarageResponse:
+async def _get_garage(user_id: int) -> UserGarageResponse:
     return UserGarageResponse.from_db(get_user_garage(user_id))
+
+
+@router.post("/forgot-password")
+async def _forgot_password(
+    request: ForgotPasswordRequest,
+) -> SuccessResponse:
+    return SuccessResponse(success=True)
 
 
 #################
@@ -85,12 +93,12 @@ async def get_garage(user_id: int) -> UserGarageResponse:
 
 
 @router.get("")
-async def get_user(user: Row = Depends(auth_required)) -> UserDataResponse:
+async def _get_user(user: Row = Depends(auth_required)) -> UserDataResponse:
     return UserDataResponse.from_db(user)
 
 
 @router.get("/logout")
-async def logout_user(
+async def _logout_user(
     response: Response,
     token: None | str = Depends(get_token),
 ) -> SuccessResponse:
@@ -102,7 +110,7 @@ async def logout_user(
 
 
 @router.post("/change-password")
-async def change_password_user(
+async def _change_password_user(
     request: ChangePasswordRequest,
     user: Row = Depends(auth_required),
 ) -> SuccessResponse:
@@ -120,7 +128,7 @@ async def change_password_user(
 
 
 @router.post("/edit")
-async def edit_field_user(
+async def _edit_field_user(
     request: EditUserFieldRequest,
     user: Row = Depends(auth_required),
 ) -> SuccessResponse:
@@ -146,7 +154,7 @@ async def edit_field_user(
 
 
 @router.post("/garage")
-async def add_garage_item(
+async def _add_garage_item(
     item: GarageItem,
     user: Row = Depends(auth_required),
 ) -> SuccessResponse:
@@ -161,7 +169,7 @@ async def add_garage_item(
 
 
 @router.post("/garage/delete")
-async def delete_garage_item(
+async def _delete_garage_item(
     request: DeleteGarageItemRequest,
     user: Row = Depends(auth_required),
 ) -> SuccessResponse:

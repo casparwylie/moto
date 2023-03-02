@@ -3,6 +3,7 @@ const RACING_API_URL = '/api/racing';
 const inputsContainer = document.getElementById('racer-inputs-container');
 const racerContainer = document.getElementById('racer-container');
 const raceGoOpt = document.getElementById('race-go-option');
+const raceGoSkipOpt = document.getElementById('race-go-skip-option');
 const raceShareOpt = document.getElementById('link-share-opt');
 const addMoreOpt = document.getElementById('add-more-option');
 const recommendationsContainer = document.getElementById('recommendation-container');
@@ -14,6 +15,11 @@ const lightsContainer = document.getElementById('lights-container');
 const controlPanel = document.getElementById('control-panel');
 const fbShareOpt = document.getElementById('fb-share-opt');
 const resultsWindow = document.getElementById('results-window');
+
+const raceUpvotes = document.getElementById('race-upvotes');
+const raceDownvotes = document.getElementById('race-downvotes');
+const upvoteRaceOpt = document.getElementById('upvote-result-opt');
+const downvoteRaceOpt = document.getElementById('downvote-result-opt');
 
 
 class Racer {
@@ -71,7 +77,7 @@ class Racer {
 
   static async fromApi(make, model, year, race) {
     let data = await _get(
-      `${RACING_API_URL}?make=${make}&model=${model}&year=${year}`
+      `${RACING_API_URL}/racer?make=${make}&model=${model}&year=${year}`
     );
     if (data) return Racer.fromData(data, race);
   }
@@ -114,7 +120,9 @@ class Racer {
     }
   }
 
-  move() {
+  async move(skip) {
+    var interval = 40;
+    if (skip) interval = 0;
     this._finished = false;
     this._progress = this.torque / 25;
     this._interval = setInterval(() => {
@@ -130,7 +138,7 @@ class Racer {
         this.finish();
         clearInterval(this._interval);
       }
-    }, 40);
+    }, interval);
   }
 
   getStatsString() {
@@ -143,9 +151,9 @@ class Racer {
     `
   }
 
-  finish() {
+  async finish() {
     this._finished = true;
-    this.race.checkFinished();
+    await this.race.checkFinished();
 
     let position = resultsContainer.children.length + 1;
     var posDisplay;
@@ -208,9 +216,10 @@ class Race {
       Racer.fromData(racer, this)
     ));
     this.raceId = result.race_id;
+    this.raceUniqueId = result.race_unique_id;
   }
 
-  async race(save) {
+  async race(save, skip) {
     if (this.racers.length == 0) return;
     if (save) {
       await this.save();
@@ -222,16 +231,22 @@ class Race {
       _hide(controlPanel);
     }
     this.reset();
-    this.startLights();
+    var startDelay = 0;
+    if (!skip) {
+      this.startLights();
+      startDelay = 4000;
+    }
     _hide(raceGoOpt);
+    _hide(raceGoSkipOpt);
     this.racers.forEach((racer) => racer.render());
-    setTimeout(() => this.racers.forEach((racer) => racer.move()), 4000);
+    setTimeout(() => this.racers.forEach((racer) => racer.move(skip)), startDelay);
   }
 
   async save() {
       let modelIds = this.racers.map((racer) => racer.modelId);
-      let data = await _post(`${RACING_API_URL}/save`, {'model_ids': modelIds});
+      let data = await _post(`${RACING_API_URL}/race/save`, {'model_ids': modelIds});
       this.raceId = data.race_id;
+      this.raceUniqueId = data.race_unique_id;
       await userState.refresh();
   }
 
@@ -260,9 +275,41 @@ class Race {
     );
   }
 
-  checkFinished() {
+  async vote(vote) {
+    let result = await _post(
+      `${RACING_API_URL}/race/vote`, {race_unique_id: this.raceUniqueId, vote: vote}
+    );
+    if (result.success) {
+      Informer.inform('Successfully voted', 'good');
+    } else if (result._status_code == 403) {
+      Informer.inform('You must have an account to vote.', 'bad');
+    }
+    await this.setVotes();
+  }
+
+  async setVotes() {
+    let result = await _get(
+      `${RACING_API_URL}/race/votes?race_unique_id=${this.raceUniqueId}`
+    );
+    let alreadyVoted = await _get(
+      `${RACING_API_URL}/race/vote/voted?race_unique_id=${this.raceUniqueId}`
+    );
+
+    raceUpvotes.innerHTML = result.upvotes;
+    raceDownvotes.innerHTML = result.downvotes;
+
+    if (alreadyVoted.voted) {
+      downvoteRaceOpt.classList.add('disabled-vote-opt');
+      upvoteRaceOpt.classList.add('disabled-vote-opt');
+    } else {
+      downvoteRaceOpt.classList.remove('disabled-vote-opt');
+      upvoteRaceOpt.classList.remove('disabled-vote-opt');
+    }
+  }
+
+  async checkFinished() {
       let finished = this.racers.every((racer) => racer._finished);
-      if (finished) this.finish();
+      if (finished) await this.finish();
   }
 
   startLights() {
@@ -286,17 +333,19 @@ class Race {
     setTimeout(() => _hide(lightsContainer), 4000);
   }
 
-  finish() {
+  async finish() {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
     _show(raceGoOpt);
+    _show(raceGoSkipOpt);
     _show(resultsWindow);
     this.setShare();
+    await this.setVotes();
   }
 }
 
 
-class RacingPage {
+class Racing {
 
   constructor() {
     this.addEventListeners();
@@ -306,13 +355,23 @@ class RacingPage {
   }
 
   addEventListeners() {
-    raceGoOpt.addEventListener('click', () => this.runRace());
+    raceGoOpt.addEventListener('click', () => this.runRace(false, null));
+    raceGoSkipOpt.addEventListener('click', () => this.runRace(true, null));
     addMoreOpt.addEventListener('click', () => this.addInput());
     raceShareOpt.addEventListener('click', () => this.share());
     resetOption.addEventListener('click', () => this.resetInputs());
     controlPanel.addEventListener('click', (evt) => {
       if (evt.target == controlPanel) _hide(recommendationsContainer);
     });
+
+    downvoteRaceOpt.addEventListener('click', () => this.voteRace(0));
+    upvoteRaceOpt.addEventListener('click', () => this.voteRace(1));
+  }
+
+  voteRace(vote) {
+    if (this.race && this.race.raceId) {
+      this.race.vote(vote);
+    }
   }
 
   share() {
@@ -372,10 +431,10 @@ class RacingPage {
       let year = item.children[2].value.trim();
       state += `${make} ${model} ${year}`;
     }
-    return state;
+    return state.trim();
   }
 
-  async runRace(raceId=null) {
+  async runRace(skip, raceId) {
     var save = false;
     if (this.inputState !== this.getInputState()) {
       // changed / new - load and save
@@ -387,18 +446,20 @@ class RacingPage {
       this.race = new Race();
       await this.race.setRacersFromRaceId(raceId);
       await this.setInputsFromRace();
+    } else if (!this.inputState){
+      return;
     } else {
       // Unchanged / replay - don't save
     }
     this.inputState = this.getInputState();
-    await this.race.race(save);
+    await this.race.race(save, skip);
   }
 
   async checkSharedRace() {
     let sharedUrlMatch = window.location.pathname.match("/r/\([0-9]+)/?$");
     if (sharedUrlMatch) {
       let raceId = parseInt(sharedUrlMatch[1]);
-      await this.runRace(raceId);
+      await this.runRace(false, raceId);
     }
   }
 }

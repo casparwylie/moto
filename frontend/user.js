@@ -4,6 +4,7 @@ const loginWindow = document.getElementById('login-window');
 const loginUsernameIn = document.getElementById('login-username');
 const loginPasswordIn = document.getElementById('login-password');
 const loginSubmit = document.getElementById('login-submit');
+const forgotPasswordOpt = document.getElementById('forgot-password-opt');
 
 const signupWindow = document.getElementById('signup-window');
 const signupUsernameIn = document.getElementById('signup-username');
@@ -321,6 +322,14 @@ class UserState {
 class SignupForm {
   constructor() {
     signupSubmit.addEventListener('click', () => this.signupRequest());
+    signupPasswordVerifyIn.addEventListener('keypress', (evt) => this.enterTrigger(evt));
+  }
+
+  enterTrigger(evt) {
+    if (evt.key === "Enter") {
+      event.preventDefault();
+      signupSubmit.click();
+    }
   }
 
   async signupRequest() {
@@ -367,10 +376,53 @@ class LoginForm {
   constructor(userState) {
     this.userState = userState;
     loginSubmit.addEventListener('click', () => this.loginRequest());
+    forgotPasswordOpt.addEventListener('click', () => this.toggleForgotPassword());
+    loginPasswordIn.addEventListener('keypress', (evt) => this.enterTrigger(evt));
+    this.forgotPasswordMode = false;
+  }
+
+  enterTrigger(evt) {
+    if (evt.key === "Enter") {
+      event.preventDefault();
+      loginSubmit.click();
+    }
+  }
+
+  toggleForgotPassword() {
+    if (!this.forgotPasswordMode) {
+      loginUsernameIn.placeholder = 'Username or email...';
+      loginSubmit.innerHTML = 'Send me a link';
+      forgotPasswordOpt.innerHTML = 'I remember now - login!';
+      _hide(loginPasswordIn);
+      this.forgotPasswordMode = true;
+    } else {
+      loginUsernameIn.placeholder = 'Username...';
+      loginSubmit.innerHTML = 'Login';
+      forgotPasswordOpt.innerHTML = 'Forgot Password?';
+      _show(loginPasswordIn);
+      this.forgotPasswordMode = false;
+    }
+  }
+
+  async forgotPasswordRequest() {
+    if (loginUsernameIn.value.trim()) {
+      let result = await _post(
+        `${USER_API_URL}/forgot-password`,
+        {user_identifier: loginUsernameIn.value},
+      );
+      if (result.success) {
+        Informer.inform('You have been sent an email to reset your password.', 'good');
+        loginUsernameIn.value = '';
+      }
+    }
   }
 
   async loginRequest() {
-    if (loginUsernameIn.value && loginPasswordIn.value) {
+    if (this.forgotPasswordMode) {
+      await this.forgotPasswordRequest();
+      return;
+    }
+    if (loginUsernameIn.value.trim() && loginPasswordIn.value.trim()) {
       let response = await _post(`${USER_API_URL}/login`, {
         username: loginUsernameIn.value,
         password: loginPasswordIn.value

@@ -2,6 +2,11 @@ from pydantic import BaseModel
 from sqlalchemy import Row
 
 
+class SuccessResponse(BaseModel):
+    success: bool
+    errors: list[str] = []
+
+
 class Racer(BaseModel):
     model_id: int
     name: str | None
@@ -38,6 +43,7 @@ class Race(BaseModel):
     race_id: int
     racers: list[Racer]
     user_id: int | None = None
+    race_unique_id: str
 
     @classmethod
     def from_service(cls, race: Row, racers: list[Row]) -> "Race":
@@ -45,6 +51,7 @@ class Race(BaseModel):
             race_id=race.id,
             racers=[Racer.from_db_data(racer_data) for racer_data in racers],
             user_id=race.user_id,
+            race_unique_id=race.race_unique_id,
         )
 
 
@@ -62,3 +69,17 @@ class RaceListing(BaseModel):
                 if race and racers
             ]
         )
+
+
+class RaceVotesResponse(BaseModel):
+    upvotes: int
+    downvotes: int
+
+
+class RaceVoteRequest(BaseModel):
+    race_unique_id: str
+    vote: int
+
+
+class HasVotedResponse(BaseModel):
+    voted: bool
