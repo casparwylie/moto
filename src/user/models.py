@@ -25,6 +25,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    user_identifier: str
+
+
 class ChangePasswordRequest(BaseModel):
     old: str
     new: str

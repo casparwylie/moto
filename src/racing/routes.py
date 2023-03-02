@@ -15,9 +15,9 @@ from src.racing.models import (
 from src.racing.service import (
     get_popular_pairs,
     get_race,
-    get_race_votes,
     get_racer,
     get_recent_races,
+    get_votes,
     save_race,
     search_racers,
     user_has_voted,
@@ -27,14 +27,14 @@ from src.racing.service import (
 router = APIRouter(prefix="/api/racing")
 
 
-@router.get("")
-async def racer(make: str, model: str, year: str) -> Racer | None:
+@router.get("/racer")
+async def _get_racer(make: str, model: str, year: str) -> Racer | None:
     if racer := get_racer(make, model, year):
         return Racer.from_db_data(racer)
 
 
 @router.get("/race")
-async def race(race_id: int) -> Race | None:
+async def _get_race(race_id: int) -> Race | None:
     race, racers = get_race(race_id)
     if race and racers:
         return Race.from_service(race, racers)
@@ -42,12 +42,12 @@ async def race(race_id: int) -> Race | None:
 
 
 @router.get("/race/search")
-async def search(make: str, model: str, year: str) -> list[Racer]:
+async def _search_racers(make: str, model: str, year: str) -> list[Racer]:
     return [Racer.from_db_data(result) for result in search_racers(make, model, year)]
 
 
 @router.post("/race/save")
-async def save(
+async def _save_race(
     request: SaveRequest, user: None | Row = Depends(auth_optional)
 ) -> Race | None:
     user_id = user.id if user else None
@@ -58,7 +58,7 @@ async def save(
 
 
 @router.post("/race/vote")
-async def vote(
+async def _vote_race(
     request: RaceVoteRequest, user: Row = Depends(auth_required)
 ) -> SuccessResponse:
     if request.vote not in {1, 0}:
@@ -68,14 +68,14 @@ async def vote(
 
 
 @router.get("/race/votes")
-async def votes(race_unique_id: str) -> RaceVotesResponse:
-    if votes := get_race_votes(race_unique_id):
+async def _get_votes(race_unique_id: str) -> RaceVotesResponse:
+    if votes := get_votes(race_unique_id):
         return RaceVotesResponse(upvotes=votes[0], downvotes=votes[1])
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.get("/race/vote/voted")
-async def voted(
+async def _get_voted(
     race_unique_id: str, user: Row = Depends(auth_optional)
 ) -> HasVotedResponse:
     if user and user_has_voted(race_unique_id, user.id):
@@ -84,10 +84,10 @@ async def voted(
 
 
 @router.get("/insight/popular-pairs")
-async def insight_popular_pairs() -> RaceListing:
+async def _get_insight_popular_pairs() -> RaceListing:
     return RaceListing.from_service(get_popular_pairs())
 
 
 @router.get("/insight/recent-races")
-async def insight_recent_races(user_id: None | int = None) -> RaceListing:
+async def _get_insight_recent_races(user_id: None | int = None) -> RaceListing:
     return RaceListing.from_service(get_recent_races(user_id))

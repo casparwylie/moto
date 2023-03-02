@@ -3,6 +3,7 @@ const RACING_API_URL = '/api/racing';
 const inputsContainer = document.getElementById('racer-inputs-container');
 const racerContainer = document.getElementById('racer-container');
 const raceGoOpt = document.getElementById('race-go-option');
+const raceGoSkipOpt = document.getElementById('race-go-skip-option');
 const raceShareOpt = document.getElementById('link-share-opt');
 const addMoreOpt = document.getElementById('add-more-option');
 const recommendationsContainer = document.getElementById('recommendation-container');
@@ -76,7 +77,7 @@ class Racer {
 
   static async fromApi(make, model, year, race) {
     let data = await _get(
-      `${RACING_API_URL}?make=${make}&model=${model}&year=${year}`
+      `${RACING_API_URL}/racer?make=${make}&model=${model}&year=${year}`
     );
     if (data) return Racer.fromData(data, race);
   }
@@ -119,7 +120,9 @@ class Racer {
     }
   }
 
-  async move() {
+  async move(skip) {
+    var interval = 40;
+    if (skip) interval = 0;
     this._finished = false;
     this._progress = this.torque / 25;
     this._interval = setInterval(() => {
@@ -135,7 +138,7 @@ class Racer {
         this.finish();
         clearInterval(this._interval);
       }
-    }, 4);
+    }, interval);
   }
 
   getStatsString() {
@@ -216,7 +219,7 @@ class Race {
     this.raceUniqueId = result.race_unique_id;
   }
 
-  async race(save) {
+  async race(save, skip) {
     if (this.racers.length == 0) return;
     if (save) {
       await this.save();
@@ -228,10 +231,15 @@ class Race {
       _hide(controlPanel);
     }
     this.reset();
-    //this.startLights();
+    var startDelay = 0;
+    if (!skip) {
+      this.startLights();
+      startDelay = 4000;
+    }
     _hide(raceGoOpt);
+    _hide(raceGoSkipOpt);
     this.racers.forEach((racer) => racer.render());
-    setTimeout(() => this.racers.forEach((racer) => racer.move()), 500);
+    setTimeout(() => this.racers.forEach((racer) => racer.move(skip)), startDelay);
   }
 
   async save() {
@@ -329,6 +337,7 @@ class Race {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
     _show(raceGoOpt);
+    _show(raceGoSkipOpt);
     _show(resultsWindow);
     this.setShare();
     await this.setVotes();
@@ -346,7 +355,8 @@ class Racing {
   }
 
   addEventListeners() {
-    raceGoOpt.addEventListener('click', () => this.runRace());
+    raceGoOpt.addEventListener('click', () => this.runRace(false, null));
+    raceGoSkipOpt.addEventListener('click', () => this.runRace(true, null));
     addMoreOpt.addEventListener('click', () => this.addInput());
     raceShareOpt.addEventListener('click', () => this.share());
     resetOption.addEventListener('click', () => this.resetInputs());
@@ -421,10 +431,10 @@ class Racing {
       let year = item.children[2].value.trim();
       state += `${make} ${model} ${year}`;
     }
-    return state;
+    return state.trim();
   }
 
-  async runRace(raceId=null) {
+  async runRace(skip, raceId) {
     var save = false;
     if (this.inputState !== this.getInputState()) {
       // changed / new - load and save
@@ -436,18 +446,20 @@ class Racing {
       this.race = new Race();
       await this.race.setRacersFromRaceId(raceId);
       await this.setInputsFromRace();
+    } else if (!this.inputState){
+      return;
     } else {
       // Unchanged / replay - don't save
     }
     this.inputState = this.getInputState();
-    await this.race.race(save);
+    await this.race.race(save, skip);
   }
 
   async checkSharedRace() {
     let sharedUrlMatch = window.location.pathname.match("/r/\([0-9]+)/?$");
     if (sharedUrlMatch) {
       let raceId = parseInt(sharedUrlMatch[1]);
-      await this.runRace(raceId);
+      await this.runRace(false, raceId);
     }
   }
 }

@@ -98,665 +98,709 @@
     }
 
     .form-opts {
-      background: #1a1919;
-      color: white;
-    }
-
-    #recommendation-container {
-      width: calc(50% - 2px);
-      background: #002d59;
-      border-radius: 5px;
-      float: right;
-      padding: 20px;
-      color: white;
-      margin-top: -60px;
-      display: none;
-      position: relative;
-      z-index: 1000;
-    }
-
-    .recommendation-row:hover {
-      color: #39ae86;
-    }
-    .recommendation-row {
-      cursor: pointer;
-      border-bottom: 1px solid black;
-      text-align: center;
-    }
-
-    #starter-form {
-      padding: 20px;
-      margin: 0 auto;
-      width: 40%;
-      background: white;
-      max-height: 200%;
-    }
-
-    #starter-triggers {
-      margin-top: 10px;
-      display: flex;
-      flex: 0 0 auto;
-      flex-wrap: wrap;
-      justify-content: left;
-    }
-
-    #lights-container {
-      height: 28vw;
-      width: 10vw;
-      margin: 15vh 45vw;
-      position: absolute;
-      background: #353a3c;
-      padding: 20px;
-      display: none;
-      border-radius: 30px;
-      box-shadow: 0px 0px 20px grey;
-    }
-
-    .light {
-      height: 28%;
-      margin-top: 11%;
-      width: 80%;
-      border-radius: 100%;
-      margin-left: 10%;
-      position: relative;
-    }
-
-    #heading {
-      font-family: 'Tourney', cursive;
-      margin: 0 auto;
-      height: 70px;
-      width: 100%;
-      text-align: center;
-      font-size: 30px;
-      color: black;
-      padding-top: 10px;
-    }
-
-    .result-row {
-      padding: 5px;
-    }
-
-    #credit {
-      color: #d3c9c6;
-      font-size: 15px;
-    }
-
-    #link-share-opt {
-      background-color: #ffa500;
-    }
-
-    .shared-link {
-      color: #39ae86;
-      text-decoration: underline;
-    }
-
-    #menu {
-      margin: 0 auto;
-      width: 40%;
-      display: flex;
-      border-bottom: 1px double black;
-      border-top: 1px double black;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .menu-item {
-      padding: 5px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .menu-item:hover {
-      color: #39ae86;
-    }
-
-    .window {
-      width: 50%;
-      margin-top: 5%;
-      height: 70vh;
-      overflow-y: scroll;
-      margin-left: calc(25% - 20px);
-      text-align: center;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 0px 30px darkgrey;
-      background-color: #008b8b;
-      display: none;
-      position: absolute;
-      z-index: 10000;
-    }
-
-    #introduction-container {
-      margin-top: 3%;
-      font-size: 15px;
-    }
-
-    .close {
-      float: right;
-      cursor: pointer;
-      color: white;
-    }
-
-    .window-header-image {
-       background-size: 100%;
-       background-repeat: no-repeat;
-       height: 100px;
-       width: 20%;
-       margin: 0 auto;
-    }
-    .window-header-image-1 {
-       background-image: url('/static/images/classic_type.svg');
-    }
-
-    .window-header-image-2 {
-       background-image: url('/static/images/adventure_type.svg');
-    }
-
-    .window-header-image-3 {
-       background-image: url('/static/images/sport_type.svg');
-    }
-
-    .window-header-image-4 {
-       background-image: url('/static/images/cross_type.svg');
-    }
-
-    .window-header-image-5 {
-       background-image: url('/static/images/retro_type.svg');
-    }
-
-    #popular-pairs-container {
-    }
-
-    .popular-pair-row {
-      padding: 5px;
-      border-bottom: 1px solid grey;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .popular-pair-row:hover {
-      color: white;
-    }
-
-    .vs-text {
-      font-weight: bold;
-      color: #004545;
-      padding-left: 20px;
-      padding-right: 20px;
-    }
-
-    .result-container {
-      padding: 20px;
-      font-size: 15px;
-      border-bottom: 1px solid grey;
-    }
-
-    .results-container {
-
-    }
-
-    .result-heading {
-      color: #ffa500;
-    }
-
-    .pos-text {
-      font-size: 25px;
-      color: #ffa500;
-    }
-
-    #results-window {
-      color: white;
-      background: black;
-    }
-
-    #race-go-option {
-      background-color: #39ae86;
-      color: white;
-      font-weight: bold;
-      font-size: 20px;
-      width: 25%;
-      flex: 0 0 100%;
-    }
-
-    #login-window {
-      height: 45vh;
-    }
-
-    #signup-window {
-      height: 55vh;
-    }
-
-    .account-form button, .account-form input {
-      width: 100%;
-      margin-top: 5px;
-    }
-    .account-form button {
-      border-radius: 5px;
-      outline-width: 0px;
-      border: 1px;
-      font-size: 20px;
-      width: 100%;
-      margin: 1px;
-      margin-top: 5px;
-      width: 40%;
-      float: left;
-    }
-
-    .account-form {
-      position: relative;
-      margin: 0 auto;
-      width: 60%;
-    }
-
-    .good {
-      background-color: #39ae86;
-    }
-
-    .normal {
-      background-color: #40e0d0;
-    }
-
-    .bad {
-      background-color: #ff4c4c;
-    }
-
-    .informer-row {
-      width: 100vw;
-      text-align: center;
-      color: white;
-      padding: 5px;
-      z-index: 100000;
-    }
-    #informer-container {
-      position: absolute;
-      z-index: 100000;
-    }
-
-    #profile-row-container{
-      margin-top: 10px;
-    }
-
-    .profile-row {
-      text-align: center;
-    }
-    .profile-row-value {
-      font-weight: bold;
-      display: inline-block;
-    }
-
-    #add-garage-item-container {
-      display: none;
-    }
-    #add-garage-item-container input {
-      width: 25%;
-    }
-    #add-garage-toggle-opt {
-      margin-left: 10px;
-    }
-    #add-garage-recommender {
-      width: 40%;
-      background: #002d59;
-      border-radius: 5px;
-      float: right;
-      padding: 20px;
-      color: white;
-      display: none;
-      position: absolute;
-      z-index: 1000;
-      margin-left: calc(30% - 40px);
-    }
-
-    #profile-garage-container {
-      border: 6px double black;
-      padding: 20px;
-      margin-top: 10px;
-    }
-
-    .garage-item-row {
-      border-bottom: 1px solid black;
-    }
-
-    .garage-item-delete-opt {
-      color: #ff4c4c;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-
-    #profile-edit-container, #profile-change-pass-container {
-      display: none;
-      margin-top: 10px;
-    }
-
-
-    #upvote-result-opt {
-      background-color: #39ae86;
-    }
-
-    #downvote-result-opt {
-      background-color: #ff4c4c;
-    }
-    .vote-opt {
-      width: 100%;
-      text-align: left;
-    }
-
-    #vote-opt-container {
-    }
-
-    #results-opt-container>*{
-      flex: 1;
-      margin: 1px;
-    }
-
-    #results-opt-container button:hover:not(button.disabled-vote-opt){
-      color: black;
-    }
-    #results-opt-container {
-      display: flex;
-      margin: 0 auto;
-      width: 70%;
-    }
-
-    #fb-share-opt {
-     background: #3399ff;
-    }
-
-    #fb-f {
-      font-weight: bold;
-      padding-right: 6px;
-      color: white;
-    }
-
-    #view-comments-opt {
-      background: #c44597;
-    }
-
-    .disabled-vote-opt {
-      cursor:not-allowed;
-      opacity: 0.7;
-    }
-
-    #add-comment-text {
-      width: 80%;
-      height: 15%;
-      resize: none;
-    }
-
-    #comments-container {
-      height: 60%;
-      width: 80%;
-      overflow-y: scroll;
-      margin: 0 auto;
-    }
-
-    .comment-container {
-      background: #007d7d;
-      padding: 5px;
-      margin-top: 5px;
-      border-radius: 5px;
-    }
-
-    .comment-text-container {
-      width: 100%;
-      padding: 5px;
-    }
-
-    .comment-info-container {
-      color: #005353;
-      font-size: 12px;
-    }
-
-    #add-comment-container {
-      width: 100%;
-      margin: 10px auto;
-    }
-
-    #add-comment-opt {
-      margin-top: 5px;
-    }
-
-
-    #social-window {
-      z-index: 100000;
-    }
-
-    @media only screen and (max-width: 900px) {
-      #menu {
-        width: 60%;
-        font-size: 15px;
-      }
-
-      #race-go-option, .account-form button, select, button, input {
-        font-size: 10px;
-        font-size: 12px;
+        background: #1a1919;
+        color: white;
       }
 
       #recommendation-container {
-        padding: 5px;
-        font-size: 12px;
+        width: calc(50% - 2px);
+        background: #002d59;
+        border-radius: 5px;
+        float: right;
+        padding: 20px;
+        color: white;
+        margin-top: -60px;
+        display: none;
+        position: relative;
+        z-index: 1000;
       }
-      .window {
+
+      .recommendation-row:hover {
+        color: #39ae86;
+      }
+      .recommendation-row {
+        cursor: pointer;
+        border-bottom: 1px solid black;
+        text-align: center;
+      }
+
+      #starter-form {
+        padding: 20px;
+        margin: 0 auto;
+        width: 40%;
+        background: white;
+        max-height: 200%;
+      }
+
+      #starter-misc-options {
+        margin-top: 10px;
+        display: flex;
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+        justify-content: left;
+      }
+      #starter-triggers {
+        margin-top: 10px;
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+      }
+
+
+      #lights-container {
+        height: 28vw;
+        width: 10vw;
+        margin: 15vh 45vw;
+        position: absolute;
+        background: #353a3c;
+        padding: 20px;
+        display: none;
+        border-radius: 30px;
+        box-shadow: 0px 0px 20px grey;
+      }
+
+      .light {
+        height: 28%;
+        margin-top: 11%;
         width: 80%;
-        margin-left: calc(10% - 20px);
+        border-radius: 100%;
+        margin-left: 10%;
+        position: relative;
+      }
+
+      #heading {
+        font-family: 'Tourney', cursive;
+        margin: 0 auto;
+        height: 70px;
+        width: 100%;
+        text-align: center;
+        font-size: 30px;
+        color: black;
+        padding-top: 10px;
+      }
+
+      .result-row {
+        padding: 5px;
+      }
+
+      #credit {
+        color: #d3c9c6;
+        font-size: 15px;
+      }
+
+      #link-share-opt {
+        background-color: #ffa500;
+      }
+
+      .shared-link {
+        color: #39ae86;
+        text-decoration: underline;
+      }
+
+      #menu {
+        margin: 0 auto;
+        width: 40%;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .menu-item {
+        padding: 5px;
+        text-align: center;
+        margin-left: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid black;
+      }
+
+      .menu-item:hover {
+        color: #39ae86;
+        border-color: #39ae86;
+      }
+
+      .window {
+        width: 50%;
+        margin-top: 5%;
+        height: 70vh;
+        overflow-y: scroll;
+        margin-left: calc(25% - 20px);
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 30px darkgrey;
+        background-color: #008b8b;
+        display: none;
+        position: absolute;
+        z-index: 10000;
+      }
+
+      #introduction-container {
+        margin-top: 3%;
+        font-size: 15px;
+      }
+
+      .close {
+        float: right;
+        cursor: pointer;
+        color: white;
       }
 
       .window-header-image {
-       height: 28%;
+         background-size: 100%;
+         background-repeat: no-repeat;
+         height: 100px;
+         width: 20%;
+         margin: 0 auto;
       }
-    }
+      .window-header-image-1 {
+         background-image: url('/static/images/classic_type.svg');
+      }
+
+      .window-header-image-2 {
+         background-image: url('/static/images/adventure_type.svg');
+      }
+
+      .window-header-image-3 {
+         background-image: url('/static/images/sport_type.svg');
+      }
+
+      .window-header-image-4 {
+         background-image: url('/static/images/cross_type.svg');
+      }
+
+      .window-header-image-5 {
+         background-image: url('/static/images/retro_type.svg');
+      }
+
+      #popular-pairs-container {
+      }
+
+      .popular-pair-row {
+        padding: 5px;
+        border-bottom: 1px solid grey;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .popular-pair-row:hover {
+        color: white;
+      }
+
+      .vs-text {
+        font-weight: bold;
+        color: #004545;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .result-container {
+        padding: 20px;
+        font-size: 15px;
+        border-bottom: 1px solid grey;
+      }
+
+      .results-container {
+
+      }
+
+      .result-heading {
+        color: #ffa500;
+      }
+
+      .pos-text {
+        font-size: 25px;
+        color: #ffa500;
+      }
+
+      #results-window {
+        color: white;
+        background: black;
+      }
+
+      #race-go-option {
+        background-color: #39ae86;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        flex: 0 0 70%;
+      }
+
+      #race-go-skip-option: hover, #race-go-option: hover {
+        color: black;
+      }
+
+      #race-go-skip-option {
+        background-color: #ffa500;
+        color: white;
+        font-size: 20px;
+        flex: 0 0 30%;
+      }
+
+      #login-window {
+        height: 45vh;
+      }
+
+      #signup-window {
+        height: 55vh;
+      }
+
+      .account-form button, .account-form input {
+        width: 100%;
+        margin-top: 5px;
+      }
+      .account-form button {
+        border-radius: 5px;
+        outline-width: 0px;
+        border: 1px;
+        font-size: 20px;
+        width: 100%;
+        margin: 1px;
+        margin-top: 5px;
+        width: 40%;
+        float: left;
+      }
+
+      .account-form {
+        position: relative;
+        margin: 0 auto;
+        width: 60%;
+      }
+
+      #forgot-password-opt {
+        padding: 10px;
+        float: left;
+      }
+
+      #forgot-password-opt:hover {
+        color: white;
+        cursor: pointer;
+      }
+
+      .good {
+        background-color: #39ae86;
+      }
+
+      .normal {
+        background-color: #40e0d0;
+      }
+
+      .bad {
+        background-color: #ff4c4c;
+      }
+
+      .informer-row {
+        width: 100vw;
+        text-align: center;
+        color: white;
+        padding: 5px;
+        z-index: 100000;
+      }
+      #informer-container {
+        position: absolute;
+        z-index: 100000;
+      }
+
+      #profile-row-container{
+        margin-top: 10px;
+      }
+
+      .profile-row {
+        text-align: center;
+      }
+      .profile-row-value {
+        font-weight: bold;
+        display: inline-block;
+      }
+
+      #add-garage-item-container {
+        display: none;
+      }
+      #add-garage-item-container input {
+        width: 25%;
+      }
+      #add-garage-toggle-opt {
+        margin-left: 10px;
+      }
+      #add-garage-recommender {
+        width: 40%;
+        background: #002d59;
+        border-radius: 5px;
+        float: right;
+        padding: 20px;
+        color: white;
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        margin-left: calc(30% - 40px);
+      }
+
+      #profile-garage-container {
+        border: 6px double black;
+        padding: 20px;
+        margin-top: 10px;
+      }
+
+      .garage-item-row {
+        border-bottom: 1px solid black;
+      }
+
+      .garage-item-delete-opt {
+        color: #ff4c4c;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      .comment-delete-opt {
+        color: #ff4c4c;
+        float: right;
+        cursor: pointer;
+      }
+
+      #profile-edit-container, #profile-change-pass-container {
+        display: none;
+        margin-top: 10px;
+      }
 
 
-  </style>
-</head>
-<body>
-  <div id="informer-container"></div>
+      #upvote-result-opt {
+        background-color: #39ae86;
+      }
+
+      #downvote-result-opt {
+        background-color: #ff4c4c;
+      }
+      .vote-opt {
+        width: 100%;
+        text-align: left;
+      }
+
+      #vote-opt-container {
+      }
+
+      #results-opt-container>*{
+        flex: 1;
+        margin: 1px;
+      }
+
+      #results-opt-container button:hover:not(button.disabled-vote-opt){
+        color: black;
+      }
+      #results-opt-container {
+        display: flex;
+        margin: 0 auto;
+        width: 70%;
+      }
+
+      #fb-share-opt {
+       background: #3399ff;
+      }
+
+      #fb-f {
+        font-weight: bold;
+        padding-right: 6px;
+        color: white;
+      }
+
+      #view-comments-opt {
+        background-color: #ffa500;
+      }
+
+      .disabled-vote-opt {
+        cursor:not-allowed;
+        opacity: 0.7;
+      }
+
+      #add-comment-text {
+        width: 80%;
+        height: 15%;
+        resize: none;
+      }
+
+      #comments-container {
+        height: 60%;
+        width: 80%;
+        overflow-y: scroll;
+        margin: 0 auto;
+      }
+
+      .comment-container {
+        background: #007d7d;
+        padding: 5px;
+        margin-top: 5px;
+        border-radius: 5px;
+      }
+
+      .comment-text-container {
+        width: 100%;
+        padding: 5px;
+      }
+
+      .comment-info-container {
+        color: #005353;
+        font-size: 12px;
+      }
+
+      .garage-info-container {
+        color: white;
+        font-style: italic;
+        font-size: 12px;
+      }
+
+      #add-comment-container {
+        width: 100%;
+        margin: 10px auto;
+      }
+
+      #add-comment-opt {
+        margin-top: 5px;
+      }
 
 
-  <div class="window" id="social-window">
-    <div window="social-window" class="close">x</div>
-    <h2>Comments</h2>
-    <div id="comments-container"></div>
-    <div id="add-comment-container">
-      <textarea placeholder="Enter comment..." id="add-comment-text"></textarea>
-      <br>
-      <button id="add-comment-opt">Comment</div>
-    </div>
-
-  </div>
+      #social-window {
+        z-index: 100000;
+      }
 
 
-  <div class="window" id="myprofile-window">
-    <div window="myprofile-window" class="close">x</div>
-    <h2>My Profile</h2>
-    <button id="edit-profile-toggle">Edit</button>
-    <button id="change-password-toggle">Change Password</button>
-    <div id="profile-row-container" class="profile-data-view">
-      <div class="profile-row">
-        Username: <div class="profile-row-value" id="profile-row-username"></div>
+      @media only screen and (max-width: 900px) {
+        #menu {
+          width: 60%;
+          font-size: 15px;
+        }
+
+        #race-go-option, #race-go-skip-option, .account-form button, select, button, input {
+          font-size: 10px;
+          font-size: 12px;
+        }
+
+        #recommendation-container {
+          padding: 5px;
+          font-size: 12px;
+        }
+        .window {
+          width: 80%;
+          margin-left: calc(10% - 20px);
+        }
+
+        .window-header-image {
+         height: 28%;
+        }
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <div id="informer-container"></div>
+
+
+    <div class="window" id="social-window">
+      <div window="social-window" class="close">x</div>
+      <h2>Comments</h2>
+      <div id="comments-container"></div>
+      <div id="add-comment-container">
+        <textarea placeholder="Enter comment..." id="add-comment-text"></textarea>
+        <br>
+        <button id="add-comment-opt">Comment</div>
       </div>
-      <div class="profile-row">
-        Email: <div class="profile-row-value" id="profile-row-email"></div>
+
+    </div>
+
+
+    <div class="window" id="myprofile-window">
+      <div window="myprofile-window" class="close">x</div>
+      <h2>My Profile</h2>
+      <button id="edit-profile-toggle">Edit</button>
+      <button id="change-password-toggle">Change Password</button>
+      <div id="profile-row-container" class="profile-data-view">
+        <div class="profile-row">
+          Username: <div class="profile-row-value" id="profile-row-username"></div>
+        </div>
+        <div class="profile-row">
+          Email: <div class="profile-row-value" id="profile-row-email"></div>
+        </div>
+      </div>
+      <div id="profile-edit-container" class="profile-data-view">
+        <input type="text" id="profile-edit-username" placeholder="New username...">
+        <button id="edit-username-submit">Save</button><br>
+        <input type="text" id="profile-edit-email" placeholder="New email...">
+        <button id="edit-email-submit">Save</button><br>
+      </div>
+      <div id="profile-change-pass-container" class="profile-data-view">
+        <input type="password" id="profile-change-pass-old" placeholder="Old password..."><br>
+        <input type="password" id="profile-change-pass-new" placeholder="New password..."><br>
+        <input type="password" id="profile-change-pass-verify-new" placeholder="Verify new password..."><br>
+        <button id="change-password-submit">Change</button>
+      </div>
+
+      <h2>My Garage<button id="add-garage-toggle-opt">+</button></h2>
+      <div id="add-garage-item-container">
+        <input type="text" placeholder="Make..." id="add-garage-item-make">
+        <input type="text" placeholder="Model..." id="add-garage-item-model">
+        <input type="text" placeholder="Year..." id="add-garage-item-year">
+        <select id="add-garage-item-relation">
+          <option value="">--Relationship--</option>
+          <option value="OWNS">Currenty Own</option>
+          <option value="HAS_OWNED">Used to Own</option>
+          <option value="HAS_RIDDEN">Have Ridden</option>
+          <option value="SAT_ON">Once Sat On</option>
+        </select>
+        <button id="add-garage-item-submit">+ Add</button>
+        <div id="add-garage-recommender"></div>
+      </div>
+      <div id="profile-garage-container"></div>
+
+
+      <h2>My Recent Races</h2>
+      <div id="my-recent-races-container"></div>
+    </div>
+
+
+
+
+
+    <div class="window" id="login-window">
+      <div window="login-window" class="close">x</div>
+      <div class="window-header-image window-header-image-4"></div>
+      <h2>Login</h2>
+      <div id="login-form" class="account-form">
+        <input id="login-username" type="text" placeholder="Username...">
+        <input id="login-password" type="password" placeholder="Password...">
+        <button id="login-submit">Login</button><div id="forgot-password-opt">Forgot Password?</div>
       </div>
     </div>
-    <div id="profile-edit-container" class="profile-data-view">
-      <input type="text" id="profile-edit-username" placeholder="New username...">
-      <button id="edit-username-submit">Save</button><br>
-      <input type="text" id="profile-edit-email" placeholder="New email...">
-      <button id="edit-email-submit">Save</button><br>
-    </div>
-    <div id="profile-change-pass-container" class="profile-data-view">
-      <input type="password" id="profile-change-pass-old" placeholder="Old password..."><br>
-      <input type="password" id="profile-change-pass-new" placeholder="New password..."><br>
-      <input type="password" id="profile-change-pass-verify-new" placeholder="Verify new password..."><br>
-      <button id="change-password-submit">Change</button>
-    </div>
-
-    <h2>My Garage<button id="add-garage-toggle-opt">+</button></h2>
-    <div id="add-garage-item-container">
-      <input type="text" placeholder="Make..." id="add-garage-item-make">
-      <input type="text" placeholder="Model..." id="add-garage-item-model">
-      <input type="text" placeholder="Year..." id="add-garage-item-year">
-      <select id="add-garage-item-relation">
-        <option value="">--Relationship--</option>
-        <option value="OWNS">Currenty Own</option>
-        <option value="HAS_OWNED">Used to Own</option>
-        <option value="HAS_RIDDEN">Have Ridden</option>
-        <option value="SAT_ON">Once Sat On</option>
-      </select>
-      <button id="add-garage-item-submit">+ Add</button>
-      <div id="add-garage-recommender"></div>
-    </div>
-    <div id="profile-garage-container"></div>
-
-
-    <h2>My Recent Races</h2>
-    <div id="my-recent-races-container"></div>
-  </div>
 
 
 
 
 
-  <div class="window" id="login-window">
-    <div window="login-window" class="close">x</div>
-    <div class="window-header-image window-header-image-4"></div>
-    <h2>Login</h2>
-    <div id="login-form" class="account-form">
-      <input id="login-username" type="text" placeholder="Username...">
-      <input id="login-password" type="password" placeholder="Password...">
-      <button id="login-submit">Login</button>
-    </div>
-  </div>
-
-
-
-
-
-  <div class="window" id="signup-window">
-    <div window="signup-window" class="close">x</div>
-    <div class="window-header-image window-header-image-5"></div>
-    <h2>Sign Up</h2>
-    <div id="signup-form" class="account-form">
-      <input id="signup-username" type="text" placeholder="Username...">
-      <input id="signup-email" type="email" placeholder="Email...">
-      <input id="signup-password" type="password" placeholder="Password...">
-      <input id="signup-password-verify" type="password" placeholder="Verify Password...">
-      <button id="signup-submit">Sign up</button>
-    </div>
-  </div>
-
-
-
-
-
-
-
-  <div class="window" id="results-window">
-    <div window="results-window" class="close">x</div>
-    <h2>Results</h2>
-    <div id="results-opt-container">
-      <button id="link-share-opt" class="share-opt"><b>Share Race</b></button>
-      <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
-      <div id="vote-opt-container">
-        <button class="vote-opt" id="upvote-result-opt">
-          &#9650; Upvote (<span id="race-upvotes">0</span>)
-        </button>
-        <button class="vote-opt" id="downvote-result-opt">
-          &#9660; Downvote (<span id="race-downvotes">0</span>)
-        </button>
+    <div class="window" id="signup-window">
+      <div window="signup-window" class="close">x</div>
+      <div class="window-header-image window-header-image-5"></div>
+      <h2>Sign Up</h2>
+      <div id="signup-form" class="account-form">
+        <input id="signup-username" type="text" placeholder="Username...">
+        <input id="signup-email" type="email" placeholder="Email...">
+        <input id="signup-password" type="password" placeholder="Password...">
+        <input id="signup-password-verify" type="password" placeholder="Verify Password...">
+        <button id="signup-submit">Sign up</button>
       </div>
-      <button id="view-comments-opt">View Comments</button>
     </div>
-    <div id="results-container"></div>
-  </div>
-
-
-
-
-
-  <div class="window" id="introduction-window">
-    <div window="introduction-window" class="close">x</div>
-    <div class="window-header-image window-header-image-1"></div>
-    <h2>Introduction</h2>
-    Welcome to 2wheel Bet - an experiment that hopes to bring fellow bikers together for healthy debate and ultimately some fun. The experiment simulates a virtual drag race between any real-life motorcycle based on real performance data. I created this because I wanted to reason with the mysterious nature of motorcycle performance, and see how my own bike would fare against others. It's not perfect, but I like to think that any imperfection in the algorithm is just like real-life imperfections such as the rider, weather conditions, and so on.
-
-    <h2>Get started</h2>
-    Simply enter the model and makes of the motorcycles you want to race. You can also share your race with friends by clicking Share (a link will be copied, and anyone with it will be able to rewatch the race).
-
-    <h2>How it works</h2>
-    The algorithm takes into account power, weight, and torque from a dataset that isn't always perfect. It even tries to simulate gear changes - so you can expect surprises throughout a race. On the whole, it seems to produce realistic enough results, and I rarely disagree with the outcome. Real life speed, distance and time is not directly comparable to what you'll see on the screen, though it should be proportional (it may seem exaggerated).
-
-    Data imperfections are difficult to tune. For example, the data may mismatch bikes with dry and wet weight, meaning a dry weighted bike might get an advantage. I've tried to tune it, and compensate for imperfections like that.
-
-    <h2>Insight Tabs</h2>
-
-    <p><b>Head2heads:</b> This is a list of the most popular motorcycle pairs people searched. E.g if a Fireblade and R1 are at number 1, it means they have appeared within the most races together.</p>
-
-    <p><b>Recent races:</b> This is a list of the most recent races people have searched.</p>
-
-
-    <h2>Development</h2>
-    I am trying to improve and add features all the time, though it's hard work as the only developer. If you have any ideas, or would like to get involved, please contact me at casparwylie@gmail.com.
-
-    <h2>Obvious disclaimer</h2>
-    (1) If you want to disprove the results in real life, do it on a track. (2) This experiment is not meant to encourage public road racing.
-    (3) The results are not perfect, hence I will be adding voting and commenting features to allow for debate.
-
-  </div>
-
-
-
-
-
-  <div class="window" id="popular-pairs-window">
-    <div window="popular-pairs-window" class="close">x</div>
-    <div class="window-header-image window-header-image-2"></div>
-    <h2>Most Popular Raced Pairs</h2>
-    <div id="popular-pairs-container"></div>
-  </div>
 
 
 
 
 
 
-  <div class="window" id="recent-races-window">
-    <div window="recent-races-window" class="close">x</div>
-    <div class="window-header-image window-header-image-3"></div>
-    <h2>Recent Races</h2>
-    <div id="recent-races-container"></div>
-  </div>
 
-
-
-
-  <div id="lights-container">
-    <div class="light" id="light-1"></div>
-    <div class="light" id="light-2"></div>
-    <div class="light" id="light-3"></div>
-  </div>
-
-
-
-
-
-  <div id="control-panel">
-    <div id="heading">Which Bikes Win?<div id="credit"> By Caspar Wylie</div></div>
-    <div id="menu">
-      <div class="menu-item" window="introduction-window">Introduction</div>
-      <div class="menu-item" window="popular-pairs-window">Head2heads</div>
-      <div class="menu-item" window="recent-races-window">Recent Races</div>
-      <div class="loggedout menu-item" window="login-window">Login</div>
-      <div class="loggedout menu-item" window="signup-window">Sign Up</div>
-      <div class="loggedin menu-item" window="myprofile-window">My Profile</div>
-      <div id="logout-opt" class="loggedin menu-item">Log out</div>
-    </div>
-    <div id="starter-form">
-      <div id="racer-inputs-container"></div>
-      <div id="starter-triggers">
-        <button class="form-opts" id="add-more-option">+ Add</button>
-        <button class="form-opts" id="reset-option">Reset</button>
-        <button id="race-go-option"><b>Race!</b></button>
+    <div class="window" id="results-window">
+      <div window="results-window" class="close">x</div>
+      <h2>Results</h2>
+      <div id="results-opt-container">
+        <div id="vote-opt-container">
+          <button class="vote-opt" id="upvote-result-opt">
+            &#9650; Upvote (<span id="race-upvotes">0</span>)
+          </button>
+          <button class="vote-opt" id="downvote-result-opt">
+            &#9660; Downvote (<span id="race-downvotes">0</span>)
+          </button>
+        </div>
+        <button id="view-comments-opt">View Comments</button>
+        <button id="link-share-opt" class="share-opt"><b>Share Race</b></button>
+        <button class="share-opt" id="fb-share-opt"><span id="fb-f">f</span> Share</button>
       </div>
+      <div id="results-container"></div>
+    </div>
+
+
+
+
+
+    <div class="window" id="introduction-window">
+      <div window="introduction-window" class="close">x</div>
+      <div class="window-header-image window-header-image-1"></div>
+      <h2>Introduction</h2>
+      Welcome to 2wheel Bet - an experiment that hopes to bring fellow bikers together for healthy debate and ultimately some fun. The experiment simulates a virtual drag race between any real-life motorcycle based on real performance data. I created this because I wanted to reason with the mysterious nature of motorcycle performance, and see how my own bike would fare against others. It's not perfect, but I like to think that any imperfection in the algorithm is just like real-life imperfections such as the rider, weather conditions, and so on.
+
+      <h2>Get started</h2>
+      Simply enter the model and makes of the motorcycles you want to race. You can also share your race with friends by clicking Share (a link will be copied, and anyone with it will be able to rewatch the race).
+
+      <h2>How it works</h2>
+      The algorithm takes into account power, weight, and torque from a dataset that isn't always perfect. It even tries to simulate gear changes - so you can expect surprises throughout a race. On the whole, it seems to produce realistic enough results, and I rarely disagree with the outcome. Real life speed, distance and time is not directly comparable to what you'll see on the screen, though it should be proportional (it may seem exaggerated).
+
+      Data imperfections are difficult to tune. For example, the data may mismatch bikes with dry and wet weight, meaning a dry weighted bike might get an advantage. I've tried to tune it, and compensate for imperfections like that.
+
+      <h2>Insight Tabs</h2>
+
+      <p><b>Head2heads:</b> This is a list of the most popular motorcycle pairs people searched. E.g if a Fireblade and R1 are at number 1, it means they have appeared within the most races together.</p>
+
+      <p><b>Recent races:</b> This is a list of the most recent races people have searched.</p>
+
+
+      <h2>Development</h2>
+      I am trying to improve and add features all the time, though it's hard work as the only developer. If you have any ideas, or would like to get involved, please contact me at casparwylie@gmail.com.
+
+      <h2>Obvious disclaimer</h2>
+      (1) If you want to disprove the results in real life, do it on a track. (2) This experiment is not meant to encourage public road racing.
+      (3) The results are not perfect, hence I will be adding voting and commenting features to allow for debate.
+
+    </div>
+
+
+
+
+
+    <div class="window" id="popular-pairs-window">
+      <div window="popular-pairs-window" class="close">x</div>
+      <div class="window-header-image window-header-image-2"></div>
+      <h2>Most Popular Raced Pairs</h2>
+      <div id="popular-pairs-container"></div>
+    </div>
+
+
+
+
+
+
+    <div class="window" id="recent-races-window">
+      <div window="recent-races-window" class="close">x</div>
+      <div class="window-header-image window-header-image-3"></div>
+      <h2>Recent Races</h2>
+      <div id="recent-races-container"></div>
+    </div>
+
+
+
+
+    <div id="lights-container">
+      <div class="light" id="light-1"></div>
+      <div class="light" id="light-2"></div>
+      <div class="light" id="light-3"></div>
+    </div>
+
+
+
+
+
+    <div id="control-panel">
+      <div id="heading">Which Bikes Win?<div id="credit"> By Caspar Wylie</div></div>
+      <div id="menu">
+        <div class="menu-item" window="introduction-window">Introduction</div>
+        <div class="menu-item" window="popular-pairs-window">Head2heads</div>
+        <div class="menu-item" window="recent-races-window">Recent Races</div>
+        <div class="loggedout menu-item" window="login-window">Login</div>
+        <div class="loggedout menu-item" window="signup-window">Sign Up</div>
+        <div class="loggedin menu-item" window="myprofile-window">My Profile</div>
+        <div id="logout-opt" class="loggedin menu-item">Log out</div>
+      </div>
+      <div id="starter-form">
+        <div id="racer-inputs-container"></div>
+        <div id="starter-misc-options">
+          <button class="form-opts" id="add-more-option">+ Add</button>
+          <button class="form-opts" id="reset-option">Reset</button>
+        </div>
+        <div id="starter-triggers">
+          <button id="race-go-option"><b>Race!</b></button>
+          <button id="race-go-skip-option"><b>Skip to results</b></button>
+        </div>
       <div id="recommendation-container"></div>
     </div>
   </div>

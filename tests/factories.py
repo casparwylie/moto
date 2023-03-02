@@ -21,6 +21,13 @@ VALUES('{token}', '{user_id}', '{expire}')
 """
 
 
+_insert_user_garage_query = """
+INSERT INTO user_garage
+    (user_id, model_id, relation)
+VALUES({user_id}, {model_id}, '{relation}')
+"""
+
+
 def encrypt_password(password: str) -> str:
     return hashlib.sha512(password.encode("utf-8")).hexdigest()
 
@@ -94,3 +101,21 @@ def store_race(
         db.execute(text(f"INSERT INTO race_racers VALUES({race_id}, {model_id})"))
     db.commit()
     return race_id, race_unique_id
+
+
+def store_garage_item(
+    db: Connection,
+    user_id: int,
+    model_id: int,
+    relation: str,
+) -> None:
+    db.execute(
+        text(
+            _insert_user_garage_query.format(
+                user_id=user_id,
+                model_id=model_id,
+                relation=relation,
+            )
+        )
+    )
+    db.commit()

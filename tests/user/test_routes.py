@@ -7,6 +7,7 @@ from freezegun.api import FrozenDateTimeFactory
 from sqlalchemy import Connection, Row, text
 
 from src.auth import SESSION_KEY_NAME
+from src.constants import GarageItemRelations
 from src.user.models import (
     ChangePasswordRequest,
     DeleteGarageItemRequest,
@@ -21,29 +22,23 @@ from src.user.models import (
 )
 from src.user.routes import (
     _SESSION_EXPIRE,
-    add_garage_item,
-    change_password_user,
-    delete_garage_item,
-    edit_field_user,
-    get_garage,
-    get_user,
-    login_user,
-    logout_user,
-    signup_user,
+    _add_garage_item,
+    _change_password_user,
+    _delete_garage_item,
+    _edit_field_user,
+    _get_garage,
+    _get_user,
+    _login_user,
+    _logout_user,
+    _signup_user,
 )
-from src.user.service import GarageItemRelations
 from tests.factories import (
     encrypt_password,
     make_auth_required,
+    store_garage_item,
     store_user,
     store_user_session,
 )
-
-_insert_user_garage_query = """
-INSERT INTO user_garage
-    (user_id, model_id, relation)
-VALUES({user_id}, {model_id}, '{relation}')
-"""
 
 
 class MockResponse:
@@ -68,24 +63,6 @@ def clear(db: Connection) -> Generator:
     db.execute(text("DELETE FROM user_garage"))
     db.execute(text("DELETE FROM user_sessions"))
     db.execute(text("DELETE FROM users"))
-    db.commit()
-
-
-def _store_garage_item(
-    db: Connection,
-    user_id: int,
-    model_id: int,
-    relation: str,
-) -> None:
-    db.execute(
-        text(
-            _insert_user_garage_query.format(
-                user_id=user_id,
-                model_id=model_id,
-                relation=relation,
-            )
-        )
-    )
     db.commit()
 
 
@@ -125,7 +102,7 @@ async def test_get_user(db: Connection) -> None:
     token = store_user_session(db, user_id=user_id)
 
     # When
-    result = await get_user(user=make_auth_required(token))
+    result = await _get_user(user=make_auth_required(token))
 
     # Then
     assert result == UserDataResponse(
@@ -142,7 +119,7 @@ async def test_get_user_no_token(db: Connection) -> None:
 
     # Then
     with pytest.raises(HTTPException):
-        await get_user(user=make_auth_required("bad"))
+        await _get_user(user=make_auth_required("bad"))
 
 
 @pytest.mark.asyncio
@@ -152,7 +129,7 @@ async def test_sign_up_success(db: Connection) -> None:
         username="user123", email="test@gmail.com", password="123456"
     )
     # When
-    result = await signup_user(signup_request)
+    result = await _signup_user(signup_request)
 
     # Then
     user = _get_first_user(db)
@@ -170,7 +147,7 @@ async def test_sign_up_user_exists_username(db: Connection) -> None:
         username="user123", email="e@gmail.com", password="123456"
     )
     # When
-    result = await signup_user(signup_request)
+    result = await _signup_user(signup_request)
 
     # Then
     assert _get_user_count(db) == 1
@@ -187,7 +164,7 @@ async def test_sign_up_user_exists_email(db: Connection) -> None:
         username="user1234", email="test@gmail.com", password="123456"
     )
     # When
-    result = await signup_user(signup_request)
+    result = await _signup_user(signup_request)
 
     # Then
     assert _get_user_count(db) == 1
@@ -201,7 +178,7 @@ async def test_sign_up_validations(db: Connection) -> None:
     # Given
     signup_request = SignUpRequest(username="bad", email="bad", password="1234")
     # When
-    result = await signup_user(signup_request)
+    result = await _signup_user(signup_request)
 
     # Then
     assert _get_user_count(db) == 0
@@ -228,7 +205,7 @@ async def test_login_user(db: Connection, freezer: FrozenDateTimeFactory) -> Non
     login_request = LoginRequest(username="user123", password="pass123")
 
     # When
-    result = await login_user(login_request, mock_response)
+    result = await _login_user(login_request, mock_response)
     user_session = _get_first_user_session(db)
     # Then
     assert result == SuccessResponse(success=True)
@@ -260,7 +237,7 @@ async def test_login_user_bad_credentials(
     login_request = LoginRequest(username=username, password=password)
 
     # When
-    result = await login_user(login_request, mock_response)
+    result = await _login_user(login_request, mock_response)
 
     # Then
     assert result == SuccessResponse(success=False)
@@ -280,7 +257,7 @@ async def test_login_user_existing_session_not_expired(
     login_request = LoginRequest(username="user123", password="pass123")
 
     # When
-    result = await login_user(login_request, mock_response)
+    result = await _login_user(login_request, mock_response)
     user_session = _get_first_user_session(db)
 
     # Then
@@ -302,7 +279,7 @@ async def test_login_user_existing_session_expired(
     login_request = LoginRequest(username="user123", password="pass123")
 
     # When
-    result = await login_user(login_request, mock_response)
+    result = await _login_user(login_request, mock_response)
     user_session = _get_first_user_session(db)
 
     # Then
@@ -321,7 +298,7 @@ async def test_logout_user(db: Connection) -> None:
     mock_response = MockResponse()
 
     # When
-    result = await logout_user(mock_response, token)
+    result = await _logout_user(mock_response, token)
 
     # Then
     assert result == SuccessResponse(success=True)
@@ -336,7 +313,7 @@ async def test_logout_user_fails(db: Connection) -> None:
     mock_response = MockResponse()
 
     # When
-    result = await logout_user(mock_response, None)
+    result = await _logout_user(mock_response, None)
 
     # Then
     assert result == SuccessResponse(success=False)
@@ -355,7 +332,7 @@ async def test_change_password_user(db: Connection) -> None:
     )
 
     # When
-    result = await change_password_user(
+    result = await _change_password_user(
         change_password_request,
         user=make_auth_required(token),
     )
@@ -377,7 +354,7 @@ async def test_change_password_user_bad_auth(db: Connection) -> None:
     )
 
     # When
-    result = await change_password_user(
+    result = await _change_password_user(
         change_password_request,
         user=make_auth_required(token),
     )
@@ -402,7 +379,7 @@ async def test_change_password_user_invalid(db: Connection) -> None:
     )
 
     # When
-    result = await change_password_user(
+    result = await _change_password_user(
         change_password_request,
         user=make_auth_required(token),
     )
@@ -427,7 +404,7 @@ async def test_edit_field_user(db: Connection) -> None:
     edit_field_request = EditUserFieldRequest(field="username", value="user123456")
 
     # When
-    result = await edit_field_user(
+    result = await _edit_field_user(
         edit_field_request,
         user=make_auth_required(token),
     )
@@ -446,7 +423,7 @@ async def test_edit_field_user_bad_field(db: Connection) -> None:
 
     # Then
     with pytest.raises(HTTPException):
-        result = await edit_field_user(
+        result = await _edit_field_user(
             edit_field_request,
             user=make_auth_required(token),
         )
@@ -464,7 +441,7 @@ async def test_edit_field_user_username_exists(db: Connection) -> None:
     edit_field_request = EditUserFieldRequest(field="username", value="othername")
 
     # When
-    result = await edit_field_user(
+    result = await _edit_field_user(
         edit_field_request,
         user=make_auth_required(token),
     )
@@ -486,7 +463,7 @@ async def test_edit_field_user_email_exists(db: Connection) -> None:
     edit_field_request = EditUserFieldRequest(field="email", value="other@gmail.com")
 
     # When
-    result = await edit_field_user(
+    result = await _edit_field_user(
         edit_field_request,
         user=make_auth_required(token),
     )
@@ -513,7 +490,7 @@ async def test_add_garage_item(db: Connection, relation: str) -> None:
     )
 
     # When
-    response = await add_garage_item(
+    response = await _add_garage_item(
         garage_item,
         user=make_auth_required(token),
     )
@@ -540,7 +517,7 @@ async def test_add_garage_item_bad_relation(db: Connection) -> None:
     )
 
     # When
-    response = await add_garage_item(
+    response = await _add_garage_item(
         garage_item,
         user=make_auth_required(token),
     )
@@ -556,13 +533,13 @@ async def test_get_garage(db: Connection) -> None:
     # Given
     user_id = store_user(db)
     other_user_id = store_user(db)
-    _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
-    _store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
-    _store_garage_item(db, user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
-    _store_garage_item(db, other_user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
+    store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
+    store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
+    store_garage_item(db, user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
+    store_garage_item(db, other_user_id, 3, GarageItemRelations.HAS_RIDDEN.value)
 
     # When
-    response = await get_garage(user_id)
+    response = await _get_garage(user_id)
 
     # Then
     assert response == UserGarageResponse(
@@ -597,15 +574,15 @@ async def test_delete_garage_item(db: Connection) -> None:
     # Given
     user_id = store_user(db)
     token = store_user_session(db, user_id)
-    _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
-    _store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
+    store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
+    store_garage_item(db, user_id, 2, GarageItemRelations.OWNS.value)
 
     delete_garage_item_request = DeleteGarageItemRequest(
         model_id=2,
     )
 
     # When
-    response = await delete_garage_item(
+    response = await _delete_garage_item(
         delete_garage_item_request,
         user=make_auth_required(token),
     )
@@ -622,7 +599,7 @@ async def test_delete_garage_item_not_exists(db: Connection) -> None:
     # Given
     user_id = store_user(db)
     token = store_user_session(db, user_id)
-    _store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
+    store_garage_item(db, user_id, 1, GarageItemRelations.OWNS.value)
 
     delete_garage_item_request = DeleteGarageItemRequest(
         user_id=user_id,
@@ -630,7 +607,7 @@ async def test_delete_garage_item_not_exists(db: Connection) -> None:
     )
 
     # When
-    response = await delete_garage_item(
+    response = await _delete_garage_item(
         delete_garage_item_request,
         user=make_auth_required(token),
     )

@@ -5,6 +5,7 @@ const viewCommentsOpt = document.getElementById('view-comments-opt');
 const addCommentOpt = document.getElementById('add-comment-opt');
 const commentIn = document.getElementById('add-comment-text');
 const commentsContainer = document.getElementById('comments-container');
+const commentsTitle = document.getElementById('comments-title');
 
 class Social {
   constructor() {
@@ -33,16 +34,42 @@ class Social {
   addCommentRow(comment) {
     let commentContainer = _el('div', {className: 'comment-container'});
     let infoText = `- ${comment.username} | ${comment.created_at}`;
+
     let commentTextContainer = _el('div', {
       className: 'comment-text-container', innerHTML: comment.text
     });
     let commentInfoContainer = _el('div', {
       className: 'comment-info-container', innerHTML: infoText
     });
-
+    if (userState.currentUser.username == comment.username) {
+      let commentDeleteOpt = _el('div', {
+        className: 'comment-delete-opt', innerHTML: '&#10005;'
+      });
+      commentDeleteOpt.addEventListener('click', () => this.deleteComment(comment.id));
+      commentContainer.appendChild(commentDeleteOpt);
+    }
     commentContainer.appendChild(commentTextContainer);
     commentContainer.appendChild(commentInfoContainer);
+
+    if (comment.garage_relation_sentence.length > 0) {
+      let garageInfoContainer = _el('div', {
+        className: 'garage-info-container',
+        innerHTML: `*${comment.garage_relation_sentence}`,
+      });
+      commentContainer.appendChild(garageInfoContainer);
+    }
+
     commentsContainer.appendChild(commentContainer);
+  }
+
+  async deleteComment(comment_id) {
+    let result = await _post(
+      `${SOCIAL_API_URL}/delete-comment`, {comment_id: comment_id}
+    );
+    if (result.success) {
+      Informer.inform('Successfully deleted comment.', 'good');
+      this.loadComments();
+    }
   }
 
   async saveComment() {
