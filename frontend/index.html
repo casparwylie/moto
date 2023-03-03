@@ -68,7 +68,6 @@
     #control-panel {
       margin: 0 auto;
       width: 100vw;
-      height: 40vh;
       background: white;
       padding-right: 0px;
     }
@@ -247,8 +246,8 @@
       .window-header-image {
          background-size: 100%;
          background-repeat: no-repeat;
-         height: 100px;
-         width: 20%;
+         min-height: 30%;
+         width: 20vh;
          margin: 0 auto;
       }
       .window-header-image-1 {
@@ -560,10 +559,14 @@
       }
 
 
-      @media only screen and (max-width: 900px) {
+      @media only screen and (max-width: 1000px) {
         #menu {
           width: 60%;
           font-size: 15px;
+        }
+
+        #control-panel {
+          height: 100%;
         }
 
         #race-go-option, #race-go-skip-option, .account-form button, select, button, input {
@@ -575,13 +578,14 @@
           padding: 5px;
           font-size: 12px;
         }
-        .window {
+        .window, #login-window, #signup-window {
           width: 80%;
+          height: 70vh;
           margin-left: calc(10% - 20px);
         }
 
-        .window-header-image {
-         height: 28%;
+        #starter-form {
+          width: 60%;
         }
       }
 

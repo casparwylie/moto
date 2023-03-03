@@ -120,9 +120,7 @@ class Racer {
     }
   }
 
-  async move(skip) {
-    var interval = 40;
-    if (skip) interval = 0;
+  async move(speed) {
     this._finished = false;
     this._progress = this.torque / 25;
     this._interval = setInterval(() => {
@@ -133,12 +131,12 @@ class Racer {
       this._progress  += 0.01;
       if (
         parseInt(this.racerElement.style.marginLeft)
-        > (window.innerWidth - 200)
+        > (window.innerWidth * 0.9)
       ) {
         this.finish();
         clearInterval(this._interval);
       }
-    }, interval);
+    }, speed);
   }
 
   getStatsString() {
@@ -221,6 +219,7 @@ class Race {
 
   async race(save, skip) {
     if (this.racers.length == 0) return;
+    var speed = 40;
     if (save) {
       await this.save();
     }
@@ -229,17 +228,22 @@ class Race {
       || window.matchMedia('(max-width: 1200px)').matches
     ) {
       _hide(controlPanel);
+      speed = 60;
     }
     this.reset();
-    var startDelay = 0;
-    if (!skip) {
+    var startDelay = 4000;
+    if (skip) {
+      startDelay = 0;
+      speed = 0;
+    } else {
       this.startLights();
-      startDelay = 4000;
     }
     _hide(raceGoOpt);
     _hide(raceGoSkipOpt);
     this.racers.forEach((racer) => racer.render());
-    setTimeout(() => this.racers.forEach((racer) => racer.move(skip)), startDelay);
+    setTimeout(() => this.racers.forEach(
+      (racer) => racer.move(speed)), startDelay
+    );
   }
 
   async save() {
