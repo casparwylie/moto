@@ -385,6 +385,9 @@ class Racing {
   }
 
   addInput(make=null, model=null, year=null) {
+    if (inputsContainer.children.length > 8) {
+      return
+    }
     let container = _el('div', {className: 'racer-input-row'});
     let makeIn = _el('input', {placeholder: 'Make...'});
     let modelIn = _el('input', {placeholder: 'Model...'});
