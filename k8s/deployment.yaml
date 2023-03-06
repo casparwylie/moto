@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moto-1-deployment
+  labels:
+    app: moto-1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: moto-1
+  template:
+    metadata:
+      labels:
+        app: moto-1
+    spec:
+      containers:
+      - name: web
+        image: registry.digitalocean.com/moto-1/web
+        ports:
+        - containerPort: 8000
+        env:
+        - name: "DB_USER"
+          valueFrom:
+            secretKeyRef:
+              name: db-auth
+              key: username
+        - name: "DB_PASS"
+          valueFrom:
+            secretKeyRef:
+              name: db-auth
+              key: password
+        - name: "DB_HOST"
+          valueFrom:
+            secretKeyRef:
+              name: db-auth
+              key: host
+        - name: "DB_PORT"
+          valueFrom:
+            secretKeyRef:
+              name: db-auth
+              key: port
+        - name: "DB_NAME"
+          valueFrom:
+            secretKeyRef:
+              name: db-auth
+              key: name
