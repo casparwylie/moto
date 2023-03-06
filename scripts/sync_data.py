@@ -69,16 +69,16 @@ class LocalDb(Env):
     db_user = "user"
     db_password = "password"
     host = "127.0.0.1"
-    port = "3307"
+    port = "3306"
     database = "moto"
 
 
 class ProdDb(Env):
     db_user = os.environ.get("MOTO_DB_USER_PROD", "")
     db_password = os.environ.get("MOTO_DB_PASS_PROD", "")
-    host = "108.61.173.62"
-    port = "3307"
-    database = "moto"
+    host = os.environ.get("MOTO_DB_HOST_PROD", "")
+    port = os.environ.get("MOTO_DB_PORT_PROD", "")
+    name = os.environ.get("MOTO_DB_NAME_PROD", "")
 
 
 def _create_engine(env: Env) -> Engine:
