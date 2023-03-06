@@ -20,8 +20,8 @@ DB_URL = "mysql://{user}:{password}@{host}:{port}/{database}"
 def _create_engine() -> Engine:
     db_user = os.environ.get("DB_USER")
     db_password = os.environ.get("DB_PASS")
-    host = "mysql"
-    port = "3306"
+    host = os.environ.get("DB_HOST")
+    port = os.environ.get("DB_PORT")
     database = os.environ.get("DB_NAME")
 
     url = DB_URL.format(
