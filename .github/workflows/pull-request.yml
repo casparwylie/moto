@@ -8,6 +8,7 @@ on:
 env:
   IMAGE_NAME: "registry.digitalocean.com/moto-1/${{ github.sha }}:latest"
 
+jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
