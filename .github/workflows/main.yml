@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: "ghcr.io/${{ github.repository }}/${{ github.sha }}:latest"
+  IMAGE_NAME: "registry.digitalocean.com/moto-1/${{ github.sha }}:latest"
 
 jobs:
   test:
@@ -29,13 +29,17 @@ jobs:
       -
         name: Build
         run: |
-            touch .env
-            IMAGE_NAME="${IMAGE_NAME}" docker-compose -f docker-compose.prod.yml build web
-      -
-        name: Push
-        run: |
-             echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-             IMAGE_NAME="${IMAGE_NAME}" docker-compose -f docker-compose.prod.yml push
+            docker build -t web .
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      - name: Log in to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
+      - name: Tag image
+        run: docker tag web $IMAGE_NAME
+      - name: Push image to DO Container Registry
+        run: docker push $IMAGE_NAME
 
   deploy:
     runs-on: ubuntu-latest
@@ -44,32 +48,10 @@ jobs:
       -
         name: Checking out repo
         uses: actions/checkout@v2
-      -
-        name: Set production environment variables
-        run: |
-            touch .env
-            echo "DB_NAME=${{ secrets.DB_NAME}}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER}}" >> .env
-            echo "DB_PASS=${{ secrets.DB_PASS}}" >> .env
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASS}}" >> .env
-      - name: Deploy production compose
-        uses: appleboy/scp-action@master
+      - name: Set up kubectl
+        uses: matootie/dokube@v1.4.0
         with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_KEY }}
-          source: ".env, docker-compose.prod.yml"
-          target: "~"
-      - name: Run production container
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PRODUCTION_HOST }}
-          username: ${{ secrets.PRODUCTION_USER }}
-          key: ${{ secrets.PRODUCTION_KEY }}
-          envs: IMAGE_NAME
-          script: |
-                  echo "${{ secrets.PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-                  docker image prune --force
-                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml pull web
-                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d --no-recreate mysql
-                  IMAGE_NAME="${IMAGE_NAME}" docker compose -f docker-compose.prod.yml up -d --no-deps web
+          personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          clusterName: moto-1
+      - name: Deploy
+        run: kubectl set image deployment/moto-1-deployment web=$IMAGE_NAME

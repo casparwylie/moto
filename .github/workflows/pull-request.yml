@@ -5,43 +5,14 @@ on:
     branches:
       - main
 
-env:
-  IMAGE_NAME: "registry.digitalocean.com/moto-1/${{ github.sha }}:latest"
-
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    #!!! needs: test
     steps:
       -
         name: Checking out repo
         uses: actions/checkout@v2
       -
-        name: Build
+        name: Run tests
         run: |
-            docker build -t web .
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_TOKEN }}
-      - name: Log in to DO Container Registry
-        run: doctl registry login --expiry-seconds 600
-      - name: Tag image
-        run: docker tag web $IMAGE_NAME
-      - name: Push image to DO Container Registry
-        run: docker push $IMAGE_NAME
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      -
-        name: Checking out repo
-        uses: actions/checkout@v2
-      - name: Set up kubectl
-        uses: matootie/dokube@v1.4.0
-        with:
-          personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
-          clusterName: moto-1
-      - name: Deploy
-        run: kubectl set image deployment/moto-1-deployment web=$IMAGE_NAME
+            docker-compose run tests
