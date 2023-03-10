@@ -41,7 +41,10 @@ class Social {
     let commentInfoContainer = _el('div', {
       className: 'comment-info-container', innerHTML: infoText
     });
-    if (userState.currentUser.username == comment.username) {
+    if (
+      userState.currentUser &&
+      userState.currentUser.username == comment.username
+    ) {
       let commentDeleteOpt = _el('div', {
         className: 'comment-delete-opt', innerHTML: '&#10005;'
       });

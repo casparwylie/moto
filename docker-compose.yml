@@ -16,6 +16,7 @@ services:
       DB_PASS: 'password'
       DB_HOST: 'mysql'
       DB_PORT: 3306
+      MAIL_API_KEY: '${MAIL_API_KEY}'
     depends_on:
       mysql:
         condition: service_healthy
