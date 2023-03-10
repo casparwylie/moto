@@ -16,9 +16,16 @@ spec:
     spec:
       containers:
       - name: web
-        image: registry.digitalocean.com/moto-1/web
+        image: registry.digitalocean.com/moto-1/6bd021e2e44404c01cf116cb4ccd40a90ce728eb:latest
         ports:
         - containerPort: 8000
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "100Mi"
+          limits:
+            memory: "200Mi"
+            cpu: "100m"
         env:
         - name: "DB_USER"
           valueFrom:

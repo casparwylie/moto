@@ -8,6 +8,8 @@ var loginForm;
 var social;
 
 async function main() {
+  runIntro();
+
   // Initiate user state
   userState = new UserState();
   await userState.refresh();
