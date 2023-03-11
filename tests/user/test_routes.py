@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Generator, cast
+from unittest.mock import Mock
 
 import pytest
 from fastapi import HTTPException
@@ -8,10 +9,12 @@ from sqlalchemy import Connection, Row, text
 
 from src.auth import SESSION_KEY_NAME
 from src.constants import GarageItemRelations
+from src.user import service as user_service
 from src.user.models import (
     ChangePasswordRequest,
     DeleteGarageItemRequest,
     EditUserFieldRequest,
+    ForgotPasswordRequest,
     GarageItem,
     LoginRequest,
     SignUpRequest,
@@ -26,6 +29,7 @@ from src.user.routes import (
     _change_password_user,
     _delete_garage_item,
     _edit_field_user,
+    _forgot_password,
     _get_garage,
     _get_user,
     _login_user,
@@ -95,6 +99,12 @@ def _get_user_session_count(db: Connection) -> int:
     )
 
 
+@pytest.fixture
+def mock_send_mail() -> Mock:
+    user_service.send_mail = Mock()
+    return user_service.send_mail
+
+
 @pytest.mark.asyncio
 async def test_get_user(db: Connection) -> None:
     # Given
@@ -123,7 +133,7 @@ async def test_get_user_no_token(db: Connection) -> None:
 
 
 @pytest.mark.asyncio
-async def test_sign_up_success(db: Connection) -> None:
+async def test_sign_up_success(db: Connection, mock_send_mail: Mock) -> None:
     # Given
     signup_request = SignUpRequest(
         username="user123", email="test@gmail.com", password="123456"
@@ -133,6 +143,9 @@ async def test_sign_up_success(db: Connection) -> None:
 
     # Then
     user = _get_first_user(db)
+    mock_send_mail.assert_called_once_with(
+        signup_request.email, "signup", variables={"username": user.username}
+    )
     assert user.username == signup_request.username
     assert user.email == signup_request.email
     assert user.password == encrypt_password(signup_request.password)
@@ -140,7 +153,9 @@ async def test_sign_up_success(db: Connection) -> None:
 
 
 @pytest.mark.asyncio
-async def test_sign_up_user_exists_username(db: Connection) -> None:
+async def test_sign_up_user_exists_username(
+    db: Connection, mock_send_mail: Mock
+) -> None:
     # Given
     store_user(db)
     signup_request = SignUpRequest(
@@ -150,6 +165,7 @@ async def test_sign_up_user_exists_username(db: Connection) -> None:
     result = await _signup_user(signup_request)
 
     # Then
+    mock_send_mail.assert_not_called()
     assert _get_user_count(db) == 1
     assert result == SignUpResponse(
         success=False, errors=["Username already in use. Please use another."]
@@ -157,7 +173,7 @@ async def test_sign_up_user_exists_username(db: Connection) -> None:
 
 
 @pytest.mark.asyncio
-async def test_sign_up_user_exists_email(db: Connection) -> None:
+async def test_sign_up_user_exists_email(db: Connection, mock_send_mail: Mock) -> None:
     # Given
     store_user(db)
     signup_request = SignUpRequest(
@@ -167,6 +183,7 @@ async def test_sign_up_user_exists_email(db: Connection) -> None:
     result = await _signup_user(signup_request)
 
     # Then
+    mock_send_mail.assert_not_called()
     assert _get_user_count(db) == 1
     assert result == SignUpResponse(
         success=False, errors=["Email already in use. Please use another."]
@@ -174,13 +191,14 @@ async def test_sign_up_user_exists_email(db: Connection) -> None:
 
 
 @pytest.mark.asyncio
-async def test_sign_up_validations(db: Connection) -> None:
+async def test_sign_up_validations(db: Connection, mock_send_mail: Mock) -> None:
     # Given
     signup_request = SignUpRequest(username="bad", email="bad", password="1234")
     # When
     result = await _signup_user(signup_request)
 
     # Then
+    mock_send_mail.assert_not_called()
     assert _get_user_count(db) == 0
     assert result == SignUpResponse(
         success=False,
@@ -318,6 +336,44 @@ async def test_logout_user_fails(db: Connection) -> None:
     # Then
     assert result == SuccessResponse(success=False)
     assert not mock_response.cookie_deleted
+
+
+@pytest.mark.asyncio
+async def test_forgot_password_success(db: Connection, mock_send_mail: Mock) -> None:
+    # Given
+    email = "test@gmail.com"
+    username = "test"
+    temp_password = "123"
+    user_id = store_user(db, username=username, email=email)
+    user_service._generate_temp_password = Mock(return_value=temp_password)
+
+    # When
+    forgot_password_request = ForgotPasswordRequest(email=email)
+    await _forgot_password(forgot_password_request)
+
+    # Then
+    user = _get_first_user(db)
+    assert user.password == encrypt_password(temp_password)
+    mock_send_mail.assert_called_once_with(
+        email,
+        "temp-password",
+        variables={"username": username, "temp_password": temp_password},
+    )
+
+
+@pytest.mark.asyncio
+async def test_forgot_password_bad_email(db: Connection, mock_send_mail: Mock) -> None:
+    # Given
+    password = "123"
+    user_id = store_user(db, password=password)
+    # When
+    forgot_password_request = ForgotPasswordRequest(email="other")
+    await _forgot_password(forgot_password_request)
+
+    # Then
+    user = _get_first_user(db)
+    assert user.password == encrypt_password(password)  # Unchanged
+    mock_send_mail.assert_not_called()
 
 
 @pytest.mark.asyncio

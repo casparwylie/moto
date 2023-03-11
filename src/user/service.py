@@ -7,6 +7,7 @@ from sqlalchemy import Row
 
 from src.constants import GarageItemRelations
 from src.database import engine as db
+from src.mail import send_mail
 from src.racing.service import get_racer
 from src.user.queries import (
     build_add_user_garage_item_query,
@@ -29,12 +30,16 @@ from src.user.queries import (
 #############
 
 
-def encrypt_password(password: str) -> str:
+def _encrypt_password(password: str) -> str:
     return hashlib.sha512(password.encode("utf-8")).hexdigest()
 
 
-def generate_user_session_token() -> str:
+def _generate_user_session_token() -> str:
     return uuid4().hex
+
+
+def _generate_temp_password() -> str:
+    return uuid4().hex[:7]
 
 
 ################
@@ -67,7 +72,7 @@ def get_user_token(user_id: int, expires: int) -> str | None:
                 delete_session(session.token)
             else:
                 return cast(str, session.token)
-        new_token = generate_user_session_token()
+        new_token = _generate_user_session_token()
         timestamp_now = int(datetime.timestamp(datetime.now()))
         conn.execute(
             build_make_user_session_query(
@@ -80,8 +85,8 @@ def get_user_token(user_id: int, expires: int) -> str | None:
     return new_token
 
 
-def _authenticate(username: str, password: str) -> None | int:
-    encrypted_pass = encrypt_password(password)
+def authenticate(username: str, password: str) -> None | int:
+    encrypted_pass = _encrypt_password(password)
     with db.connect() as conn:
         user = conn.execute(
             build_user_auth_query(username, encrypted_pass)
@@ -92,7 +97,7 @@ def _authenticate(username: str, password: str) -> None | int:
 
 def login(username: str, password: str, expires: int) -> str | None:
     with db.connect() as conn:
-        if user_id := _authenticate(username, password):
+        if user_id := authenticate(username, password):
             return get_user_token(user_id, expires)
 
 
@@ -101,21 +106,21 @@ def login(username: str, password: str, expires: int) -> str | None:
 ##############
 
 
-def check_user_exists(username: str, email: str) -> str | None:
+def check_user_exists(username: str, email: str) -> Row | None:
     with db.connect() as conn:
-        result = conn.execute(build_check_user_exists_query(username, email)).first()
-    if result and result.email == email:
-        return "email"
-    elif result and result.username == username:
-        return "username"
+        result = conn.execute(
+            build_check_user_exists_query(username, email)
+        ).one_or_none()
+        return result
 
 
 def signup(username: str, password: str, email: str) -> None:
-    encrypted_pass = encrypt_password(password)
+    encrypted_pass = _encrypt_password(password)
     with db.connect() as conn:
         user = conn.execute(build_signup_query(username, encrypted_pass, email))
         user.lastrowid
         conn.commit()
+    send_mail(email, "signup", variables={"username": username})
 
 
 ###############
@@ -126,14 +131,20 @@ def signup(username: str, password: str, email: str) -> None:
 _USER_EDITABLE_FIELDS = ("username", "email")
 
 
-def change_password(username: str, old: str, new: str) -> bool:
-    if user_id := _authenticate(username, old):
-        with db.connect() as conn:
-            conn.execute(build_change_password_query(user_id, encrypt_password(new)))
-            conn.commit()
-        return True
-    else:
-        return False
+def set_temp_password(user: Row) -> None:
+    temp_password = _generate_temp_password()
+    change_password(user.id, temp_password)
+    send_mail(
+        user.email,
+        "temp-password",
+        variables={"username": user.username, "temp_password": temp_password},
+    )
+
+
+def change_password(user_id: int, new: str) -> None:
+    with db.connect() as conn:
+        conn.execute(build_change_password_query(user_id, _encrypt_password(new)))
+        conn.commit()
 
 
 def edit_user_field(user_id: int, field: str, value: str) -> bool:

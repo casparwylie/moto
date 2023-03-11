@@ -16,6 +16,7 @@ from src.user.models import (
 )
 from src.user.service import (
     add_user_garage_item,
+    authenticate,
     change_password,
     check_user_exists,
     delete_session,
@@ -24,6 +25,7 @@ from src.user.service import (
     get_user_by_token,
     get_user_garage,
     login,
+    set_temp_password,
     signup,
 )
 from src.user.validation import invalid_email, invalid_password, invalid_username
@@ -47,8 +49,12 @@ async def _signup_user(request: SignUpRequest) -> SuccessResponse:
         errors.append(err)
     if err := invalid_email(request.email):
         errors.append(err)
-    if exists_type := check_user_exists(request.username, request.email):
-        errors.append(f"{exists_type.capitalize()} already in use. Please use another.")
+    if user := check_user_exists(request.username, request.email):
+        if user.email == request.email:
+            exists_type = "Email"
+        else:
+            exists_type = "Username"
+        errors.append(f"{exists_type} already in use. Please use another.")
 
     if any(errors):
         return SuccessResponse(
@@ -84,7 +90,11 @@ async def _get_garage(user_id: int) -> UserGarageResponse:
 async def _forgot_password(
     request: ForgotPasswordRequest,
 ) -> SuccessResponse:
-    return SuccessResponse(success=True)
+    if user := check_user_exists("", request.email):
+        set_temp_password(user)
+        return SuccessResponse(success=True)
+    else:
+        return SuccessResponse(success=False, errors=["No user found with that email."])
 
 
 #################
@@ -122,9 +132,11 @@ async def _change_password_user(
             success=False,
             errors=errors,
         )
-    if not (success := change_password(user.username, request.old, request.new)):
+    if user_id := authenticate(user.username, request.old):
+        change_password(user_id, request.new)
+    else:
         errors.append("Incorrect current password.")
-    return SuccessResponse(success=success, errors=errors)
+    return SuccessResponse(success=not errors, errors=errors)
 
 
 @router.post("/edit")

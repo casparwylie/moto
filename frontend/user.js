@@ -343,11 +343,15 @@ class SignupForm {
         Informer.inform('Passwords do not match.', 'bad');
         return;
       }
+      _hide(signupSubmit);
+      renderHeaderLoading('signup-header-image');
       let response = await _post(`${USER_API_URL}/signup`, {
         username: signupUsernameIn.value,
         email: signupEmailIn.value,
         password: signupPasswordIn.value
       });
+      _show(signupSubmit);
+      unrenderHeaderLoading('signup-header-image');
       if (response.success) {
         this.successSignup();
       } else {
@@ -390,9 +394,9 @@ class LoginForm {
 
   toggleForgotPassword() {
     if (!this.forgotPasswordMode) {
-      loginUsernameIn.placeholder = 'Username or email...';
+      loginUsernameIn.placeholder = 'Email...';
       loginSubmit.innerHTML = 'Send me a link';
-      forgotPasswordOpt.innerHTML = 'I remember now - login!';
+      forgotPasswordOpt.innerHTML = 'Back to login';
       _hide(loginPasswordIn);
       this.forgotPasswordMode = true;
     } else {
@@ -408,11 +412,13 @@ class LoginForm {
     if (loginUsernameIn.value.trim()) {
       let result = await _post(
         `${USER_API_URL}/forgot-password`,
-        {user_identifier: loginUsernameIn.value},
+        {email: loginUsernameIn.value},
       );
       if (result.success) {
         Informer.inform('You have been sent an email to reset your password.', 'good');
         loginUsernameIn.value = '';
+      } else {
+        result.errors.forEach((error) => Informer.inform(error, 'bad'));
       }
     }
   }

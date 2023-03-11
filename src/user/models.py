@@ -26,7 +26,7 @@ class LoginRequest(BaseModel):
 
 
 class ForgotPasswordRequest(BaseModel):
-    user_identifier: str
+    email: str
 
 
 class ChangePasswordRequest(BaseModel):
