@@ -48,3 +48,16 @@ function resetForm(id) {
     (element) => element.value = ''
   )
 }
+
+
+function renderHeaderLoading(headerImageId) {
+  let headerImage = document.getElementById(headerImageId);
+  headerImage.style.backgroundImage = 'url("./static/images/loading.gif")';
+  headerImage.style.marginTop = "9px";
+}
+
+function unrenderHeaderLoading(headerImageId) {
+  let headerImage = document.getElementById(headerImageId);
+  headerImage.style.backgroundImage = 'url("./static/images/street_type.svg")';
+  headerImage.style.marginTop = "0px";
+}
