@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: registry.digitalocean.com/moto-1/6bd021e2e44404c01cf116cb4ccd40a90ce728eb:latest
+        # image: <IMAGE>
         ports:
         - containerPort: 8000
         resources:
