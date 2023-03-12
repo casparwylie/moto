@@ -54,4 +54,6 @@ jobs:
           personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
           clusterName: moto-1
       - name: Deploy
-        run: kubectl set image deployment/moto-1-deployment web=$IMAGE_NAME
+        run: |
+            kubectl set image deployment/moto-1-deployment web=$IMAGE_NAME
+            kubectl rollout status deployment/moto-1-deployment
