@@ -48,7 +48,7 @@ class Intro {
   }
 
   chooseApp() {
-    window.location = "whatbikeswin://?sharedRaceId=" + this.sharedRaceId;
+    window.location = "whatbikeswin://?shareRaceId=" + this.sharedRaceId;
   }
 
   async exitDevicePopup() {
