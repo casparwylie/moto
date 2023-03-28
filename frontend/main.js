@@ -8,14 +8,13 @@ var loginForm;
 var social;
 
 async function main() {
+  // Initiate racing page
+  racingPage = new Racing();
+  await racingPage.checkSharedRace();
 
   // Initiate user state
   userState = new UserState();
   await userState.refresh();
-
-  // Initiate racing page
-  racingPage = new Racing();
-  await racingPage.checkSharedRace();
 
   // Initiate windows
   windows = new Windows();
@@ -37,6 +36,8 @@ async function main() {
   // Start intro
   intro = new Intro(racingPage);
   await intro.start();
+
+
 }
 
 main();

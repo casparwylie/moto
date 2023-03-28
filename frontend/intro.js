@@ -33,8 +33,10 @@ class Intro {
 
   async start() {
     if (iOS()) {
+      _hide(introCoverContainer);
       _show(introDevicePopupContainer);
     } else if (this.sharedRaceId) {
+      _hide(introCoverContainer);
       await racingPage.runRace(false, this.sharedRaceId);
     } else {
       this.runLoading();
@@ -60,7 +62,6 @@ class Intro {
   }
 
   runLoading() {
-    _show(introCoverContainer);
     setTimeout(function(){
       _hide(introLoadingText);
       let introInterval = setInterval(function(){
