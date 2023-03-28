@@ -462,11 +462,10 @@ class Racing {
     await this.race.race(save, skip);
   }
 
-  async checkSharedRace() {
+  checkSharedRace() {
     let sharedUrlMatch = window.location.pathname.match("/r/\([0-9]+)/?$");
     if (sharedUrlMatch) {
-      let raceId = parseInt(sharedUrlMatch[1]);
-      await this.runRace(false, raceId);
+      return parseInt(sharedUrlMatch[1]);
     }
   }
 }

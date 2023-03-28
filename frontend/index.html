@@ -595,6 +595,7 @@
         width: 100vw;
         position: absolute;
         background: white;
+        display: none;
       }
 
       #intro-loading-image {
@@ -612,9 +613,35 @@
       #intro-loading-text {
         text-align: center;
       }
+
+      #intro-device-popup-container {
+        position: absolute;
+        background: black;
+        padding: 20px;
+        color: white;
+        font-size: 20px;
+        height: 100vh;
+        width: 100vw;
+        text-align: center;
+        display: none;
+      }
+      #intro-device-popup-container button {
+        padding: 5px;
+        background-color: #ffa500;
+        font-size: 20px;
+      }
     </style>
   </head>
   <body>
+    <div id="intro-device-popup-container">
+      Welcome to What Bikes Win.<br>
+      You can <button id="intro-device-appstore-opt">download</button>
+      the app for the best experience,<br>
+      or <button id="intro-device-app-opt">Open</button>
+      the app if you've already installed it.<br><br>
+      Alternatively, <button id="intro-device-exit-opt">Continue to website</button>
+    </div>
+
     <div id="intro-cover-container">
       <div id="cover-header">
         <div id="intro-loading-image"></div>

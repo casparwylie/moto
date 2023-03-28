@@ -8,7 +8,6 @@ var loginForm;
 var social;
 
 async function main() {
-  runIntro();
 
   // Initiate user state
   userState = new UserState();
@@ -32,7 +31,12 @@ async function main() {
   signupForm = new SignupForm();
   loginForm = new LoginForm(userState);
 
+  // Initiate social
   social = new Social();
+
+  // Start intro
+  intro = new Intro(racingPage);
+  await intro.start();
 }
 
 main();
