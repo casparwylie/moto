@@ -44,7 +44,7 @@ class Intro {
 
   chooseAppStore() {
     // open app store
-    window.location = "http://itunes.apple.com";
+    window.location = "https://apps.apple.com/us/app/petleo/id1462882016";
   }
 
   chooseApp() {
