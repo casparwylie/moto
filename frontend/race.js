@@ -261,14 +261,10 @@ class Race {
   shareLink() {
     let shareLink = this.getShareLink();
     navigator.clipboard.writeText(shareLink);
-    raceShareOpt.innerHTML = shareLink + ' copied &#10003;';
-    raceShareOpt.classList.add('shared-link');
-    setTimeout(() => this.setShare(), 3000);
+    Informer.inform('Copied sharable URL!', 'good')
   }
 
   setShare() {
-    raceShareOpt.innerHTML = '&#x2704; Share Race URL';
-    raceShareOpt.classList.remove('shared-link');
     fbShareOpt.setAttribute(
       'onclick',
       `window.open('https://www.facebook.com/sharer/sharer.php?u='+
