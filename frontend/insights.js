@@ -4,12 +4,18 @@ const popularPairsContainer = document.getElementById('popular-pairs-container')
 const popularPairsWindow = document.getElementById('popular-pairs-window');
 const recentRacesWindow = document.getElementById('recent-races-window');
 const recentRacesContainer = document.getElementById('recent-races-container');
-
+const h2hReloader = document.getElementById('h2h-insight-reload');
+const rrReloader = document.getElementById('recent-races-insight-reload');
 
 class RaceListing {
   api_url = null;
   container = null;
   window_ = null;
+  reloader = null;
+
+  setReloader() {
+    this.reloader.addEventListener('mouseover', () => this.populate());
+  }
 
   async populate() {
     this.container.replaceChildren();
@@ -44,6 +50,7 @@ class PopularPairsInsight extends RaceListing {
   api_url = `${INSIGHTS_API_URL}/popular-pairs`;
   container = popularPairsContainer;
   window_ = popularPairsWindow;
+  reloader = h2hReloader;
 }
 
 
@@ -51,4 +58,5 @@ class RecentRacesInsight extends RaceListing {
   api_url = `${INSIGHTS_API_URL}/recent-races`;
   container = recentRacesContainer;
   window_ = recentRacesWindow;
+  reloader = rrReloader;
 }

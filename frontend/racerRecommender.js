@@ -5,12 +5,31 @@ class RacerRecommender {
     this.modelIn = modelIn;
     this.yearIn = yearIn;
     this.container = container;
+
+    this.makeIn.addEventListener('keyup', () => {
+      this.modelIn.value = "";
+      this.yearIn.value = "";
+    })
+
+  }
+
+
+  setPosition() {
+      const xPos = this.makeIn.parentElement.offsetLeft;
+      const yPos = this.makeIn.parentElement.offsetTop + this.makeIn.offsetHeight;
+      const width = this.makeIn.parentElement.offsetWidth;
+      this.container.style.marginTop = `${yPos}px`;
+      this.container.style.marginLeft = `${xPos}px`;
+      this.container.style.width = `${width}px`;
   }
 
   async get() {
+    this.setPosition();
     let make = this.makeIn.value.trim();
     let model = this.modelIn.value.trim();
     let year = this.yearIn.value.trim();
+    this.yearIn.value = "";
+
     if (make) {
       let results = await _get(
         `${RACING_API_URL}/race/search?make=${make}&model=${model}&year=${year}`

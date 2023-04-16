@@ -21,9 +21,11 @@ async function main() {
 
   // Populate insights
   popularPairsInsight = new PopularPairsInsight();
+  popularPairsInsight.setReloader();
   await popularPairsInsight.populate();
 
   recentRacesInsight = new RecentRacesInsight();
+  recentRacesInsight.setReloader();
   await recentRacesInsight.populate();
 
   // Initiate account forms
