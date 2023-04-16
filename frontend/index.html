@@ -9,8 +9,15 @@
       font-family: 'Chakra Petch', sans-serif;
       overflow: hidden;
     }
+
     h2 {
       font-family: 'Tourney', cursive;
+    }
+
+    iframe {
+        border: 0px;
+        width: 100%;
+        height: 80%;
     }
     button, input, select{
       font-family: 'Chakra Petch', sans-serif;
@@ -773,31 +780,7 @@
     <div class="window" id="introduction-window">
       <div window="introduction-window" class="close">x</div>
       <div class="window-header-image window-header-image-1"></div>
-      <h2>Introduction</h2>
-      Welcome to What Bikes Win - an experiment that hopes to bring fellow bikers together for healthy debate and ultimately some fun. The experiment simulates a virtual drag race between any real-life motorcycle based on real performance data. I created this because I wanted to reason with the mysterious nature of motorcycle performance, and see how my own bike would fare against others. It's not perfect, but I like to think that any imperfection in the algorithm is just like real-life imperfections such as the rider, weather conditions, and so on.
-
-      <h2>Get started</h2>
-      Simply enter the model and makes of the motorcycles you want to race. You can also share your race with friends by clicking Share (a link will be copied, and anyone with it will be able to rewatch the race).
-
-      <h2>How it works</h2>
-      The algorithm takes into account power, weight, and torque from a dataset that isn't always perfect. It even tries to simulate gear changes - so you can expect surprises throughout a race. On the whole, it seems to produce realistic enough results, and I rarely disagree with the outcome. Real life speed, distance and time is not directly comparable to what you'll see on the screen, though it should be proportional (it may seem exaggerated).
-
-      Data imperfections are difficult to tune. For example, the data may mismatch bikes with dry and wet weight, meaning a dry weighted bike might get an advantage. I've tried to tune it, and compensate for imperfections like that.
-
-      <h2>Insight Tabs</h2>
-
-      <p><b>Head2heads:</b> This is a list of the most popular motorcycle pairs people searched. E.g if a Fireblade and R1 are at number 1, it means they have appeared within the most races together.</p>
-
-      <p><b>Recent races:</b> This is a list of the most recent races people have searched.</p>
-
-
-      <h2>Development</h2>
-      I am trying to improve and add features all the time, though it's hard work as the only developer. If you have any ideas, or would like to get involved, please contact me at casparwylie@gmail.com.
-
-      <h2>Obvious disclaimer</h2>
-      (1) If you want to disprove the results in real life, do it on a track. (2) This experiment is not meant to encourage public road racing.
-      (3) The results are not perfect, hence I will be adding voting and commenting features to allow for debate.
-
+      <iframe src="/intro.html"></iframe>
     </div>
 
 
