@@ -292,13 +292,16 @@ class UserState {
     if (getCookie('session_token')) {
       for (let element of loggedinElements) _show(element);
       for (let element of loggedoutElements) _hide(element);
-      this.currentUser = await _get(USER_API_URL);
-      await this.loadUser();
-    } else {
-      for (let element of loggedinElements) _hide(element);
-      for (let element of loggedoutElements) _show(element);
-      this.unloadUser();
+      let response = await _get(USER_API_URL);
+      if (response._status_code == 200) {
+        this.currentUser = response
+        await this.loadUser();
+        return
+      }
     }
+    for (let element of loggedinElements) _hide(element);
+    for (let element of loggedoutElements) _show(element);
+    this.unloadUser();
   }
 
   async loadUser() {

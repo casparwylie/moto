@@ -160,7 +160,6 @@ def add_user_garage_item(
     user_id: int, make: str, model: str, year: int, relation: str
 ) -> bool:
     if relation not in list(GarageItemRelations):
-        print("relation", relation)
         return False
     with db.connect() as conn:
         result = conn.execute(build_get_model_id_query(make, model, year)).first()

@@ -35,7 +35,9 @@ async function _post(url, data) {
 
 async function _get(url) {
   let result = await fetch(url);
-  return await result.json();
+  let json = await result.json();
+  json._status_code = result.status;
+  return json
 }
 
 

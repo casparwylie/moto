@@ -1,3 +1,4 @@
+import bleach
 from sqlalchemy import Row
 
 from src.constants import GarageItemRelations
@@ -18,6 +19,7 @@ GARAGE_RELATION_SENTENCE_MAP = {
 
 
 def add_comment(text: str, race_unique_id: str, user_id: int) -> bool:
+    text = bleach.clean(text)
     with db.connect() as conn:
         conn.execute(build_add_comment_query(text, race_unique_id, user_id))
         conn.commit()
