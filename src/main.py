@@ -27,6 +27,11 @@ async def intro() -> FileResponse:
     return FileResponse(os.path.join(_FE_DIR, "intro.html"))
 
 
+@app.get("/favicon.ico")
+async def favicon() -> FileResponse:
+    return FileResponse(os.path.join(_FE_DIR, "favicon.ico"))
+
+
 @app.get("{path:path}")
 async def index(path: str) -> FileResponse:
     return FileResponse(os.path.join(_FE_DIR, "index.html"))
