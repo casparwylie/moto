@@ -28,6 +28,7 @@ from src.user.routes import (
     _add_garage_item,
     _change_password_user,
     _delete_garage_item,
+    _delete_user,
     _edit_field_user,
     _forgot_password,
     _get_garage,
@@ -264,6 +265,22 @@ async def test_login_user_bad_credentials(
 
 
 @pytest.mark.asyncio
+async def test_login_user_deleted(db: Connection) -> None:
+    # Given
+    store_user(db, deleted=True)
+    mock_response = MockResponse()
+    login_request = LoginRequest(username="user123", password="pass123")
+
+    # When
+    result = await _login_user(login_request, mock_response)
+
+    # Then
+    assert result == SuccessResponse(success=False)
+    assert mock_response.cookie_key is None
+    assert _get_first_user_session(db) is None
+
+
+@pytest.mark.asyncio
 async def test_login_user_existing_session_not_expired(
     db: Connection, freezer: FrozenDateTimeFactory
 ) -> None:
@@ -450,6 +467,20 @@ async def test_change_password_user_invalid(db: Connection) -> None:
         ],
     )
     assert _get_first_user(db).password == encrypt_password("pass123")
+
+
+@pytest.mark.asyncio
+async def test_delete_user(db: Connection) -> None:
+    # Given
+    user_id = store_user(db)
+    token = store_user_session(db, user_id)
+
+    # When
+    result = await _delete_user(user=make_auth_required(token))
+
+    # Then
+    assert result == SuccessResponse(success=True)
+    assert _get_first_user(db).deleted == True
 
 
 @pytest.mark.asyncio

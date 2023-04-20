@@ -15,6 +15,7 @@ from src.user.queries import (
     build_check_user_exists_query,
     build_delete_session_query,
     build_delete_user_garage_item_query,
+    build_delete_user_query,
     build_get_model_id_query,
     build_get_user_by_token_query,
     build_get_user_garage_query,
@@ -152,6 +153,13 @@ def edit_user_field(user_id: int, field: str, value: str) -> bool:
         return False
     with db.connect() as conn:
         conn.execute(build_update_user_field_query(user_id, field, value))
+        conn.commit()
+    return True
+
+
+def delete_user(user_id: int) -> bool:
+    with db.connect() as conn:
+        conn.execute(build_delete_user_query(user_id))
         conn.commit()
     return True
 
