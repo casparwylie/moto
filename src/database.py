@@ -1,6 +1,7 @@
 import os
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
@@ -51,6 +52,7 @@ users_table = Table(
     Column("username", String(100)),
     Column("email", String(500)),
     Column("password", String(500)),
+    Column("deleted", Boolean),
 )
 
 

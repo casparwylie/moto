@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN deleted TinyInt DEFAULT 0;

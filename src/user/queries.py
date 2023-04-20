@@ -49,6 +49,7 @@ def build_user_auth_query(username: str, password: str) -> Select:
     return select(users_table).where(
         users_table.c.password == password,
         users_table.c.username == username,
+        users_table.c.deleted == False,
     )
 
 
@@ -135,3 +136,7 @@ def build_update_user_field_query(user_id: int, field: str, value: str) -> Updat
     return (
         update(users_table).where(users_table.c.id == user_id).values(**{field: value})
     )
+
+
+def build_delete_user_query(user_id: int) -> Update:
+    return update(users_table).where(users_table.c.id == user_id).values(deleted=True)

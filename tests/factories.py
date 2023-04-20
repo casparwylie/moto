@@ -10,8 +10,8 @@ from src.racing.service import make_unique_race_id
 
 _insert_user_query = """
 INSERT INTO users
-  (username, email, password)
-VALUES('{username}', '{email}', '{password}')
+  (username, email, password, deleted)
+VALUES('{username}', '{email}', '{password}', {deleted})
 """
 
 _insert_user_session_query = """
@@ -45,6 +45,7 @@ def store_user(
     username: str = "user123",
     email: str = "test@gmail.com",
     password: str = "pass123",
+    deleted: bool = False,
 ) -> int:
     result = db.execute(
         text(
@@ -52,6 +53,7 @@ def store_user(
                 username=username,
                 email=email,
                 password=encrypt_password(password),
+                deleted=int(deleted),
             )
         )
     )

@@ -20,6 +20,7 @@ from src.user.service import (
     change_password,
     check_user_exists,
     delete_session,
+    delete_user,
     delete_user_garage_item,
     edit_user_field,
     get_user_by_token,
@@ -163,6 +164,13 @@ async def _edit_field_user(
         return SuccessResponse(success=False, errors=errors)
     success = edit_user_field(user.id, request.field, request.value)
     return SuccessResponse(success=success)
+
+
+@router.post("/delete")
+async def _delete_user(
+    user: Row = Depends(auth_required),
+) -> SuccessResponse:
+    return SuccessResponse(success=delete_user(user.id))
 
 
 @router.post("/garage")
