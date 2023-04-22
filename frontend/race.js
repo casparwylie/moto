@@ -50,8 +50,8 @@ class Racer {
 
     this.resolveWeight();
     this.raceId = null;
-    this.ptw = this.power / this.weight;
-    this.acc = this.torque / this.weight;
+    this.ptw = this.power / this.weight / 5;
+    this.acc = this.torque / this.weight / 5;
 
 
     this.logData();
@@ -124,11 +124,11 @@ class Racer {
     this._finished = false;
     this._progress = this.torque / 25;
     this._interval = setInterval(() => {
-      let momentum = ((this.acc) * this._progress) + 1 + (this.ptw * 7);
+      let momentum = ((this.acc) * this._progress) + 1 + (this.ptw * this._progress);
       this.racerElement.style.marginLeft = parseInt(
         window.getComputedStyle(this.racerElement).marginLeft
       ) + momentum + 'px';
-      this._progress  += 0.01;
+      this._progress  += 0.3;
       if (
         parseInt(this.racerElement.style.marginLeft)
         > (window.innerWidth * 0.9)
@@ -228,7 +228,6 @@ class Race {
       || window.matchMedia('(max-width: 1200px)').matches
     ) {
       _hide(controlPanel);
-      speed = 60;
     }
     this.reset();
     var startDelay = 4000;
