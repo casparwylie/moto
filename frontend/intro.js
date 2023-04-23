@@ -5,7 +5,7 @@ const introDevicePopupContainer = document.getElementById('intro-device-popup-co
 
 const introDeviceAppStoreOpt = document.getElementById('intro-device-appstore-opt');
 const introDeviceAppOpt = document.getElementById('intro-device-app-opt');
-const introDeviceExitOpt = document.getElementById('intro-device-exit-opt');
+//const introDeviceExitOpt = document.getElementById('intro-device-exit-opt');
 
 
 function iOS() {
@@ -28,7 +28,7 @@ class Intro {
 
     introDeviceAppStoreOpt.addEventListener('click', () => this.chooseAppStore());
     introDeviceAppOpt.addEventListener('click', () => this.chooseApp());
-    introDeviceExitOpt.addEventListener('click', () => this.exitDevicePopup());
+    //introDeviceExitOpt.addEventListener('click', () => this.exitDevicePopup());
   }
 
   async start() {
@@ -46,7 +46,7 @@ class Intro {
 
   chooseAppStore() {
     // open app store
-    window.location = "https://apps.apple.com/us/app/petleo/id1462882016";
+    window.location = "https://apps.apple.com/us/app/whatbikeswin/id6447978066";
   }
 
   chooseApp() {
