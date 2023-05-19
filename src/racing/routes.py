@@ -35,11 +35,6 @@ async def _get_racer(make: str, model: str, year: str) -> Racer | None:
         return Racer.from_db_data(racer)
 
 
-@router.get("/racer/search")
-async def _search_racers(make: str, model: str, year: str) -> list[Racer]:
-    return [Racer.from_db_data(result) for result in search_racers(make, model, year)]
-
-
 @router.get("/racer/makes/search")
 async def _search_racer_makes(make: str) -> MakesSearchResponse:
     return MakesSearchResponse(makes=search_racer_makes(make))
@@ -51,6 +46,17 @@ async def _get_race(race_id: int) -> Race | None:
     if race and racers:
         return Race.from_service(race, racers)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+
+# TODO: Remove when old version unused
+@router.get("/race/search")
+async def _search_racers_legacy(make: str, model: str, year: str) -> list[Racer]:
+    return [Racer.from_db_data(result) for result in search_racers(make, model, year)]
+
+
+@router.get("/racer/search")
+async def _search_racers(make: str, model: str, year: str) -> list[Racer]:
+    return [Racer.from_db_data(result) for result in search_racers(make, model, year)]
 
 
 @router.post("/race/save")
