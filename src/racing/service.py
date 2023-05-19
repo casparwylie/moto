@@ -16,6 +16,7 @@ from src.racing.queries import (
     build_insert_race_unique_query,
     build_most_recent_races_query,
     build_popular_pairs_query,
+    build_search_racer_makes_query,
     build_search_racer_query,
     build_vote_race_query,
 )
@@ -65,6 +66,16 @@ def search_racers(make: str, model: str, year: str) -> list[Row]:
                 )
             )
     return []
+
+
+def search_racer_makes(make: str) -> list[str]:
+    with db.connect() as conn:
+        return [
+            row.name
+            for row in conn.execute(
+                build_search_racer_makes_query(make).limit(_MAX_SEARCH_RESULT)
+            )
+        ]
 
 
 def save_race(

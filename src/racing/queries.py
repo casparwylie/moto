@@ -34,6 +34,12 @@ def build_search_racer_query(make: str, model: str, year: str) -> Select:
     )
 
 
+def build_search_racer_makes_query(make: str) -> Select:
+    return select(racer_makes_table.c.name).where(
+        racer_makes_table.c.name.contains(make)
+    )
+
+
 def build_get_race_racers_query(race_id: int) -> Select:
     return (
         select(

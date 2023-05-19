@@ -32,7 +32,7 @@ class RacerRecommender {
 
     if (make) {
       let results = await _get(
-        `${RACING_API_URL}/race/search?make=${make}&model=${model}&year=${year}`
+        `${RACING_API_URL}/racer/search?make=${make}&model=${model}&year=${year}`
       );
       if (results.length > 0) {
         _show(this.container);

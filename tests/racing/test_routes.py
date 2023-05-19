@@ -21,6 +21,7 @@ from src.racing.routes import (
     _get_voted,
     _get_votes,
     _save_race,
+    _search_racer_makes,
     _search_racers,
     _vote_race,
 )
@@ -163,13 +164,32 @@ async def test_get_race_not_found(db: Connection) -> None:
     ),
 )
 async def test_search_racers(
-    db: Connection, make: str, model: str, year: str, expected: Row | None
+    make: str, model: str, year: str, expected: Row | None
 ) -> None:
     # When
     result = await _search_racers(make=make, model=model, year=year)
 
     # Then
     assert result == expected
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "make,expected",
+    (
+        ("Make", ["MakeA", "MakeB", "MakeC"]),
+        ("MakeA", ["MakeA"]),
+        ("", ["MakeA", "MakeB", "MakeC"]),
+    ),
+)
+async def test_search_racer_makes(
+    db: Connection, make: str, expected: list[str]
+) -> None:
+    # When
+    result = await _search_racer_makes(make=make)
+
+    # Then
+    assert result.makes == expected
 
 
 @pytest.mark.asyncio

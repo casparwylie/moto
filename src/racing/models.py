@@ -83,3 +83,7 @@ class RaceVoteRequest(BaseModel):
 
 class HasVotedResponse(BaseModel):
     voted: bool
+
+
+class MakesSearchResponse(BaseModel):
+    makes: list[str]
