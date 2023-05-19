@@ -48,7 +48,7 @@ async def _get_race(race_id: int) -> Race | None:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
-# TODO: Remove when old version unused
+# TODO: Remove when old version unused by app
 @router.get("/race/search")
 async def _search_racers_legacy(make: str, model: str, year: str) -> list[Racer]:
     return [Racer.from_db_data(result) for result in search_racers(make, model, year)]
