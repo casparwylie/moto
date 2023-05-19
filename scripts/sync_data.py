@@ -28,6 +28,8 @@ _MAKES_TRUTH = (
     "Keeway",
     "CCM",
     "Husqvarna",
+    "Hanway",
+    "Mondial",
 )
 
 DB_URL = "mysql://{user}:{password}@{host}:{port}/{database}"
@@ -78,7 +80,7 @@ class ProdDb(Env):
     db_password = os.environ.get("MOTO_DB_PASS_PROD", "")
     host = os.environ.get("MOTO_DB_HOST_PROD", "")
     port = os.environ.get("MOTO_DB_PORT_PROD", "")
-    name = os.environ.get("MOTO_DB_NAME_PROD", "")
+    database = os.environ.get("MOTO_DB_NAME_PROD", "")
 
 
 def _create_engine(env: Env) -> Engine:
