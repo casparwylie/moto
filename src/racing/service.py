@@ -24,12 +24,6 @@ from src.racing.queries import (
 _MAX_SEARCH_RESULT = 10
 _MAX_RECENT_RACES = 30
 _MAX_POPULAR_PAIRS = 10
-_MAKE_SEARCH_PATCHES = {
-    "harley": "harley-davidson",
-    "harley davidson": "harley-davidson",
-    "royal": "enfield",
-    "royal enfield": "enfield",
-}
 
 
 def make_unique_race_id(model_ids: list[int]) -> str:
@@ -54,8 +48,6 @@ def get_race(race_id: int) -> tuple[None | Row, list[Row]]:
 
 
 def search_racers(make: str, model: str, year: str) -> list[Row]:
-    if make.lower() in _MAKE_SEARCH_PATCHES:
-        make = _MAKE_SEARCH_PATCHES[make.lower()]
     if make:
         with db.connect() as conn:
             return list(
