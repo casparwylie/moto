@@ -9,7 +9,6 @@ from sqlalchemy import (
     select,
     text,
 )
-from sqlalchemy.dialects import mysql
 from sqlalchemy.sql.expression import func
 
 from src.database import (
