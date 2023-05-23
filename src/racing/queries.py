@@ -9,6 +9,7 @@ from sqlalchemy import (
     select,
     text,
 )
+from sqlalchemy.sql.expression import func
 
 from src.database import (
     race_history_table,
@@ -18,15 +19,27 @@ from src.database import (
     racer_models_table,
 )
 
+_SEARCH_PATCHES = {
+    " ": "",
+    "-": "",
+    # Custom...
+    "nine": "9",
+}
+
 
 def build_search_racer_query(make: str, model: str, year: str) -> Select:
+
+    model_field = racer_models_table.c.name
+    for before, target in _SEARCH_PATCHES.items():
+        model = model.replace(before, target)
+        model_field = func.replace(model_field, before, target)
     return (
         select(
             racer_models_table.columns,
             racer_makes_table.c.name.label("make_name"),
         )
         .having(
-            racer_models_table.c.name.contains(model),
+            model_field.contains(model),
             racer_models_table.c.year.contains(year),
             literal_column("make_name").contains(make),
         )

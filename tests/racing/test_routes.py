@@ -161,6 +161,9 @@ async def test_get_race_not_found(db: Connection) -> None:
         ("MakeB", "Name 1", "", []),
         ("", "Name 1", "", []),
         ("", "", "", []),
+        # Search patch cases...
+        ("MakeA", "Name1", "", [_racer_from_data(1)]),
+        ("MakeA", "Name-1", "", [_racer_from_data(1)]),
     ),
 )
 async def test_search_racers(
