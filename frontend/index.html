@@ -5,6 +5,10 @@
   <meta name="keywords" content="Motorcycle, Racing, Drag, Speed, Motorbike">
   <title>What Bikes Win?</title>
   <style>
+      @font-face {
+      font-family: raceFont;
+      src: url(static/RaceFont-Medium.ttf);
+    }
     @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch&family=Space+Grotesk&family=Tourney&display=swap');
     body {
       margin: 0;
@@ -174,14 +178,13 @@
       }
 
       #heading {
-        font-family: 'Tourney', cursive;
-        margin: 0 auto;
-        height: 70px;
-        width: 100%;
-        text-align: center;
-        font-size: 30px;
+        font-family: raceFont;
+        width: 30%;
+        font-size: 4vh;
+        float: left;
         color: black;
-        padding-top: 10px;
+        padding-top: 20px;
+        margin-top: -1%;
       }
 
       .result-row {
@@ -191,6 +194,8 @@
       #credit {
         color: #d3c9c6;
         font-size: 15px;
+        margin-top: 5px;
+        text-align: center;
       }
 
       #link-share-opt {
@@ -203,18 +208,20 @@
       }
 
       #menu {
+        background: #ffa500;
+        min-height: 8%;
+      }
+
+      #menu-item-container {
+        padding-top: 1%;
+        width: 50%;
         margin: 0 auto;
-        width: 40%;
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
       }
       .menu-item {
-        padding: 5px;
         text-align: center;
-        margin-left: 10px;
+        margin-left: 5%;
+        float: left;
         cursor: pointer;
-        border-bottom: 1px solid black;
       }
 
       .menu-item:hover {
@@ -564,12 +571,37 @@
       }
 
 
+      @media only screen and (max-width: 1300px) {
+        .menu-item {
+          margin-left: 3%;
+        }
+      }
       @media only screen and (max-width: 1000px) {
-        #menu {
-          width: 60%;
-          font-size: 15px;
+        #menu-item-container {
+          width: 75%;
         }
 
+        #menu {
+          width: 15%;
+          background: #ffa500;
+          height: 100vh;
+          float: left;
+        }
+
+        #menu-item-container {
+          width: 100%;
+          height: 100vh;
+        }
+        .menu-item {
+          text-align: left;
+          margin-left: 2%;
+          margin-top: 20px;
+          float: none;
+        }
+
+        #heading {
+          float: none;
+        }
         #control-panel {
           height: 100%;
         }
@@ -640,7 +672,7 @@
       #app-link {
         font-family: 'Chakra Petch', sans-serif;
         font-size: 20px;
-        background: black;
+        background: #1a1919;
         text-align: center;
         padding: 10px;
         color: white;
@@ -654,7 +686,7 @@
       the app for the best experience,<br>
       or <button id="intro-device-app-opt">Open</button>
       the app if you've already installed it.<br><br>
-      Alternatively, visit the website on a computer to race for free.
+      Alternatively, visit the website on a computer.
     </div>
 
     <div id="intro-cover-container">
@@ -832,12 +864,10 @@
 
 
 
-      <div id="app-link"><a href="https://apps.apple.com/app/whatbikeswin/id6447978066">Download the app</a> for the best experience</div>
-    <div id="control-panel">
-      <div id="recommendation-container"></div>
-      <div id="heading">What Bikes Win?
-      <div id="credit"> By Caspar Wylie</div></div>
-      <div id="menu">
+    <div id="app-link"><a href="https://apps.apple.com/app/whatbikeswin/id6447978066">Download the app</a> for the best experience!</div>
+    <div id="menu">
+      <div id="heading">What Bikes Win?</div>
+      <div id="menu-item-container">
         <div class="menu-item" window="introduction-window">Introduction</div>
         <div class="menu-item" window="popular-pairs-window" id="h2h-insight-reload">Head2heads</div>
         <div class="menu-item" window="recent-races-window" id="recent-races-insight-reload">Recent Races</div>
@@ -846,6 +876,10 @@
         <div class="loggedin menu-item" window="myprofile-window">Me</div>
         <div id="logout-opt" class="loggedin menu-item">Log out</div>
       </div>
+    </div>
+    <div id="control-panel">
+        <div id="credit">Enter the make and models of the motorcycles you want to race...</div>
+      <div id="recommendation-container"></div>
       <div id="starter-form">
         <div id="racer-inputs-container"></div>
         <div id="starter-misc-options">

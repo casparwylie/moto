@@ -72,7 +72,7 @@ class Intro {
       setTimeout(function(){
         clearInterval(introInterval);
         _hide(introCoverContainer);
-      }, 2000);
-    }, 2000);
+      }, 1000);
+    }, 1000);
   }
 }

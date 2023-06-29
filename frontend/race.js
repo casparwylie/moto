@@ -13,6 +13,7 @@ const resultsContainer = document.getElementById('results-container');
 const starterForm = document.getElementById('starter-form');
 const lightsContainer = document.getElementById('lights-container');
 const controlPanel = document.getElementById('control-panel');
+const menu = document.getElementById('menu');
 const fbShareOpt = document.getElementById('fb-share-opt');
 const resultsWindow = document.getElementById('results-window');
 
@@ -228,6 +229,7 @@ class Race {
       || window.matchMedia('(max-width: 1200px)').matches
     ) {
       _hide(controlPanel);
+      _hide(menu);
     }
     this.reset();
     var startDelay = 4000;
@@ -335,6 +337,7 @@ class Race {
   async finish() {
     raceGoOpt.innerHTML = 'Race Again!';
     _show(controlPanel);
+    _show(menu);
     _show(raceGoOpt);
     _show(raceGoSkipOpt);
     _show(resultsWindow);

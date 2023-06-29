@@ -310,7 +310,7 @@ class UserState {
   }
 
   unloadUser() {
-    credit.innerHTML = 'By Caspar Wylie';
+    credit.innerHTML = 'Enter the make and models of the motorcycles you want to race...';
     this.profile.unsetAll();
   }
 

@@ -1,4 +1,4 @@
-const menuContainer = document.getElementById('menu');
+const menuContainer = document.getElementById('menu-item-container');
 
 class Windows {
   constructor() {
