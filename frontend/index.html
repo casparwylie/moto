@@ -114,15 +114,15 @@
         color: white;
       }
 
-      #recommendation-container {
+    #racer-recommender {
         position: absolute;
         width: 33%;
         background: #002d59;
         border-radius: 5px;
         color: white;
         display: none;
-        z-index: 1000;
-      }
+        z-index: 100000;
+    }
 
       .recommendation-row:hover {
         color: #39ae86;
@@ -435,15 +435,6 @@
       #add-garage-toggle-opt {
         margin-left: 10px;
       }
-      #add-garage-recommender {
-        position: absolute;
-        background: #002d59;
-        border-radius: 5px;
-        float: right;
-        color: white;
-        display: none;
-        z-index: 1000;
-      }
 
       #profile-garage-container {
         border: 6px double black;
@@ -685,6 +676,7 @@
     </style>
   </head>
   <body>
+    <div id="racer-recommender"></div>
     <div id="intro-device-popup-container">
       Welcome to What Bikes Win.<br>
       You must <button id="intro-device-appstore-opt">Download</button>
@@ -719,7 +711,6 @@
 
 
     <div class="window" id="myprofile-window">
-      <div id="add-garage-recommender"></div>
       <div window="myprofile-window" class="close">✕</div>
       <h2>My Profile</h2>
       <button id="edit-profile-toggle">Edit</button>
@@ -884,7 +875,6 @@
     </div>
     <div id="control-panel">
         <div id="credit">Enter the make and models of the motorcycles you want to race...</div>
-      <div id="recommendation-container"></div>
       <div id="starter-form">
         <div id="racer-inputs-container"></div>
         <div id="starter-misc-options">

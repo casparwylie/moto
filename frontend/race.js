@@ -6,7 +6,7 @@ const raceGoOpt = document.getElementById('race-go-option');
 const raceGoSkipOpt = document.getElementById('race-go-skip-option');
 const raceShareOpt = document.getElementById('link-share-opt');
 const addMoreOpt = document.getElementById('add-more-option');
-const recommendationsContainer = document.getElementById('recommendation-container');
+const recommendationsContainer = document.getElementById('racer-recommender');
 const replayOption = document.getElementById('replay-option');
 const resetOption = document.getElementById('reset-option');
 const resultsContainer = document.getElementById('results-container');
@@ -362,9 +362,6 @@ class Racing {
     addMoreOpt.addEventListener('click', () => this.addInput());
     raceShareOpt.addEventListener('click', () => this.share());
     resetOption.addEventListener('click', () => this.resetInputs());
-    controlPanel.addEventListener('click', (evt) => {
-      if (evt.target == controlPanel) _hide(recommendationsContainer);
-    });
 
     downvoteRaceOpt.addEventListener('click', () => this.voteRace(0));
     upvoteRaceOpt.addEventListener('click', () => this.voteRace(1));

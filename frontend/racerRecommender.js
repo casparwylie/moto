@@ -1,3 +1,11 @@
+function getOffset(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    left: rect.left + window.scrollX,
+    top: rect.top + window.scrollY
+  };
+}
+
 class RacerRecommender {
 
   constructor(makeIn, modelIn, yearIn, container) {
@@ -5,6 +13,12 @@ class RacerRecommender {
     this.modelIn = modelIn;
     this.yearIn = yearIn;
     this.container = container;
+
+    document.addEventListener('click', (el) =>{
+      if (el.target.tagName != 'INPUT') {
+        _hide(this.container);
+      }
+    });
 
     this.makeIn.addEventListener('keyup', () => {
       this.modelIn.value = "";
@@ -15,8 +29,8 @@ class RacerRecommender {
 
 
   setPosition() {
-      const xPos = this.makeIn.parentElement.offsetLeft;
-      const yPos = this.makeIn.parentElement.offsetTop + this.makeIn.offsetHeight;
+      const xPos = getOffset(this.makeIn.parentElement).left;
+      const yPos = getOffset(this.makeIn.parentElement).top + this.makeIn.offsetHeight;
       const width = this.makeIn.parentElement.offsetWidth;
       this.container.style.marginTop = `${yPos}px`;
       this.container.style.marginLeft = `${xPos}px`;
