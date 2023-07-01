@@ -185,6 +185,7 @@
         color: black;
         padding-top: 20px;
         margin-top: -1%;
+        margin-left: 1%;
       }
 
       .result-row {
@@ -213,14 +214,14 @@
       }
 
       #menu-item-container {
-        padding-top: 1.4%;
-        width: 50%;
-        margin: 0 auto;
+        display: flex;
+        width: 38%;
+        justify-content: space-between;
       }
       .menu-item {
         text-align: center;
-        margin-left: 5%;
-        float: left;
+        padding: 2%;
+        border-bottom: 1px dotted black;
         cursor: pointer;
       }
 
@@ -570,12 +571,15 @@
         z-index: 100000;
       }
 
-
       @media only screen and (max-width: 1300px) {
-        .menu-item {
-          margin-left: 3%;
+        #menu-item-container {
+          width: 60%;
+       }
+        #starter-form {
+          width: 60%;
         }
       }
+
       @media only screen and (max-width: 1000px) {
         #menu-item-container {
           width: 75%;
@@ -591,6 +595,7 @@
         #menu-item-container {
           width: 100%;
           height: 100vh;
+          display: block;
         }
         .menu-item {
           text-align: left;
