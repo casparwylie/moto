@@ -78,7 +78,6 @@ class Garage {
       addGarageYearIn,
       addGarageRecommendationsContainer,
     );
-    recommender.assignTrigger(addGarageModelIn);
     this.userState = userState;
   }
 

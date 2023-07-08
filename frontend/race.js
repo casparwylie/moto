@@ -394,7 +394,6 @@ class Racing {
       yearIn,
       recommendationsContainer,
     );
-    recommender.assignTrigger(modelIn);
 
     if (make && model && year) {
       makeIn.value = make;
